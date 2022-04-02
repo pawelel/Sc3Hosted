@@ -1,11 +1,11 @@
-﻿using Sc3Hosted.Server.Models;
-using Sc3Hosted.Shared.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Sc3Hosted.Server.Entities;
+using Sc3Hosted.Shared.ViewModels;
 
 namespace Sc3Hosted.Server.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class AccountsController : ControllerBase
 	{

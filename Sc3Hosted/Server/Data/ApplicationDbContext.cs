@@ -1,39 +1,35 @@
-﻿using Sc3Hosted.Server.Models;
+﻿
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Sc3Hosted.Server.Data
+using Sc3Hosted.Server.Entities;
+using Sc3Hosted.Shared.Entities;
+
+namespace Sc3Hosted.Server.Data;
+
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
+    public ApplicationDbContext(DbContextOptions options) : base(options)
+    {
+    }
 
-	///
-	/// In VS Package Manager Console (Select Default Project: Sc3Hosted.Server)
-	///
-	/// Init: (delete "BlazorDB.sqlite3" first)
-	/// Clear; Add-Migration InitialCreate -OutputDir "Data/Migrations"; Update-Database;
-	///
-	/// Add migration:
-	/// Clear; Add-Migration ExtraFields -OutputDir "Data/Migrations"
-	///
-	/// If necessary: Remove-Migration
-	///
-	/// Update-Database
-	///
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
 
-	public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
-	{
-		public ApplicationDbContext(DbContextOptions options) : base(options)
-		{
-		}
+        builder.Entity<IdentityRole>()
+               .HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+        builder.Entity<IdentityRole>()
+               .HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+        builder.Entity<IdentityRole>()
+               .HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
 
-		protected override void OnModelCreating(ModelBuilder builder)
-		{
-			base.OnModelCreating(builder);
+        builder.Entity<Plant>().ToTable("Plants", x => {
+            x.IsTemporal();
+        });
 
-			builder.Entity<IdentityRole>()
-				   .HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-			builder.Entity<IdentityRole>()
-				   .HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-		}
-	}
+    }
+    public DbSet<Plant> Plants => Set<Plant>();
 }

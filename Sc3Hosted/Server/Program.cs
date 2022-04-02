@@ -1,26 +1,31 @@
 ﻿using Sc3Hosted.Server.Data;
-using Sc3Hosted.Server.Models;
 using Sc3Hosted.Shared.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MediatR;
+using System.Reflection;
+using Sc3Hosted.Server.Repositories;
+using Sc3Hosted.Server.Entities;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-string jwtIssuer = builder.Configuration["JwtIssuer"];
-string jwtAudience = builder.Configuration["JwtAudience"];
-string jwtSecurityKey = builder.Configuration["JwtSecurityKey"];
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var jwtIssuer = builder.Configuration["JwtIssuer"];
+var jwtAudience = builder.Configuration["JwtAudience"];
+var jwtSecurityKey = builder.Configuration["JwtSecurityKey"];
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-	options.UseSqlite(connectionString));
+	options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
 		.AddRoles<IdentityRole>()
 		.AddEntityFrameworkStores<ApplicationDbContext>();
-
+builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 		.AddJwtBearer(options =>
 		{
@@ -36,7 +41,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				ClockSkew = TimeSpan.FromSeconds(0)
 			};
 		});
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization(config =>
 {
 	config.AddPolicy(Policies.IsAdmin, Policies.IsAdminPolicy());
@@ -60,7 +65,11 @@ else
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
-
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+	c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blazor API V1");
+});
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();

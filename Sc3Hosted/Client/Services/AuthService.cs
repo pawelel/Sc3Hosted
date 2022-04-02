@@ -1,9 +1,9 @@
 ﻿using Blazored.LocalStorage;
 using Sc3Hosted.Client.Helpers;
-using Sc3Hosted.Shared.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Sc3Hosted.Shared.ViewModels;
 
 namespace Sc3Hosted.Client.Services;
 

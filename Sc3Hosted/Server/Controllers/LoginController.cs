@@ -1,15 +1,15 @@
-﻿using Sc3Hosted.Server.Models;
-using Sc3Hosted.Shared.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Sc3Hosted.Server.Entities;
+using Sc3Hosted.Shared.ViewModels;
 
 namespace Sc3Hosted.Server.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class LoginController : ControllerBase
 	{

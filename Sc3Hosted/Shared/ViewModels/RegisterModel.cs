@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Sc3Hosted.Shared.Models
+namespace Sc3Hosted.Shared.ViewModels
 {
 	public class RegisterModel
 	{
