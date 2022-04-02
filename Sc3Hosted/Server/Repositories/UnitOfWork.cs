@@ -4,7 +4,7 @@ namespace Sc3Hosted.Server.Repositories;
 public interface IUnitOfWork 
 {
     IPlantRepository Plants { get; }
-    Task CompleteAsync();
+    Task SaveChangesAsync();
 }
 public class UnitOfWork: IUnitOfWork, IDisposable
 {
@@ -18,7 +18,7 @@ public class UnitOfWork: IUnitOfWork, IDisposable
         _logger = loggerFactory.CreateLogger("logs");
         Plants = new PlantRepository(_context, _logger);
     }
-    public async Task CompleteAsync()
+    public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
     }

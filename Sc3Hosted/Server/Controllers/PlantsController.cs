@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Sc3Hosted.Server.CQRS.Commands;
-using Sc3Hosted.Server.CQRS.Queries;
+
+
+using Sc3Hosted.Server.Features.Plants.Commands;
+using Sc3Hosted.Server.Features.Plants.Queries;
 
 namespace Sc3Hosted.Server.Controllers;
 
@@ -39,19 +43,15 @@ public class PlantsController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
       var plant =  await _mediator.Send(new GetPlantByIdQuery { Id = id });
-        if (plant is null)
-        {
-            return NotFound();
-        }
-        return Ok(plant);
+      return Ok(plant);
     }
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePlantCommand command)
     {
         command.Id = id;
         return Ok(await _mediator.Send(command));
     }
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         return Ok(await _mediator.Send(new DeletePlantByIdCommand { Id = id }));
