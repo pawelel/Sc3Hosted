@@ -1,8 +1,9 @@
 ﻿using MediatR;
 
 using Sc3Hosted.Server.Data;
+using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Repositories;
-using Sc3Hosted.Shared.Entities;
+
 
 namespace Sc3Hosted.Server.Features.Plants.Commands;
 

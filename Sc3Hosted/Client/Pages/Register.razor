@@ -1,5 +1,5 @@
 ﻿@page "/register"
-@using Sc3Hosted.Shared.ViewModels
+@using Sc3Hosted.Shared.Dtos
 @inject IAuthService _authService
 @inject NavigationManager _navMan
 
@@ -49,7 +49,7 @@
 
 @code {
 
-    private RegisterModel _registerModel = new RegisterModel();
+    private RegisterDto _registerModel = new RegisterDto();
     private bool _showErrors;
     private IEnumerable<string>? _errors;
 

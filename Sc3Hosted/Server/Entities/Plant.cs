@@ -1,4 +1,4 @@
-﻿namespace Sc3Hosted.Shared.Entities;
+﻿namespace Sc3Hosted.Server.Entities;
 public class Plant
 {
     public int Id { get; set; }

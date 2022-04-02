@@ -1,5 +1,5 @@
 ﻿@page "/login"
-@using Sc3Hosted.Shared.ViewModels
+@using Sc3Hosted.Shared.Dtos
 @inject IAuthService AuthService
 @inject NavigationManager NavMan
 
@@ -38,7 +38,7 @@
 
 @code {
 
-    private LoginModel loginModel = new LoginModel();
+    private LoginDto loginModel = new LoginDto();
     private bool ShowErrors;
     private string Error = "";
 

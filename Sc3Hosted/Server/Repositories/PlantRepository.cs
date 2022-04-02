@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Query;
 
 using Sc3Hosted.Server.Data;
-using Sc3Hosted.Shared.Entities;
+using Sc3Hosted.Server.Entities;
 
 using System.Linq;
 using System.Linq.Expressions;

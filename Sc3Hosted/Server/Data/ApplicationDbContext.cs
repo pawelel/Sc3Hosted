@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 using Sc3Hosted.Server.Entities;
-using Sc3Hosted.Shared.Entities;
 
 namespace Sc3Hosted.Server.Data;
 

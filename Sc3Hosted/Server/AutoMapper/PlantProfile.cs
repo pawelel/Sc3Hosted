@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using Sc3Hosted.Shared.Entities;
-using Sc3Hosted.Shared.ViewModels;
+
+using Sc3Hosted.Server.Entities;
+using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.AutoMapper;
 

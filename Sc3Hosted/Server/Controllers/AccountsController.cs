@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Sc3Hosted.Server.Entities;
-using Sc3Hosted.Shared.ViewModels;
+using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Controllers
 {
@@ -19,7 +19,7 @@ namespace Sc3Hosted.Server.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Post([FromBody] RegisterModel model)
+		public async Task<IActionResult> Post([FromBody] RegisterDto model)
 		{
 			var newUser = new ApplicationUser { UserName = model.Email, Email = model.Email };
 
@@ -29,7 +29,7 @@ namespace Sc3Hosted.Server.Controllers
 			{
 				var errors = result.Errors.Select(x => x.Description);
 
-				return BadRequest(new RegisterResult { Successful = false, Errors = errors });
+				return BadRequest(new RegisterResultDto { Successful = false, Errors = errors });
 			}
 
 			// Add all new users to the User role
@@ -41,7 +41,7 @@ namespace Sc3Hosted.Server.Controllers
 				await _userManager.AddToRoleAsync(newUser, "Admin");
 			}
 
-			return Ok(new RegisterResult { Successful = true });
+			return Ok(new RegisterResultDto { Successful = true });
 		}
 	}
 }

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Query;
 using NuGet.Packaging.Signing;
 
 using Sc3Hosted.Server.Data;
-using Sc3Hosted.Shared.Entities;
 
 using System.Linq.Expressions;
 

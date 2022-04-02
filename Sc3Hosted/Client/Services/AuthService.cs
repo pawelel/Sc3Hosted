@@ -3,14 +3,14 @@ using Sc3Hosted.Client.Helpers;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Sc3Hosted.Shared.ViewModels;
+using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Client.Services;
 
 public interface IAuthService
 {
-    Task<LoginResult> Login(LoginModel loginModel);
-    Task<RegisterResult> Register(RegisterModel registerModel);
+    Task<LoginResultDto> Login(LoginDto loginModel);
+    Task<RegisterResultDto> Register(RegisterDto registerModel);
     Task Logout();
 }
 public class AuthService : IAuthService
@@ -28,17 +28,17 @@ public class AuthService : IAuthService
         _localStorage = localStorage;
     }
 
-    public async Task<RegisterResult> Register(RegisterModel registerModel)
+    public async Task<RegisterResultDto> Register(RegisterDto registerModel)
     {
         var response = await _httpClient.PostAsJsonAsync("api/accounts", registerModel);
-        var result = await response.Content.ReadFromJsonAsync<RegisterResult>();
-        return result??new RegisterResult();
+        var result = await response.Content.ReadFromJsonAsync<RegisterResultDto>();
+        return result??new RegisterResultDto();
     }
 
-    public async Task<LoginResult> Login(LoginModel loginModel)
+    public async Task<LoginResultDto> Login(LoginDto loginModel)
     {
         var response = await _httpClient.PostAsJsonAsync("api/login", loginModel);
-        var result = await response.Content.ReadFromJsonAsync<LoginResult>()??new LoginResult();
+        var result = await response.Content.ReadFromJsonAsync<LoginResultDto>()??new LoginResultDto();
 
         if (!result.Successful) return result;
         await _localStorage.SetItemAsync("authToken", result.Token);

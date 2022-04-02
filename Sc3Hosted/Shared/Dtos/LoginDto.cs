@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Sc3Hosted.Shared.ViewModels
+namespace Sc3Hosted.Shared.Dtos
 {
-	public class LoginModel
+	public class LoginDto
 	{
 		[Required]
 		public string Email { get; set; } = string.Empty;

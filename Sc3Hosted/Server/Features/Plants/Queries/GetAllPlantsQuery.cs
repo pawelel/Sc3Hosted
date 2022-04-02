@@ -4,8 +4,8 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 using Sc3Hosted.Server.Data;
-using Sc3Hosted.Shared.Entities;
-using Sc3Hosted.Shared.ViewModels;
+
+using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Features.Plants.Queries;
 

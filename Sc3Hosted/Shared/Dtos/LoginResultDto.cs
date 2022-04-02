@@ -1,6 +1,6 @@
-﻿namespace Sc3Hosted.Shared.ViewModels
+﻿namespace Sc3Hosted.Shared.Dtos
 {
-	public class LoginResult
+	public class LoginResultDto
 	{
 		public bool Successful { get; set; }
 		public string Error { get; set; } = string.Empty;

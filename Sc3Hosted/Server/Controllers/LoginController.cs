@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Sc3Hosted.Server.Entities;
-using Sc3Hosted.Shared.ViewModels;
+using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Controllers
 {
@@ -24,11 +24,11 @@ namespace Sc3Hosted.Server.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Login([FromBody] LoginModel login)
+		public async Task<IActionResult> Login([FromBody] LoginDto login)
 		{
 			var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, false, false);
 
-			if (!result.Succeeded) return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
+			if (!result.Succeeded) return BadRequest(new LoginResultDto { Successful = false, Error = "Username and password are invalid." });
 
 			var user = await _signInManager.UserManager.FindByEmailAsync(login.Email);
 			var roles = await _signInManager.UserManager.GetRolesAsync(user);
@@ -54,7 +54,7 @@ namespace Sc3Hosted.Server.Controllers
 				signingCredentials: creds
 			);
 
-			return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
+			return Ok(new LoginResultDto { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
 		}
 	}
 }

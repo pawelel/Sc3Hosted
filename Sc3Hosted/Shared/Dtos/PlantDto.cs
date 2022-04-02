@@ -1,4 +1,4 @@
-﻿namespace Sc3Hosted.Shared.ViewModels;
+﻿namespace Sc3Hosted.Shared.Dtos;
 
 public class PlantDto
 {
