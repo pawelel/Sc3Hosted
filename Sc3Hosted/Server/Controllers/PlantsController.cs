@@ -19,31 +19,45 @@ namespace Sc3Hosted.Server.Controllers;
 public class PlantsController : ControllerBase
 {
     private readonly IMediator _mediator;
-
-    public PlantsController(IMediator mediator)
+    private readonly ILogger _logger;
+    public PlantsController(IMediator mediator, ILogger logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
-        
+
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreatePlantCommand command)
     {
         var result = await _mediator.Send(command);
         return Ok(result);
     }
-        
+
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var result = await _mediator.Send(new GetAllPlantsQuery());
-        return Ok(result);
+        try
+        {
+            var result = await _mediator.Send(new GetAllPlantsQuery());
+            if (result==null|| !result.Any())
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error receiving data from the database.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from the database");
+        }
+        
     }
-   
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-      var plant =  await _mediator.Send(new GetPlantByIdQuery { Id = id });
-      return Ok(plant);
+        var plant = await _mediator.Send(new GetPlantByIdQuery { Id = id });
+        return Ok(plant);
     }
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePlantCommand command)

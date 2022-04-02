@@ -1,0 +1,123 @@
+﻿
+@if (AssetModel is not null)
+{
+    <MudPaper Class="d-flex align-content-center flex-wrap pa-1 flex-grow-1 grey darken-4">
+        <MudItem xs=12 md=6>
+                <MudSimpleTable Class="pa-2 ma-1">
+            <MudToolBar Dense=true DisableGutters=true Class="mt-n2">
+                <MudText Typo="Typo.h5">Urządzenie</MudText>
+                </MudToolBar>
+                    <tbody>
+                    <tr>
+                        <td>
+                <MudText Typo="Typo.body1">Asset:</MudText>
+                        </td>
+                        <td>
+                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Name</MudText>
+                        </td>
+                    </tr>
+                    <tr style=@Utils.WarnMissingValue(@AssetModel?.Process!)>
+                        <td>
+                <MudText Typo="Typo.body1">Proces: </MudText>
+                        </td>
+                        <td>
+                            <MudText Class="px-2" Typo="Typo.body2">@Utils.MissingTextCheck(AssetModel?.Process!)</MudText>
+                        </td>
+                    </tr>
+                 <tr style=@Utils.WarnMissingValue(@AssetModel?.Status.ToString())>
+                        <td>
+                <MudText Typo="Typo.body1">Status: </MudText>
+                        </td>
+                        <td>
+                            <MudText Class="px-2" Typo="Typo.body2">@((AssetModel?.Status!).GetAttribute<DisplayAttribute>().Name)</MudText>
+                        </td>
+                    </tr>
+                 <tr>
+                        <td>
+                <MudText Typo="Typo.body1">Sprzęt: </MudText>
+
+                        </td>
+                        <td>
+                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Device?.Name</MudText>
+                        </td>
+                    </tr>
+                 <tr>
+                        <td>
+                <MudText Typo="Typo.body1">Model: </MudText>
+
+                        </td>
+                        <td>
+                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Model?.Name</MudText>
+                        </td>
+                    </tr>
+                 <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                            <MudText Class="px-2" Typo="Typo.body2">Param</MudText>
+                        </td>
+                    </tr>
+                </tbody>
+                </MudSimpleTable>
+                      
+                <MudText Typo="Typo.body1">Parametry: </MudText>
+                    
+                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Area?.Name</MudText>
+            <MudPaper Class="pa-2 ma-1 mt-2">
+                <MudText Typo="Typo.h5">Szczegóły</MudText>
+                <MudText Typo="Typo.body2">Old paint found on a stone house door.</MudText>
+                <MudText Typo="Typo.body2">This photo was taken in a small village in Istra Croatia.</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs=12 md=6>
+            <MudPaper Class="pa-2 ma-1">
+                <MudText Typo="Typo.h5">Ostatnia aktualizacja</MudText>
+                <MudText Typo="Typo.body2">Old paint found on a stone house door.</MudText>
+                <MudText Typo="Typo.body2">This photo was taken in a small village in Istra Croatia.</MudText>
+            </MudPaper>
+            <MudPaper Class="pa-2 ma-1 mt-2">
+                <MudText Typo="Typo.h5">Komunikaty</MudText>
+                <MudText Typo="Typo.body2">Old paint found on a stone house door.</MudText>
+                <MudText Typo="Typo.body2">This photo was taken in a small village in Istra Croatia.</MudText>
+            </MudPaper>
+                <MudText Typo="Typo.h5">Lokalizacja</MudText>
+            <MudSimpleTable Class="pa-2 ma-1 mt-2">
+                <tbody>
+                    <tr>
+                        <td>
+                <MudText Typo="Typo.body1">Obszar: </MudText>
+                        </td>
+                        <td>
+                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Area?.Name</MudText>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                <MudText Typo="Typo.body1">Typ przestrzeni: </MudText>
+                        </td>
+                        <td>
+                <MudText Class="px-2" Typo="Typo.body2">@(((AssetModel?.Space?.SpaceType!)==null?SpaceType.Unknown:AssetModel?.Space?.SpaceType!).GetAttribute<DisplayAttribute>().Name)</MudText>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                <MudText Typo="Typo.body1">Koordynat: </MudText>
+                        </td>
+                        <td>
+                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Coordinate?.Name</MudText>
+                        </td>
+                    </tr>
+                    </tbody>
+            </MudSimpleTable>
+            <MudPaper Class="pa-2 ma-1 mt-2">
+                <MudText Typo="Typo.h5">Kategorie</MudText>
+                <MudText Typo="Typo.body2">Old paint found on a stone house door.</MudText>
+            </MudPaper>
+            </MudItem>
+    </MudPaper>
+}
+else
+{
+<p>Brak danych</p>
+}

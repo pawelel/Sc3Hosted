@@ -1,0 +1,73 @@
+﻿@if (_locations is null)
+{
+     <p>please wait</p>
+}
+else
+{
+    <MudTextField @bind-Value="_searchString" Placeholder="Szukaj" Adornment="Adornment.Start" Immediate="true"
+              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    <MudDataGrid T="LocationDto" Dense=true Class="mb-3" Items="@_locations" Sortable="true" Filterable="true" QuickFilter="@AreaFilter">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Obszary</MudText>
+        </ToolBarContent>
+        <Columns>
+            <Column T="LocationDto" Field="@(nameof(LocationDto.Area))" Title="Obszar">
+                <HeaderTemplate>
+                    Obszar <MudIconButton Color="Color.Default" Icon="@Icons.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined" />
+                </HeaderTemplate>
+                <CellTemplate>
+                    <MudButton Variant=Variant.Outlined Size=Size.Small Color=Color.Default>
+                        <MudText>@context.Item.Area</MudText>
+                    </MudButton>
+                </CellTemplate>
+            </Column>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager RowsPerPageString="Elementów na stronę" PageSizeOptions="Utils.PageSizeOptions" T="LocationDto" />
+        </PagerContent>
+    </MudDataGrid>
+    <MudDataGrid Dense=true Class="mb-3" Items="@_locations" Sortable="true" Filterable="true" QuickFilter="@SpaceFilter">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Przestrzenie</MudText>
+        </ToolBarContent>
+        <Columns>
+            <Column T="LocationDto" Field="@(nameof(LocationDto.Space))" Title="Przestrzeń">
+                <HeaderTemplate>
+                    Przestrzeń <MudIconButton Color="Color.Default" Icon="@Icons.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined" />
+                </HeaderTemplate>
+                <CellTemplate>
+                    <MudButton Variant=Variant.Outlined Size=Size.Small Color=Color.Default>
+                        <MudText>@context.Item.Space</MudText>
+                    </MudButton>
+                </CellTemplate>
+            </Column>
+            <Column T="LocationDto" Field="@(nameof(LocationDto.Area))" Title="Obszar" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager RowsPerPageString="Elementów na stronę" PageSizeOptions="Utils.PageSizeOptions" T="LocationDto" />
+        </PagerContent>
+    </MudDataGrid>
+    <MudDataGrid Dense=true Items="@_locations" Sortable="true" Filterable="true" QuickFilter="@CoordinateFilter">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Koordynaty</MudText>
+        </ToolBarContent>
+        <Columns>
+            <Column T="LocationDto" Field="@(nameof(LocationDto.Coordinate))" Title="Koordynat">
+                <HeaderTemplate>
+                    Koordynat <MudIconButton Color="Color.Default" Icon="@Icons.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined" />
+                </HeaderTemplate>
+                <CellTemplate>
+                    <MudButton Variant=Variant.Outlined Size=Size.Small Color=Color.Default>
+                        <MudText>@context.Item.Coordinate</MudText>
+                    </MudButton>
+                </CellTemplate>
+            </Column>
+            <Column T="LocationDto" Field="@(nameof(LocationDto.Space))" Title="Przestrzeń" />
+            <Column T="LocationDto" Field="@(nameof(LocationDto.Area))" Title="Obszar" />
+        </Columns>
+        <PagerContent>
+
+            <MudDataGridPager RowsPerPageString="Elementów na stronę" PageSizeOptions="Utils.PageSizeOptions" T="LocationDto" />
+        </PagerContent>
+    </MudDataGrid>
+    }
