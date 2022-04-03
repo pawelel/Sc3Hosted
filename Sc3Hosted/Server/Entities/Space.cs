@@ -11,6 +11,6 @@ public class Space : BaseEntity
     public int AreaId { get; set; }
     public Area Area { get; set; } = new();
     public SpaceType SpaceType { get; set; }
-    public bool IsArchived { get; set; }
+    
     public virtual List<SpaceCommunicate> SpaceCommunicates { get; set; } = new();
 }

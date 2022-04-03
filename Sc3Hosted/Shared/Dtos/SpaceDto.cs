@@ -9,6 +9,6 @@ public class SpaceDto
     public string Description { get; set; }=string.Empty;
     public List<CoordinateDto> Coordinates { get; set; } =new();
     public SpaceType SpaceType { get; set; }
-    public bool IsArchived { get; set; }
+    
     public List<SpaceCommunicateDto> SpaceCommunicates { get; set; }=new();
 }

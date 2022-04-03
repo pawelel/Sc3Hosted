@@ -16,7 +16,7 @@ public class CommunicateUpdateDto
     public CommunicationType CommunicationType { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public bool IsArchived { get; set; }
+    
     public List<AreaCommunicateDto> AreaCommunicates { get; set; } = new();
     public List<AssetCommunicateDto> AssetCommunicates { get; set; } = new();
     public List<CoordinateCommunicateDto> CoordinateCommunicates { get; set; } = new();

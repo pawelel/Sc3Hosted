@@ -28,11 +28,11 @@ public class PlantsController : ControllerBase
     {
         var userId = _userContextService.UserId;
         var result = await _dbService.CreatePlant(plantCreateDto, userId);
-        if (result)
+        if (result.Success)
         {
         return Ok(result);
         }
-        return BadRequest("Could not create plant");
+        return BadRequest(result.Message);
     }
     
 
@@ -40,11 +40,11 @@ public class PlantsController : ControllerBase
     public async Task<IActionResult> Get()
     {
         var result = await _dbService.GetPlants();
-        if (result != null)
+        if (result.Success)
         {
             return Ok(result);
         }
-        return BadRequest("Could not get plants");
+        return BadRequest(result.Message);
         
     }
 
@@ -52,11 +52,11 @@ public class PlantsController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _dbService.GetPlantById(id);
-        if (result != null)
+        if (result.Success)
         {
             return Ok(result);
         }
-        return BadRequest("Could not get plant");
+        return BadRequest(result.Message);
     }
     
     [HttpPut("{id:int}")]
@@ -64,21 +64,21 @@ public class PlantsController : ControllerBase
     {
         var userId = _userContextService.UserId;
         var result = await _dbService.UpdatePlant(id, userId, plantUpdateDto);
-        if (result)
+        if (result.Success)
         {
             return Ok(result);
         }
-        return BadRequest("Could not update plant");
+        return BadRequest(result.Message);
     }
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _dbService.DeletePlant(id);
-        if (result)
+        if (result.Success)
         {
             return Ok(result);
         }
-        return BadRequest("Could not delete plant");
+        return BadRequest(result.Message);
     }
 }

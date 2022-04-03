@@ -10,6 +10,6 @@ public class CoordinateUpdateDto
     public string Name { get; set; }= string.Empty;
 
     public string Description { get; set; } = string.Empty;
-    public bool IsArchived { get; set; }
+    
     public List<CoordinateCommunicateDto> CoordinateCommunicates { get; set; }= new();
 }
