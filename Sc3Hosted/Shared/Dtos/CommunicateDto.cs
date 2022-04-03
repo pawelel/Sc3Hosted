@@ -11,10 +11,10 @@ public class CommunicateDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool IsArchived { get; set; } = false;
-    public List<AreaCommunicateDto>? AreaCommunicates { get; set; } 
-    public List<AssetCommunicateDto>? AssetCommunicates { get; set; } 
-    public List<CoordinateCommunicateDto>? CoordinateCommunicates { get; set; } 
-    public List<DeviceCommunicateDto>? DeviceCommunicates { get; set; } 
-    public List<ModelCommunicateDto>? ModelCommunicates { get; set; } 
-    public List<SpaceCommunicateDto>? SpaceCommunicates { get; set; }
+    public List<AreaCommunicateDto> AreaCommunicates { get; set; } 
+    public List<AssetCommunicateDto> AssetCommunicates { get; set; } 
+    public List<CoordinateCommunicateDto> CoordinateCommunicates { get; set; } 
+    public List<DeviceCommunicateDto> DeviceCommunicates { get; set; } 
+    public List<ModelCommunicateDto> ModelCommunicates { get; set; } 
+    public List<SpaceCommunicateDto> SpaceCommunicates { get; set; }
 }

@@ -7,5 +7,5 @@ public class CoordinateDto
 
     public string? Description { get; set; }
     public bool IsArchived { get; set; }
-    public List<CoordinateCommunicateDto>? CoordinateCommunicates { get; set; }
+    public List<CoordinateCommunicateDto> CoordinateCommunicates { get; set; }
 }

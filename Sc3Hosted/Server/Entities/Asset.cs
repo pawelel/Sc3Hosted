@@ -2,23 +2,18 @@
 
 namespace Sc3Hosted.Server.Entities;
 
-public class Asset 
+public class Asset : BaseEntity
 {
     public int AssetId { get; set; }
-    public string Name { get; set; }
-
-    public Asset(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; } = string.Empty;
     public int ModelId { get; set; }
-    public Model? Model { get; set; }
+    public virtual Model Model { get; set; } = new();
     public Status Status { get; set; }
-    public Coordinate? Coordinate { get; set; }
+    public virtual Coordinate Coordinate { get; set; } = new();
     public int CoordinateId { get; set; }
-    public virtual List<AssetCategory>? AssetCategories { get; set; } 
-    public virtual List<AssetDetail>? AssetDetails { get; set; }
-    public virtual List<SituationAsset>? AssetSituations { get; set; }
-    public string? Process { get; set; }
-    public virtual List<AssetCommunicate>? AssetCommunicates { get; set; }
+    public virtual List<AssetCategory> AssetCategories { get; set; } = new();
+    public virtual List<AssetDetail> AssetDetails { get; set; } = new();
+    public virtual List<SituationAsset> AssetSituations { get; set; } = new();
+    public string Process { get; set; }=string.Empty;
+    public virtual List<AssetCommunicate> AssetCommunicates { get; set; } = new();
 }

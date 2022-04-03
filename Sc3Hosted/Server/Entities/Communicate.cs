@@ -1,27 +1,21 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
 
 namespace Sc3Hosted.Server.Entities;
-public class Communicate 
+public class Communicate  : BaseEntity
 {
     public int CommunicateId { get; set; }
-    public string Name { get; set; }
-
-    public Communicate(string name)
-    {
-        Name = name;
-    }
-
-    public string? Description { get; set; } 
+    public string Name { get; set; }=string.Empty;
+    public string Description { get; set; } = string.Empty;
     public Scope Scope { get; set; }
     public CommunicationType CommunicationType { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool IsArchived { get; set; }
-    public List<AreaCommunicate>? AreaCommunicates { get; set; } 
-    public List<AssetCommunicate>? AssetCommunicates { get; set; } 
-    public List<CoordinateCommunicate>? CoordinateCommunicates { get; set; } 
-    public List<DeviceCommunicate>? DeviceCommunicates { get; set; } 
-    public List<ModelCommunicate>? ModelCommunicates { get; set; } 
-    public List<SpaceCommunicate>? SpaceCommunicates { get; set; } 
+    public virtual List<AreaCommunicate> AreaCommunicates { get; set; } = new();
+    public virtual List<AssetCommunicate> AssetCommunicates { get; set; }  = new();
+    public virtual List<CoordinateCommunicate> CoordinateCommunicates { get; set; }=new(); 
+    public virtual List<DeviceCommunicate> DeviceCommunicates { get; set; } = new();
+    public virtual List<ModelCommunicate> ModelCommunicates { get; set; } = new();
+    public virtual List<SpaceCommunicate> SpaceCommunicates { get; set; } = new();
 
 }

@@ -20,6 +20,6 @@ public class AssetDisplayDto
     public int? ModelId { get; set; }
     public DeviceFlat? Device { get; set; }
     public int? DeviceId { get; set; }
-    public List<CategoryDto>? Categories { get; set; }
+    public List<CategoryDto> Categories { get; set; }
     public bool ShowDetails { get; set; }
 }

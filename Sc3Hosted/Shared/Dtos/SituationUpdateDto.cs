@@ -13,9 +13,9 @@ public class SituationUpdateDto
     {
         Name = name;
     }
-public List<SituationQuestionDto>? SituationQuestions { get; set; }
-public List<SituationCategoryDto>? CategorySituations { get; set; }
-public List<SituationDetailDto>? SituationDetails { get; set; }
-public List<SituationParameterDto>? SituationParameters { get; set; }
-public List<SituationAssetDto>? AssetSituations { get; set; }
+public List<SituationQuestionDto> SituationQuestions { get; set; }
+public List<SituationCategoryDto> CategorySituations { get; set; }
+public List<SituationDetailDto> SituationDetails { get; set; }
+public List<SituationParameterDto> SituationParameters { get; set; }
+public List<SituationAssetDto> AssetSituations { get; set; }
 }

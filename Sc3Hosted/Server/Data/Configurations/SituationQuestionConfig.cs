@@ -11,6 +11,10 @@ public class SituationQuestionConfig : IEntityTypeConfiguration<SituationQuestio
     public void Configure(EntityTypeBuilder<SituationQuestion> builder)
     {
         builder.ToTable("SituationQuestions", x => x.IsTemporal());
+        builder.HasKey(x => x.SituationQuestionId);
+        builder.Property(x => x.SituationQuestionId).ValueGeneratedOnAdd();
+        builder.Property(x => x.SituationId).IsRequired();
+        builder.Property(x => x.QuestionId).IsRequired();
 
     }
 }

@@ -12,5 +12,7 @@ public class AssetCategoryConfig : IEntityTypeConfiguration<AssetCategory>
         builder.ToTable("AssetCategories", x=>x.IsTemporal());
         builder.HasKey(x => x.AssetCategoryId);
         builder.Property(x => x.AssetCategoryId).ValueGeneratedOnAdd();
+        builder.Property(x=>x.AssetId).IsRequired();
+        builder.Property(x=>x.CategoryId).IsRequired();
     }
 }

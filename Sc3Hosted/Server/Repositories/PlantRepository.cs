@@ -44,7 +44,7 @@ public class PlantRepository : Repository<Plant>, IPlantRepository
     {
          try
          {
-             var exist = await context.Plants.FirstOrDefaultAsync(x => x.Id == entityToDelete.Id);
+             var exist = await context.Plants.FirstOrDefaultAsync(x => x.PlantId == entityToDelete.PlantId);
              if(exist is null){
                 return false;
              }
@@ -80,7 +80,7 @@ public class PlantRepository : Repository<Plant>, IPlantRepository
     {
         try
         {
-                var exist = await context.Plants.FirstOrDefaultAsync(x => x.Id == entityToUpdate.Id);
+                var exist = await context.Plants.FirstOrDefaultAsync(x => x.PlantId == entityToUpdate.PlantId);
                 if(exist is null){
                  return false;
                 }

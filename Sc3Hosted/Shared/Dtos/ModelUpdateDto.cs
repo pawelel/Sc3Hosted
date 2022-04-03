@@ -12,6 +12,6 @@ public class ModelUpdateDto
     {
         Name = name;
     }
-    public List<ModelParameterDto>? ModelParameters { get; set; }
-    public List<AssetDto>? Assets { get; set; }
+    public List<ModelParameterDto> ModelParameters { get; set; }
+    public List<AssetDto> Assets { get; set; }
 }

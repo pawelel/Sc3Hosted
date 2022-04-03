@@ -11,5 +11,10 @@ public class AssetConfig : IEntityTypeConfiguration<Asset>
     public void Configure(EntityTypeBuilder<Asset> builder)
     {
         builder.ToTable("Assets", x => x.IsTemporal());
+        builder.HasKey(x => x.AssetId);
+        builder.Property(x => x.AssetId).ValueGeneratedOnAdd();
+        builder.Property(x => x.Name).IsRequired();
+        builder.Property(x=>x.CoordinateId).IsRequired();
+        builder.Property(x=>x.ModelId).IsRequired();
     }
 }

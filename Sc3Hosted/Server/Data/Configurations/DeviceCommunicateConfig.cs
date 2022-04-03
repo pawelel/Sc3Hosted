@@ -9,5 +9,9 @@ public class DeviceCommunicateConfig : IEntityTypeConfiguration<DeviceCommunicat
     public void Configure(EntityTypeBuilder<DeviceCommunicate> builder)
     {
         builder.ToTable("DeviceCommunicates", x => x.IsTemporal());
+        builder.HasKey(x => x.DeviceCommunicateId);
+        builder.Property(x => x.DeviceCommunicateId).ValueGeneratedOnAdd();
+        builder.Property(x => x.DeviceId).IsRequired();
+        builder.Property(x => x.CommunicateId).IsRequired();
     }
 }

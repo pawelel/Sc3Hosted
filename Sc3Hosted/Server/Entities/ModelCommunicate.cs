@@ -1,9 +1,9 @@
 ﻿namespace Sc3Hosted.Server.Entities;
-public class ModelCommunicate
+public class ModelCommunicate : BaseEntity
 {
     public int ModelCommunicateId { get; set; }
     public int ModelId { get; set; }
-    public Model? Model { get; set; } 
+    public virtual Model Model { get; set; } = new();
     public int CommunicateId { get; set; }
-    public Communicate? Communicate { get; set; } 
+    public virtual Communicate Communicate { get; set; } = new();
 }

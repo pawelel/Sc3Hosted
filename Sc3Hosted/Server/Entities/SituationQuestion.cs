@@ -1,11 +1,11 @@
 ﻿
 namespace Sc3Hosted.Server.Entities;
 
-public class SituationQuestion 
+public class SituationQuestion : BaseEntity
 {
     public int SituationQuestionId { get; set; }
     public int SituationId { get; set; }
-    public Situation? Situation { get; set; } 
+    public virtual Situation Situation { get; set; } = new();
     public int QuestionId { get; set; }
-    public Question? Question { get; set; } 
+    public virtual Question Question { get; set; } = new();
 }

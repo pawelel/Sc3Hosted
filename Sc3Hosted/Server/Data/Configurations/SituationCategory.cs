@@ -10,6 +10,10 @@ public class SituationCategoryConfig : IEntityTypeConfiguration<SituationCategor
     public void Configure(EntityTypeBuilder<SituationCategory> builder)
     {
         builder.ToTable("SituationCategories", x => x.IsTemporal());
+        builder.HasKey(x => x.SituationCategoryId);
+        builder.Property(x => x.SituationCategoryId).ValueGeneratedOnAdd();
+        builder.Property(x => x.SituationId).IsRequired();
+        builder.Property(x => x.CategoryId).IsRequired();
 
     }
 }

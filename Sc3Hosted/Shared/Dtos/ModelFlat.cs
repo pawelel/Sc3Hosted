@@ -9,6 +9,6 @@ public class ModelFlat
 {
     public int ModelId { get; set; }
     public string? Name { get; set; }
-    public List<ModelParameterDto>? ModelParameters { get; set; }
+    public List<ModelParameterDto> ModelParameters { get; set; }
 
 }

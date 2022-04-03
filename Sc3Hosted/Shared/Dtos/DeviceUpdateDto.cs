@@ -13,6 +13,6 @@ public class DeviceUpdateDto
     {
         Name = name;
     }
-    public List<ModelDto>? Models { get; set; }
-    public List<DeviceCommunicateDto>? DeviceCommunicates { get; set; }
+    public List<ModelDto> Models { get; set; }
+    public List<DeviceCommunicateDto> DeviceCommunicates { get; set; }
 }
