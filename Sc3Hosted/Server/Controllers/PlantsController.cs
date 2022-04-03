@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -72,12 +70,11 @@ public class PlantsController : ControllerBase
         }
         return BadRequest("Could not update plant");
     }
-    
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var userId = _userContextService.UserId;
-        var result = await _dbService.DeletePlant(id, userId);
+        var result = await _dbService.DeletePlant(id);
         if (result)
         {
             return Ok(result);
