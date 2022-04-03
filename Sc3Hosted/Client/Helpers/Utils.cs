@@ -35,7 +35,7 @@ public static class Utils
 
     public static string WarnMissingValue(string? style)
     {
-        return string.IsNullOrEmpty(style) || style.Contains("Unknown") ? "background-color:#ff9800ff; color" : "";
+        return string.IsNullOrEmpty(style) || style.Contains("Unknown") ? "background-color:#ff9800ff; color" : string.Empty;
     }
 
     public static string MissingTextCheck(string? value)
