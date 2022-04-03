@@ -119,7 +119,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
                 query = include(query);
             }
 
-            return await query.FirstOrDefaultAsync()??null!;
+            return await query.FirstOrDefaultAsync() ?? null!;
         }
         catch (Exception ex)
         {
@@ -128,28 +128,93 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         }
     }
 
-    public virtual Task<bool> Delete(int id)
+    public virtual async Task<bool> Delete(int id)
     {
-        throw new NotImplementedException();
+        if (id == 0)
+        {
+            return await Task.FromResult(false);
+        }
+        try
+        {
+            context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            dbSet = context.Set<TEntity>();
+            TEntity entityToDelete = (await dbSet.FindAsync(id)) ?? null!;
+            if (entityToDelete == null)
+            {
+                _logger.LogWarning("{Repo} Delete function error: entity not found", typeof(Repository<TEntity>));
+                return await Task.FromResult(false);
+            }
+            return await Delete(entityToDelete);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} Delete function error", typeof(Repository<TEntity>));
+            return await Task.FromResult(false);
+        }
     }
 
-    public virtual Task<bool> MarkDelete(TEntity entityToDelete)
+    public virtual async Task<bool> MarkDelete(TEntity entityToDelete)
     {
-        throw new NotImplementedException();
-    }
-    
-    public virtual Task<bool> Delete(TEntity entityToDelete)
-    {
-        throw new NotImplementedException();
+        try
+        {
+            context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            dbSet = context.Set<TEntity>();
+            dbSet.Attach(entityToDelete);
+            context.Entry(entityToDelete).State = EntityState.Modified;
+            return await Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} MarkDelete function error", typeof(Repository<TEntity>));
+            return await Task.FromResult(false);
+        }
     }
 
-    public virtual Task<bool> Create(TEntity entityToUpdate)
+    public virtual async Task<bool> Delete(TEntity entityToDelete)
     {
-        throw new NotImplementedException();
+        try
+        {
+            context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            dbSet = context.Set<TEntity>();
+            dbSet.Remove(entityToDelete);
+            return await Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} Delete function error", typeof(Repository<TEntity>));
+            return await Task.FromResult(false);
+        }
     }
 
-    public virtual Task<bool> Update(TEntity entityToUpdate)
+    public virtual async Task<bool> Create(TEntity entityToCreate)
     {
-        throw new NotImplementedException();
+       try{
+            context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            dbSet = context.Set<TEntity>();
+            dbSet.Add(entityToCreate);
+           return await Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} Create function error", typeof(Repository<TEntity>));
+            return await Task.FromResult(false);
+        }
+    }
+
+    public virtual async Task<bool> Update(TEntity entityToUpdate)
+    {
+        try
+        {
+            context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            dbSet = context.Set<TEntity>();
+            dbSet.Attach(entityToUpdate);
+            context.Entry(entityToUpdate).State = EntityState.Modified;
+            return await Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} Update function error", typeof(Repository<TEntity>));
+            return await Task.FromResult(false);
+        }
     }
 }
