@@ -17,11 +17,20 @@ public class PlantRepository : Repository<Plant>, IPlantRepository
 {
     public PlantRepository(ApplicationDbContext context, ILogger logger) : base(context, logger) { }
 
-    public override async Task<bool> Create(Plant entity)
+    public override async Task<bool> Create(Plant plant)
     {
-       try
+        if (plant == null)
+        {
+            throw new ArgumentNullException(nameof(plant));
+        }
+        var exist = await GetOne(x=>x.Name==plant.Name);
+        if (exist != null)
+        {
+            return false;
+        }
+        try
        {
-              await context.Plants.AddAsync(entity);
+              await context.Plants.AddAsync(plant);
               return true;
          }
          catch (Exception ex)

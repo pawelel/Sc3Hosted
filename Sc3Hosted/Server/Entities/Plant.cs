@@ -5,4 +5,5 @@ public class Plant
     public string Name { get; set; } = string.Empty;
     public string UserId { get; set; } = "App";
     public string Description { get; set; } = string.Empty;
+    public virtual List<Area>? Areas { get; set; }
 }

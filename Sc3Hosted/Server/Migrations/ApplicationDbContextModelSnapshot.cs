@@ -263,7 +263,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Sc3Hosted.Shared.Entities.Plant", b =>
+            modelBuilder.Entity("Sc3Hosted.Server.Entities.Plant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

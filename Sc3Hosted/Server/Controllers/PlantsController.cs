@@ -3,71 +3,80 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using MediatR;
+
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-
-using Sc3Hosted.Server.Features.Plants.Commands;
-using Sc3Hosted.Server.Features.Plants.Queries;
-
+using Sc3Hosted.Server.Services;
+using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class PlantsController : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger _logger;
-    public PlantsController(IMediator mediator, ILogger logger)
+    private readonly IDbService _dbService;
+
+    public PlantsController(IDbService dbService)
     {
-        _mediator = mediator;
-        _logger = logger;
+        _dbService = dbService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] CreatePlantCommand command)
+    public async Task<IActionResult> Post([FromBody] PlantCreateDto plantCreateDto)
     {
-        var result = await _mediator.Send(command);
+        var result = await _dbService.CreatePlant(plantCreateDto);
+        if (result)
+        {
         return Ok(result);
+        }
+        return BadRequest("Could not create plant");
     }
+    
 
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        try
+        var result = await _dbService.GetPlants();
+        if (result != null)
         {
-            var result = await _mediator.Send(new GetAllPlantsQuery());
-            if (result==null|| !result.Any())
-            {
-                return NotFound();
-            }
             return Ok(result);
         }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error receiving data from the database.");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from the database");
-        }
+        return BadRequest("Could not get plants");
         
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var plant = await _mediator.Send(new GetPlantByIdQuery { Id = id });
-        return Ok(plant);
+        var result = await _dbService.GetPlantById(id);
+        if (result != null)
+        {
+            return Ok(result);
+        }
+        return BadRequest("Could not get plant");
     }
+    
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, UpdatePlantCommand command)
+    public async Task<IActionResult> Update(int id, PlantUpdateDto plantUpdateDto)
     {
-        command.Id = id;
-        return Ok(await _mediator.Send(command));
+        var result = await _dbService.UpdatePlant(id, plantUpdateDto);
+        if (result)
+        {
+            return Ok(result);
+        }
+        return BadRequest("Could not update plant");
     }
+    
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        return Ok(await _mediator.Send(new DeletePlantByIdCommand { Id = id }));
+        var result = await _dbService.DeletePlant(id);
+        if (result)
+        {
+            return Ok(result);
+        }
+        return BadRequest("Could not delete plant");
     }
 }
