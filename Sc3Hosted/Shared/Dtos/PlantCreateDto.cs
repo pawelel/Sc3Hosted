@@ -7,10 +7,7 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class PlantCreateDto
 {
-    public string Name { get; set; }
+    public string Name { get; set; }= "";
+    public string Description { get; set; } = "";
 
-    public PlantCreateDto(string name)
-    {
-        Name = name;
-    }
 }

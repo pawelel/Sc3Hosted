@@ -29,15 +29,15 @@ public class AssetsService : IAssetsService
 
         try
         {
-            var response = await _http.GetAsync("api/assets");
+            var response = await _http.GetAsync("/api/assets");
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<List<AssetDisplayDto>>(options);
-            return result;
+            return result??new();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return null;
+            return new();
         }
     }
 }

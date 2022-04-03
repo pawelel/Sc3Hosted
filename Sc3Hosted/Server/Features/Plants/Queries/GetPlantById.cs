@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 using Sc3Hosted.Server.Data;
-
+using Sc3Hosted.Server.Repositories;
 using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Features.Plants.Queries;
@@ -15,19 +15,33 @@ public class GetPlantByIdQuery : IRequest<PlantDto>
 
     public class GetPlantByIdQueryHandler : IRequestHandler<GetPlantByIdQuery, PlantDto>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ILogger<GetPlantByIdQueryHandler> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 private readonly  IMapper _mapper;
-        public GetPlantByIdQueryHandler(ApplicationDbContext context, IMapper mapper)
+
+        public GetPlantByIdQueryHandler(ILogger<GetPlantByIdQueryHandler> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _logger = logger;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         public async Task<PlantDto> Handle(GetPlantByIdQuery query, CancellationToken cancellationToken)
         {
-            var plant = await _context.Plants.FindAsync(new object?[] { query.Id }, cancellationToken: cancellationToken);
-
-            return _mapper.Map<PlantDto>(plant);
+            try
+            {
+                var plant = await _unitOfWork.Plants.GetById(query.Id);
+                if (plant == null)
+                {
+                    return null!;
+                }
+                return _mapper.Map<PlantDto>(plant);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting plant by id");
+                return null!;
+            }
         }
     }
 }

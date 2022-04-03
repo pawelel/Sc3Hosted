@@ -1,1 +1,12 @@
-﻿
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField T=string @bind-Value=_plantCreateDto.Name Label="Nazwa Zakładu" Required=true RequiredError="Nazwa zakładu jest wymagana" Counter=60 MaxLength=59 HelperText="Maksymalna długość nazwy" Validation="@(new Func<string, IEnumerable<string>>(MaxNameCharacters))"/>
+            <MudTextField T="string" @bind-Value=_plantCreateDto.Description Immediate="true" Label="Opis Zakładu" Lines="5" Counter=250 MaxLength=249 HelperText="Maksymalna długość opisu" Validation="@(new Func<string, IEnumerable<string>>(MaxDescriptionCharacters))"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Warning" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton  Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="HandleSave">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>

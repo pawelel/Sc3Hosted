@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Repositories;
@@ -14,34 +15,42 @@ public class UpdatePlantCommand : IRequest<bool>
     public class UpdatePlantCommandHandler : IRequestHandler<UpdatePlantCommand, bool>
     {
        private readonly IUnitOfWork _unitOfWork;
-private  readonly ILogger<UpdatePlantCommandHandler> _logger;
+       private readonly IMapper _mapper;
+       private readonly ILogger<UpdatePlantCommandHandler> _logger;
 
-        public UpdatePlantCommandHandler(IUnitOfWork unitOfWork, ILogger<UpdatePlantCommandHandler> logger)
+        public UpdatePlantCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ILogger<UpdatePlantCommandHandler> logger)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
             _logger = logger;
         }
 
         public async Task<bool> Handle(UpdatePlantCommand request, CancellationToken cancellationToken)
         {
-           try
-           {
-                var entity = await _unitOfWork.Plants.GetById(request.Id);
-                if (entity == null)
+            try
+            {
+                var plant = await _unitOfWork.Plants.GetById(request.Id);
+                if (plant == null)
                 {
-                     return false;
+                    return false;
                 }
-                entity.Name = request.Name;
-                entity.Description = request.Description;
-               await _unitOfWork.Plants.Update(entity);
+                plant.Name = request.Name;
+                plant.Description = request.Description;
+            var result =  await  _unitOfWork.Plants.Update(plant);
+            if (!result)
+            {_logger.LogError("Error updating plant");
+                return false;
+            }
                 await _unitOfWork.SaveChangesAsync();
                 return true;
-              }
-              catch (Exception ex)
-              {
-                _logger.LogError(ex, "{Repo} Update function error", typeof(PlantRepository));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating plant");
                 return false;
-           }
+            }
         }
+
+        
     }
 }
