@@ -17,12 +17,12 @@ var jwtIssuer = builder.Configuration["JwtIssuer"];
 var jwtAudience = builder.Configuration["JwtAudience"];
 var jwtSecurityKey = builder.Configuration["JwtSecurityKey"];
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<Sc3HostedDbContext>(options =>
 	options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
 		.AddRoles<IdentityRole>()
-		.AddEntityFrameworkStores<ApplicationDbContext>();
+		.AddEntityFrameworkStores<Sc3HostedDbContext>();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDbService, DbService>();

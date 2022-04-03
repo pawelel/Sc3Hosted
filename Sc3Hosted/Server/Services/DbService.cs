@@ -9,11 +9,12 @@ namespace Sc3Hosted.Server.Services;
 #region IDbService interface
 public interface IDbService
 {
-    Task<bool> CreatePlant(PlantCreateDto plantCreateDto);
-    Task<bool> DeletePlant(int id);
+    Task<bool> CreatePlant(PlantCreateDto plantCreateDto, string userId);
+    Task<bool> DeletePlant(int id, string userId);
     Task<PlantDto> GetPlantById(int id);
     Task<IEnumerable<PlantDto>> GetPlants();
-    Task<bool> UpdatePlant(int id, PlantUpdateDto plantUpdateDto);
+    Task<bool> MarkDeletePlant(int id, string userId);
+    Task<bool> UpdatePlant(int id, string userId, PlantUpdateDto plantUpdateDto);
 }
 #endregion
 
@@ -67,7 +68,7 @@ public class DbService : IDbService
         }
     }
 
-    public async Task<bool> UpdatePlant(int id, PlantUpdateDto plantUpdateDto)
+    public async Task<bool> UpdatePlant(int id, string userId, PlantUpdateDto plantUpdateDto)
     {
         try
         {
@@ -86,14 +87,40 @@ public class DbService : IDbService
             return false;
         }
     }
-
-    public async Task<bool> DeletePlant(int id)
+    public async Task<bool> MarkDeletePlant(int id, string userId)
     {
         try
         {
             var plant = await _unitOfWork.Plants.GetById(id);
             if (plant == null)
             {
+                return false;
+            }
+            plant.IsDeleted = true;
+            plant.UserId = userId;
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting plant");
+            return false;
+        }
+    }
+
+    public async Task<bool> DeletePlant(int id, string userId)
+    {
+        try
+        {
+            var plant = await _unitOfWork.Plants.GetById(id);
+            if (plant == null)
+            {
+                _logger.LogError("Plant not found");
+                return false;
+            }
+            if (plant.IsDeleted == false)
+            {
+                _logger.LogError("Plant not marked as deleted");
                 return false;
             }
             await _unitOfWork.Plants.Delete(plant);
@@ -106,11 +133,12 @@ public class DbService : IDbService
             return false;
         }
     }
-    public async Task<bool> CreatePlant(PlantCreateDto plantCreateDto)
+    public async Task<bool> CreatePlant(PlantCreateDto plantCreateDto, string userId)
     {
         try
         {
             var plant = _mapper.Map<Plant>(plantCreateDto);
+            plant.UserId = userId;
             var result =await _unitOfWork.Plants.Create(plant);
             if (result)
             {

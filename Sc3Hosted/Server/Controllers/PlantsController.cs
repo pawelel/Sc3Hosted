@@ -17,16 +17,19 @@ namespace Sc3Hosted.Server.Controllers;
 public class PlantsController : ControllerBase
 {
     private readonly IDbService _dbService;
+    private readonly IUserContextService _userContextService;
 
-    public PlantsController(IDbService dbService)
+    public PlantsController(IDbService dbService, IUserContextService userContextService)
     {
         _dbService = dbService;
+        _userContextService = userContextService;
     }
 
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] PlantCreateDto plantCreateDto)
     {
-        var result = await _dbService.CreatePlant(plantCreateDto);
+        var userId = _userContextService.UserId;
+        var result = await _dbService.CreatePlant(plantCreateDto, userId);
         if (result)
         {
         return Ok(result);
@@ -61,7 +64,8 @@ public class PlantsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, PlantUpdateDto plantUpdateDto)
     {
-        var result = await _dbService.UpdatePlant(id, plantUpdateDto);
+        var userId = _userContextService.UserId;
+        var result = await _dbService.UpdatePlant(id, userId, plantUpdateDto);
         if (result)
         {
             return Ok(result);
@@ -72,7 +76,8 @@ public class PlantsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await _dbService.DeletePlant(id);
+        var userId = _userContextService.UserId;
+        var result = await _dbService.DeletePlant(id, userId);
         if (result)
         {
             return Ok(result);

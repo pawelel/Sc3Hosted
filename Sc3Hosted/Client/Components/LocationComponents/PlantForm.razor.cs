@@ -15,20 +15,20 @@ public partial class PlantForm : ComponentBase
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(true));
-    private MudForm _form;
+    private MudForm _form=new();
     bool _isOpen;
     private void Cancel() => MudDialog.Cancel();
     private PlantCreateDto _plantCreateDto = new();
     protected override async Task OnInitializedAsync()
     {
-        _form = new();
+
     }
-    private IEnumerable<string> MaxNameCharacters(string ch)
+    private static IEnumerable<string> MaxNameCharacters(string ch)
     {
         if (!string.IsNullOrEmpty(ch) && 60 < ch?.Length)
             yield return "Max 59 znaków";
     }
-    private IEnumerable<string> MaxDescriptionCharacters(string ch)
+    private static IEnumerable<string> MaxDescriptionCharacters(string ch)
     {
         if (!string.IsNullOrEmpty(ch) && 250 < ch?.Length)
             yield return "Max 249 znaków";

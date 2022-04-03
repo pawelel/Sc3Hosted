@@ -2,7 +2,7 @@
 
 namespace Sc3Hosted.Server.Entities;
 
-public class Space  : BaseEntity
+public class Space : BaseEntity
 {
     public int SpaceId { get; set; }
     public string Name { get; set; } = string.Empty;

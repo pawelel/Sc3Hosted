@@ -19,16 +19,17 @@ public interface IRepository<TEntity> where TEntity : class
     Task<TEntity> GetOne(Expression<Func<TEntity, bool>> filter = null!, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null!);
     Task<bool> Create(TEntity entityToUpdate);
     Task<bool> Update(TEntity entityToUpdate);
+    Task<bool> MarkDelete(TEntity entityToDelete);
 }
 
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {
-    protected ApplicationDbContext context;
+    protected Sc3HostedDbContext context;
     public readonly ILogger _logger;
 
     internal DbSet<TEntity> dbSet;
 
-    public Repository(ApplicationDbContext context, ILogger logger)
+    public Repository(Sc3HostedDbContext context, ILogger logger)
     {
         this.context = context;
         this.dbSet = context.Set<TEntity>();
@@ -132,6 +133,11 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         throw new NotImplementedException();
     }
 
+    public virtual Task<bool> MarkDelete(TEntity entityToDelete)
+    {
+        throw new NotImplementedException();
+    }
+    
     public virtual Task<bool> Delete(TEntity entityToDelete)
     {
         throw new NotImplementedException();

@@ -15,7 +15,7 @@ public interface IPlantRepository : IRepository<Plant>
 
 public class PlantRepository : Repository<Plant>, IPlantRepository
 {
-    public PlantRepository(ApplicationDbContext context, ILogger logger) : base(context, logger) { }
+    public PlantRepository(Sc3HostedDbContext context, ILogger logger) : base(context, logger) { }
 
     public override async Task<bool> Create(Plant plant)
     {
@@ -23,7 +23,7 @@ public class PlantRepository : Repository<Plant>, IPlantRepository
         {
             throw new ArgumentNullException(nameof(plant));
         }
-        var exist = await GetOne(x=>x.Name==plant.Name);
+        var exist = await GetOne(x => Equals(x.Name.ToLower().Trim(), plant.Name.ToLower().Trim()));
         if (exist != null)
         {
             return false;
@@ -58,6 +58,8 @@ public class PlantRepository : Repository<Plant>, IPlantRepository
             }
     }
 
+
+    
     public override async Task<bool> Delete(int id)
     {
       try
@@ -76,6 +78,26 @@ public class PlantRepository : Repository<Plant>, IPlantRepository
             return false;
       }
     }
+
+    public override async Task<bool> MarkDelete(Plant entityToDelete)
+    {
+        try
+        {
+            var exist = await context.Plants.FirstOrDefaultAsync(x => x.PlantId == entityToDelete.PlantId);
+            if (exist is null)
+            {
+                return false;
+            }
+            context.Entry(exist).CurrentValues.SetValues(entityToDelete);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} Mark delete function error", typeof(PlantRepository));
+            return false;
+        }
+    }
+
     public override async Task<bool> Update(Plant entityToUpdate)
     {
         try

@@ -51,7 +51,7 @@
 
     private RegisterDto _registerModel = new RegisterDto();
     private bool _showErrors;
-    private IEnumerable<string> _errors;
+    private IEnumerable<string> _errors=new List<string>();
 
     private async Task HandleRegistration()
     {

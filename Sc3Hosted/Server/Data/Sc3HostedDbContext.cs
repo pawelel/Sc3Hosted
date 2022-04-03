@@ -9,9 +9,9 @@ using Sc3Hosted.Server.Entities;
 
 namespace Sc3Hosted.Server.Data;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
 {
-    public ApplicationDbContext(DbContextOptions options) : base(options)
+    public Sc3HostedDbContext(DbContextOptions options) : base(options)
     {
     }
 

@@ -4,19 +4,22 @@ namespace Sc3Hosted.Server.Repositories;
 public interface IUnitOfWork 
 {
     IPlantRepository Plants { get; }
+    IAreaRepository Areas { get; }
     Task SaveChangesAsync();
 }
 public class UnitOfWork: IUnitOfWork, IDisposable
 {
     private bool _disposed;
-    private readonly ApplicationDbContext _context;
+    private readonly Sc3HostedDbContext _context;
     private readonly ILogger _logger;
     public IPlantRepository Plants { get; private set; }
-    public UnitOfWork(ApplicationDbContext context, ILoggerFactory loggerFactory)
+    public IAreaRepository Areas { get; private set; }
+    public UnitOfWork(Sc3HostedDbContext context, ILoggerFactory loggerFactory)
     {
         _context = context;
         _logger = loggerFactory.CreateLogger("logs");
         Plants = new PlantRepository(_context, _logger);
+        Areas = new AreaRepository(_context, _logger);
     }
     public async Task SaveChangesAsync()
     {

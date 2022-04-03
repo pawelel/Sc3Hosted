@@ -10,7 +10,7 @@ using Sc3Hosted.Server.Data;
 
 namespace Sc3Hosted.Server.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(Sc3HostedDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
