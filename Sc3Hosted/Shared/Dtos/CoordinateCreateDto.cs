@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class CoordinateCreateDto
 {
-    public string Name { get; set; }
-
-    public CoordinateCreateDto(string name)
-    {
-        Name = name;
-    }
-
-    public string? Description { get; set; }
+    public string Name { get; set; }= string.Empty;
+    public string Description { get; set; } = string.Empty;
 }

@@ -8,5 +8,5 @@ namespace Sc3Hosted.Shared.Dtos;
 public class AreaFlat
 {
     public int AreaId { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 }

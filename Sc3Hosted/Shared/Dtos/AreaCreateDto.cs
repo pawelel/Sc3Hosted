@@ -7,11 +7,7 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class AreaCreateDto
 {
-    public string Name { get; set; }
+    public string Name { get; set; }= string.Empty;
 
-    public AreaCreateDto(string name)
-    {
-        Name = name;
-    }
-
+    
 }

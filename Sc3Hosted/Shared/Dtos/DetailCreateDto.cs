@@ -7,10 +7,7 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class DetailCreateDto
 {
-    public string Name { get; set; }
-    public string? Description { get; set; }
-    public DetailCreateDto(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; }= string.Empty;
+    public string Description { get; set; } = string.Empty;
+   
 }

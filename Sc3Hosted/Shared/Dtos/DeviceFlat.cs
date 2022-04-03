@@ -8,6 +8,6 @@ namespace Sc3Hosted.Shared.Dtos;
 public class DeviceFlat
 {
     public int DeviceId { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
 }

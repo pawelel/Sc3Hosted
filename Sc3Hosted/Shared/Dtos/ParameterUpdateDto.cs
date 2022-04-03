@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class ParameterUpdateDto
 {
-    public string Name { get; set; }
-
-    public ParameterUpdateDto(string name)
-    {
-        Name = name;
-    }
-
-    public string? Description { get; set; }
+    public string Name { get; set; }= string.Empty;
+    public string Description { get; set; } = string.Empty;
 }

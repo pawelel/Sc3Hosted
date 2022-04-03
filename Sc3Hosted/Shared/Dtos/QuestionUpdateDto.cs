@@ -7,10 +7,5 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class QuestionUpdateDto
 {
-    public string Name { get; set; }
-
-    public QuestionUpdateDto(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; }= string.Empty;
 }

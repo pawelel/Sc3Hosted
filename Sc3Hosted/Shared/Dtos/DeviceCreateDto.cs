@@ -8,10 +8,6 @@ namespace Sc3Hosted.Shared.Dtos;
 public class DeviceCreateDto
 {
     public int DeviceId { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; }= string.Empty;
 
-    public DeviceCreateDto(string name)
-    {
-        Name = name;
-    }
 }

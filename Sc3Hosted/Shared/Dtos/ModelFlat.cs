@@ -8,7 +8,7 @@ namespace Sc3Hosted.Shared.Dtos;
 public class ModelFlat
 {
     public int ModelId { get; set; }
-    public string? Name { get; set; }
-    public List<ModelParameterDto> ModelParameters { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public List<ModelParameterDto> ModelParameters { get; set; }=new();
 
 }

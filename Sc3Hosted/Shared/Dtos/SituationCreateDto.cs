@@ -2,10 +2,6 @@ namespace Sc3Hosted.Shared.Dtos;
 
 public class SituationCreateDto
 {
-public string Name { get; set; }
+public string Name { get; set; }= string.Empty;
 
-    public SituationCreateDto(string name)
-    {
-        Name = name;
-    }
 }

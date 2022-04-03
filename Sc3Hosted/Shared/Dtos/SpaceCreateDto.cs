@@ -9,12 +9,8 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class SpaceCreateDto
 {
-    public string Name { get; set; }
+    public string Name { get; set; }= string.Empty;
 
-    public SpaceCreateDto(string name)
-    {
-        Name = name;
-    }
     public SpaceType SpaceType { get; set; }
     public bool IsArchived { get; set; }
 }

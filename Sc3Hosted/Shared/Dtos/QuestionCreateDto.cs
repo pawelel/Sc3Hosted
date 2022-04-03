@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class QuestionCreateDto
 {
-    public string Name { get; set; }
-
-    public QuestionCreateDto(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; }= string.Empty;
+   
 }

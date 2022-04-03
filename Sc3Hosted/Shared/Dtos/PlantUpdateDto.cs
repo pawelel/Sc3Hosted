@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class PlantUpdateDto
 {
-    public string Name { get; set; }
-    public List<AreaDto> Areas { get; set; }
-    public PlantUpdateDto(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; }= string.Empty;
+    public List<AreaDto> Areas { get; set; }= new();
 }

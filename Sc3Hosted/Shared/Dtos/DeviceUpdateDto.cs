@@ -7,12 +7,8 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class DeviceUpdateDto
 {
-    public string Name { get; set; }
+    public string Name { get; set; }= string.Empty;
 
-    public DeviceUpdateDto(string name)
-    {
-        Name = name;
-    }
-    public List<ModelDto> Models { get; set; }
-    public List<DeviceCommunicateDto> DeviceCommunicates { get; set; }
+    public List<ModelDto> Models { get; set; }= new();
+    public List<DeviceCommunicateDto> DeviceCommunicates { get; set; }= new();
 }

@@ -13,7 +13,7 @@ public partial class PlantForm : ComponentBase
     [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
     [Inject] IPlantService PlantService { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
-    
+
     private void Submit() => MudDialog.Close(DialogResult.Ok(true));
     private MudForm _form;
     bool _isOpen;
@@ -21,7 +21,7 @@ public partial class PlantForm : ComponentBase
     private PlantCreateDto _plantCreateDto = new();
     protected override async Task OnInitializedAsync()
     {
-
+        _form = new();
     }
     private IEnumerable<string> MaxNameCharacters(string ch)
     {
@@ -54,6 +54,6 @@ public partial class PlantForm : ComponentBase
                 Snackbar.Add(ex.Message, Severity.Error);
             }
         }
-        
+
     }
 }

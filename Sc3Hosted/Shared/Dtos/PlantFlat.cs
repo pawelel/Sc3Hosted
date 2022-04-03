@@ -3,6 +3,6 @@
 public class PlantFlat
 {
     public int PlantId { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
 }

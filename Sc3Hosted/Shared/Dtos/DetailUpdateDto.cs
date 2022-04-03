@@ -7,12 +7,7 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class DetailUpdateDto
 {
-    public string Name { get; set; }
+    public string Name { get; set; }= string.Empty;
 
-    public DetailUpdateDto(string name)
-    {
-        Name = name;
-    }
-
-    public string? Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 }
