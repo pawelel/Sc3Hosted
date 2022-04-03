@@ -657,58 +657,258 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<CoordinateDto>> GetCoordinateById(int id)
     {
-        throw new NotImplementedException();
+       try
+        {
+            var coordinate = await _unitOfWork.Coordinates.GetById(id);
+            if (coordinate == null)
+            {
+                return new("Coordinate not found", false);
+            }
+            return new(_mapper.Map<CoordinateDto>(coordinate), "Coordinate returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting coordinate by id");
+            return new("Error getting coordinate by id", false);
+        }
     }
 
     public async Task<ServiceResponse<IEnumerable<CoordinateDto>>> GetCoordinates()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var coordinates = await _unitOfWork.Coordinates.Get();
+            if (coordinates == null)
+            {
+                return new("Coordinates not found", false);
+            }
+            return new(_mapper.Map<IEnumerable<CoordinateDto>>(coordinates), "List of coordinates returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all coordinates");
+            return new("Error getting all coordinates", false);
+        }
     }
 
     public async Task<ServiceResponse<IEnumerable<CoordinateDto>>> GetCoordinatesWithAssets()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var coordinates = await _unitOfWork.Coordinates.Get(include: c => c.Include(a => a.Assets));
+            if (coordinates == null)
+            {
+                return new("Coordinates not found", false);
+            }
+            return new(_mapper.Map<IEnumerable<CoordinateDto>>(coordinates), "List of coordinates with assets returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all coordinates with assets");
+            return new("Error getting all coordinates with assets", false);
+        }
     }
 
     public async Task<ServiceResponse> UpdateCoordinate(int id, string userId, CoordinateUpdateDto coordinateUpdateDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var coordinate = await _unitOfWork.Coordinates.GetById(id);
+            if (coordinate == null)
+            {
+                return new("Coordinate not found", false);
+            }
+            coordinate.Description = coordinateUpdateDto.Description;
+            coordinate.Name = coordinateUpdateDto.Name;
+            coordinate.UserId = userId;
+            await _unitOfWork.SaveChangesAsync();
+            return new("Coordinate updated", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating coordinate");
+            return new("Error updating coordinate", false);
+        }
     }
 
     public async Task<ServiceResponse> MarkDeleteCoordinate(int id, string userId)
     {
-        throw new NotImplementedException();
+        var coordinate = await _unitOfWork.Coordinates.GetOne(c => c.CoordinateId == id, c => c.Include(a => a.Assets));
+        if (coordinate == null)
+        {
+            return new("Coordinate not found", false);
+        }
+        if (coordinate.Assets.Any())
+        {
+            return new("Cannot delete coordinate with assets", false);
+        }
+        try
+        {
+            coordinate.IsDeleted = true;
+            coordinate.UserId = userId;
+            await _unitOfWork.SaveChangesAsync();
+            return new("Coordinate marked as deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking coordinate as deleted");
+            return new("Error deleting coordinate", false);
+        }
     }
 
     public async Task<ServiceResponse> DeleteCoordinate(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var coordinate = await _unitOfWork.Coordinates.GetById(id);
+            if (coordinate == null)
+            {
+                _logger.LogError("Coordinate not found");
+                return new("Coordinate not found", false);
+            }
+            if (coordinate.IsDeleted == false)
+            {
+                _logger.LogError("Coordinate not marked as deleted");
+                return new("Coordinate not marked as deleted", false);
+            }
+            await _unitOfWork.Coordinates.Delete(coordinate);
+            await _unitOfWork.SaveChangesAsync();
+            return new("Coordinate deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting coordinate");
+            return new("Error deleting coordinate", false);
+        }
     }
     #endregion
     #region asset service
     public async Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId)
     {
-        throw new NotImplementedException();
+        var coordinate = await _unitOfWork.Coordinates.GetOne(c => c.CoordinateId == assetCreateDto.CoordinateId, c => c.Include(a => a.Assets));
+        if (coordinate == null)
+        {
+            _logger.LogWarning("Cannot create asset for coordinate with id {coordinateId}", assetCreateDto.CoordinateId);
+            return new($"Cannot create asset for coordinate with id {assetCreateDto.CoordinateId}", false);
+        }
+        if (coordinate.Assets.Any(a => !a.IsDeleted && a.Name.ToLower().Trim() == assetCreateDto.Name.ToLower().Trim()))
+        {
+            _logger.LogWarning("Asset with name {assetName} already exists", assetCreateDto.Name);
+            return new($"Asset with name {assetCreateDto.Name} already exists", false);
+        }
+        var model = await _unitOfWork.Models.GetOne(m => m.ModelId == assetCreateDto.ModelId);
+        if (model == null)
+        {
+            _logger.LogWarning("Cannot create asset for model with id {modelId}", assetCreateDto.ModelId);
+            return new($"Cannot create asset for model with id {assetCreateDto.ModelId}", false);
+        }
+        try
+        {
+            var asset = _mapper.Map<Asset>(assetCreateDto);
+            asset.UserId = userId;
+            var result = await _unitOfWork.Assets.Create(asset);
+            if (result)
+            {
+                await _unitOfWork.SaveChangesAsync();
+                return new("Asset created", true);
+            }
+            return new("Asset not created", false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating asset");
+            return new("Error creating asset", false);
+        }
     }
 
     public async Task<ServiceResponse<AssetDto>> GetAssetById(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var asset = await _unitOfWork.Assets.GetOne(a => a.AssetId == id, a => a.Include(a=>a.AssetDetails).Include(a=>a.AssetCategories));
+            if (asset == null)
+            {
+                return new("Asset not found", false);
+            }
+            return new(_mapper.Map<AssetDto>(asset), "Asset returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting asset by id");
+            return new("Error getting asset by id", false);
+        }
     }
 
     public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var assets = await _unitOfWork.Assets.Get(include: a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories));
+            if (assets == null)
+            {
+                return new("Assets not found", false);
+            }
+            return new(_mapper.Map<IEnumerable<AssetDto>>(assets), "List of assets returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all assets");
+            return new("Error getting all assets", false);
+        }
     }
 
     public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssetsWithAllData()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var assets = await _unitOfWork.Assets.Get(include: a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories).Include(a => a.Coordinate).Include(c => c.AssetCommunicates).Include(a=>a.AssetSituations).Include(a=>a.Model));
+            if (assets == null)
+            {
+                return new("Assets not found", false);
+            }
+            return new(_mapper.Map<IEnumerable<AssetDto>>(assets), "List of assets returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all assets");
+            return new("Error getting all assets", false);
+        }
     }
 
     public async Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var asset = await _unitOfWork.Assets.GetOne(a => a.AssetId == id, a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories));
+            if (asset == null)
+            {
+                _logger.LogWarning("Asset not found");
+                return new("Asset not found", false);
+            }
+            if (asset.IsDeleted)
+            {
+                _logger.LogWarning("Asset marked as deleted");
+                return new("Asset marked as deleted", false);
+            }
+            
+            if (asset.Name.ToLower().Trim() != assetUpdateDto.Name.ToLower().Trim())
+            {
+                var coordinate = await _unitOfWork.Coordinates.GetOne(c => c.CoordinateId == assetUpdateDto.CoordinateId, c => c.Include(a => a.Assets));
+                if (coordinate == null)
+                {
+                    _logger.LogWarning("Cannot update asset for coordinate with id {coordinateId}", assetUpdateDto.CoordinateId);
+                    return new($"Cannot update asset for coordinate with id {assetUpdateDto.CoordinateId}", false);
+                }
+                if (coordinate.Assets.Any(a => !a.IsDeleted && a.Name.ToLower().Trim() == assetUpdateDto.Name.ToLower().Trim()))
+                {
+                    _logger.LogWarning("Asset with name {assetName} already exists", assetUpdateDto.Name);
+                    return new($"Asset with name {assetUpdateDto.Name} already exists", false);
+                }
+            }
+            var model = await _unitOfWork.Models.GetOne(m => m.ModelId == assetUpdateDto.ModelId);
+            if (model == null)
+            {
+                _logger.LogWarning("Cannot
     }
 
     public async Task<ServiceResponse> MarkDeleteAsset(int id, string userId)
