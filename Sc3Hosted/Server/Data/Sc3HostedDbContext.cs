@@ -56,7 +56,7 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     }
     //stuff
     public DbSet<Asset> Assets => Set<Asset>();
-    public DbSet<AssetCategoryConfig> AssetCategories => Set<AssetCategoryConfig>();
+    public DbSet<AssetCategory> AssetCategories => Set<AssetCategory>();
     public DbSet<AssetDetail> AssetDetails => Set<AssetDetail>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Detail> Details => Set<Detail>();
@@ -66,13 +66,13 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Parameter> Parameters => Set<Parameter>();
     public DbSet<Plant> Plants => Set<Plant>();
     // information
-    public DbSet<CommunicateArea> AreaCommunicates => Set<CommunicateArea>();
-    public DbSet<CommunicateAsset> AssetCommunicates => Set<CommunicateAsset>();
+    public DbSet<CommunicateArea> CommunicateAreas => Set<CommunicateArea>();
+    public DbSet<CommunicateAsset> CommunicateAssets => Set<CommunicateAsset>();
     public DbSet<Communicate> Communicates => Set<Communicate>();
-    public DbSet<CommunicateCoordinate> CoordinateCommunicates => Set<CommunicateCoordinate>();
-    public DbSet<CommunicateDevice> DeviceCommunicates => Set<CommunicateDevice>();
-    public DbSet<CommunicateModel> ModelCommunicates => Set<CommunicateModel>();
-    public DbSet<CommunicateSpace> SpaceCommunicates => Set<CommunicateSpace>();
+    public DbSet<CommunicateCoordinate> CommunicateCoordinates => Set<CommunicateCoordinate>();
+    public DbSet<CommunicateDevice> CommunicateDevices => Set<CommunicateDevice>();
+    public DbSet<CommunicateModel> CommunicateModels => Set<CommunicateModel>();
+    public DbSet<CommunicateSpace> CommunicateSpaces => Set<CommunicateSpace>();
 
     // location
     public DbSet<Area> Areas => Set<Area>();

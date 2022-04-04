@@ -146,7 +146,7 @@ public class DbService : IDbService
         using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var plant = await context.Plants.Include(a => a.Areas).FirstOrDefaultAsync(p=>p.PlantId==id);
+            var plant = await context.Plants.Include(a => a.Areas).FirstOrDefaultAsync(p => p.PlantId == id);
             if (plant == null)
             {
                 return new("Plant not found", false);
@@ -158,10 +158,10 @@ public class DbService : IDbService
             plant.IsDeleted = true;
             plant.UserId = userId;
             context.Plants.Update(plant);
-       
-                await context.SaveChangesAsync();
+
+            await context.SaveChangesAsync();
             transaction.Commit();
-                return new("Plant marked as deleted", true);
+            return new("Plant marked as deleted", true);
         }
         catch (Exception ex)
         {
@@ -176,7 +176,7 @@ public class DbService : IDbService
         using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var plant = await context.Plants.FirstOrDefaultAsync(p=>p.PlantId==id);
+            var plant = await context.Plants.FirstOrDefaultAsync(p => p.PlantId == id);
             if (plant == null)
             {
                 return new("Plant not found", false);
@@ -193,10 +193,10 @@ public class DbService : IDbService
             plant.IsDeleted = false;
             plant.UserId = userId;
             context.Plants.Update(plant);
-         
-                await context.SaveChangesAsync();
+
+            await context.SaveChangesAsync();
             transaction.Commit();
-                return new("Plant marked as undeleted", true);
+            return new("Plant marked as undeleted", true);
         }
         catch (Exception ex)
         {
@@ -211,7 +211,7 @@ public class DbService : IDbService
         using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var plant = await context.Plants.FirstOrDefaultAsync(p=>p.PlantId==id);
+            var plant = await context.Plants.FirstOrDefaultAsync(p => p.PlantId == id);
             if (plant == null)
             {
                 _logger.LogError("Plant not found");
@@ -222,11 +222,11 @@ public class DbService : IDbService
                 _logger.LogError("Plant not marked as deleted");
                 return new("Plant not marked as deleted", false);
             }
-             context.Plants.Remove(plant);
-         
-                await context.SaveChangesAsync();
+            context.Plants.Remove(plant);
+
+            await context.SaveChangesAsync();
             transaction.Commit();
-                return new("Plant deleted", true);
+            return new("Plant deleted", true);
         }
         catch (Exception ex)
         {
@@ -239,9 +239,11 @@ public class DbService : IDbService
     #region area service
     public async Task<ServiceResponse> CreateArea(int plantId, AreaCreateDto areaCreateDto, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var plant = await context.Plants.FirstOrDefaultAsync(p => p.PlantId == plantId, p => p.Include(a => a.Areas));
+            var plant = await context.Plants.Include(a => a.Areas).FirstOrDefaultAsync(p => p.PlantId == plantId);
             if (plant == null || plant.IsDeleted)
             {
                 _logger.LogWarning("Cannot create area for plant with id {plantId}", plantId);
@@ -257,30 +259,26 @@ public class DbService : IDbService
             area.Description = areaCreateDto.Description;
             area.PlantId = plantId;
             area.UserId = userId;
-            var result = await context.Areas.Add(area);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Area created", true);
-            }
-            else
-            {
-                _logger.LogError("Area not created");
-                return new("Area not created", false);
-            }
+            context.Areas.Add(area);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Area created", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating area");
+            transaction.Rollback();
             return new("Error creating area", false);
         }
     }
 
     public async Task<ServiceResponse<AreaDto>> GetAreaById(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
+
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(id);
+            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id);
             if (area == null)
             {
                 return new("Area not found", false);
@@ -296,9 +294,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<AreaDto>>> GetAreas()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var areas = await context.Areas.Get();
+            var areas = await context.Areas.ToListAsync();
             if (areas == null)
             {
                 return new("Areas not found", false);
@@ -314,9 +313,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<AreaDto>>> GetAreasWithSpaces()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var areas = await context.Areas.Get(include: a => a.Include(s => s.Spaces));
+            var areas = await context.Areas.Include(s => s.Spaces).ToListAsync();
             if (areas == null)
             {
                 return new("Areas not found", false);
@@ -332,9 +332,11 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateArea(int id, string userId, AreaUpdateDto areaUpdateDto)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(id);
+            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id);
             if (area == null)
             {
                 return new("Area not found", false);
@@ -348,29 +350,27 @@ public class DbService : IDbService
             area.Description = areaUpdateDto.Description;
             area.Name = areaUpdateDto.Name;
             area.UserId = userId;
-            var result = await context.Areas.Update(area);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Area updated", true);
-            }
-            else
-            {
-                return new("Area not updated", false);
-            }
+            context.Areas.Update(area);
+
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Area updated", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating area");
+            transaction.Rollback();
             return new("Error updating area", false);
         }
     }
 
     public async Task<ServiceResponse> MarkDeleteArea(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id, a => a.Include(s => s.Spaces));
+            var area = await context.Areas.Include(s => s.Spaces).FirstOrDefaultAsync(a => a.AreaId == id);
             if (area == null)
             {
                 return new("Area not found", false);
@@ -382,26 +382,23 @@ public class DbService : IDbService
             area.IsDeleted = true;
             area.UserId = userId;
 
-            var result = await context.Areas.Update(area);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Area marked as deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Area not marked as deleted");
-                return new("Area not marked as deleted", false);
-            }
+            context.Areas.Update(area);
+
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Area marked as deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking area as deleted");
+            transaction.Rollback();
             return new("Error deleting area", false);
         }
     }
     public async Task<ServiceResponse> MarkUnDeleteArea(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
             var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id);
@@ -417,29 +414,26 @@ public class DbService : IDbService
             area.IsDeleted = false;
             area.UserId = userId;
 
-            var result = await context.Areas.Update(area);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Area marked as undeleted", true);
-            }
-            else
-            {
-                _logger.LogError("Area not marked as undeleted");
-                return new("Area not marked as undeleted", false);
-            }
+            context.Areas.Update(area);
+
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Area marked as undeleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking area as undeleted");
+            transaction.Rollback();
             return new("Error deleting area", false);
         }
     }
     public async Task<ServiceResponse> DeleteArea(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(id);
+            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id);
             if (area == null)
             {
                 _logger.LogError("Area not found");
@@ -450,21 +444,15 @@ public class DbService : IDbService
                 _logger.LogError("Area not marked as deleted");
                 return new("Area not marked as deleted", false);
             }
-            var result = await context.Areas.Remove(area);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Area deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Area not deleted");
-                return new("Area not deleted", false);
-            }
+            context.Areas.Remove(area);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Area deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting area");
+            transaction.Rollback();
             return new("Error deleting area", false);
         }
     }
@@ -472,9 +460,11 @@ public class DbService : IDbService
     #region space service
     public async Task<ServiceResponse> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == areaId, a => a.Include(s => s.Spaces));
+            var area = await context.Areas.Include(s => s.Spaces).FirstOrDefaultAsync(a => a.AreaId == areaId);
             if (area == null)
             {
                 _logger.LogWarning("Cannot create space for area with id {areaId}", areaId);
@@ -490,30 +480,25 @@ public class DbService : IDbService
             space.AreaId = areaId;
             space.Name = spaceCreateDto.Name;
             space.Description = spaceCreateDto.Description;
-            var result = await context.Spaces.Add(space);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Space created", true);
-            }
-            else
-            {
-                _logger.LogError("Space not created");
-                return new("Space not created", false);
-            }
+            context.Spaces.Add(space);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Space created", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating space");
+            transaction.Rollback();
             return new("Error creating space", false);
         }
     }
 
     public async Task<ServiceResponse<SpaceDto>> GetSpaceById(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var space = await context.Spaces.FirstOrDefaultAsync(id);
+            var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == id);
             if (space == null)
             {
                 return new("Space not found", false);
@@ -529,9 +514,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<SpaceDto>>> GetSpaces()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var spaces = await context.Spaces.Get();
+            var spaces = await context.Spaces.FirstOrDefaultAsync();
             if (spaces == null)
             {
                 return new("Spaces not found", false);
@@ -547,9 +533,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<SpaceDto>>> GetSpacesWithCoordinates()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var spaces = await context.Spaces.Get(include: s => s.Include(c => c.Coordinates));
+            var spaces = await context.Spaces.Include(c => c.Coordinates).ToListAsync();
             if (spaces == null)
             {
                 return new("Spaces not found", false);
@@ -565,14 +552,20 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateSpace(int id, string userId, SpaceUpdateDto spaceUpdateDto)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var space = await context.Spaces.FirstOrDefaultAsync(id);
+            var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == id);
             if (space == null)
             {
                 return new("Space not found", false);
             }
-            var exists = await context.Spaces.Get(s => s.IsDeleted == false && s.SpaceId != id && Equals(s.Name.ToLower().Trim(), spaceUpdateDto.Name.ToLower().Trim()));
+            var exists = await context.Spaces
+                .Where(s => s.IsDeleted == false)
+                .Where(s => s.SpaceId != id)
+                .Where(s => Equals(s.Name.ToLower().Trim(), spaceUpdateDto.Name.ToLower().Trim()))
+                .ToListAsync();
             if (exists.Any())
             {
                 return new($"Space with name {spaceUpdateDto.Name} already exists", false);
@@ -581,30 +574,26 @@ public class DbService : IDbService
             space.Description = spaceUpdateDto.Description;
             space.SpaceType = spaceUpdateDto.SpaceType;
             space.UserId = userId;
-            var result = await context.Spaces.Update(space);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Space updated", true);
-            }
-            else
-            {
-                _logger.LogError("Space with id {id} not updated", id);
-                return new("Space not updated", false);
-            }
+            context.Spaces.Update(space);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Space updated", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating space");
+            transaction.Rollback();
             return new("Error updating space", false);
         }
     }
 
     public async Task<ServiceResponse> MarkDeleteSpace(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == id, s => s.Include(c => c.Coordinates));
+            var space = await context.Spaces.Include(c => c.Coordinates).FirstOrDefaultAsync(s => s.SpaceId == id);
             if (space == null)
             {
                 return new("Space not found", false);
@@ -615,26 +604,22 @@ public class DbService : IDbService
             }
             space.IsDeleted = true;
             space.UserId = userId;
-            var result = await context.Spaces.Update(space);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Space marked as deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Space not deleted");
-                return new("Space not deleted", false);
-            }
+            context.Spaces.Update(space);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Space marked as deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking space as deleted");
+            transaction.Rollback();
             return new("Error marking space as deleted", false);
         }
     }
     public async Task<ServiceResponse> MarkUnDeleteSpace(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
             var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == id);
@@ -646,36 +631,32 @@ public class DbService : IDbService
             {
                 return new("Space is not marked as deleted", false);
             }
-            var exists = await context.Spaces.Get(s => s.IsDeleted == false && s.SpaceId != id && Equals(s.Name.ToLower().Trim(), space.Name.ToLower().Trim()));
+            var exists = await context.Spaces.Where(s => s.IsDeleted == false && s.SpaceId != id && Equals(s.Name.ToLower().Trim(), space.Name.ToLower().Trim())).ToListAsync();
             if (exists.Any())
             {
                 return new($"Space with name {space.Name} already exists", false);
             }
             space.IsDeleted = false;
             space.UserId = userId;
-            var result = await context.Spaces.Update(space);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Space marked as undeleted", true);
-            }
-            else
-            {
-                _logger.LogError("Space not undeleted");
-                return new("Space not undeleted", false);
-            }
+            context.Spaces.Update(space);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Space marked as undeleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking space as undeleted");
+            transaction.Rollback();
             return new("Error undeleting space", false);
         }
     }
     public async Task<ServiceResponse> DeleteSpace(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var space = await context.Spaces.FirstOrDefaultAsync(id);
+            var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == id);
             if (space == null)
             {
                 _logger.LogError("Space not found");
@@ -686,21 +667,15 @@ public class DbService : IDbService
                 _logger.LogError("Space not marked as deleted");
                 return new("Space not marked as deleted", false);
             }
-            var result = await context.Spaces.Remove(space);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Space deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Space not deleted");
-                return new("Space not deleted", false);
-            }
+            context.Spaces.Remove(space);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Space deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting space");
+            transaction.Rollback();
             return new("Error deleting space", false);
         }
     }
@@ -708,9 +683,11 @@ public class DbService : IDbService
     #region coordinate service
     public async Task<ServiceResponse> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == spaceId, s => s.Include(c => c.Coordinates));
+            var space = await context.Spaces.Include(c => c.Coordinates).FirstOrDefaultAsync(s => s.SpaceId == spaceId);
             if (space == null)
             {
                 _logger.LogWarning("Cannot create coordinate for space with id {spaceId}", spaceId);
@@ -721,33 +698,32 @@ public class DbService : IDbService
                 _logger.LogWarning("Coordinate with name {coordinateName} already exists", coordinateCreateDto.Name);
                 return new($"Coordinate with name {coordinateCreateDto.Name} already exists", false);
             }
-
-
             Coordinate coordinate = new();
             coordinate.Name = coordinateCreateDto.Name;
             coordinate.Description = coordinateCreateDto.Description;
             coordinate.SpaceId = spaceId;
             coordinate.UserId = userId;
-            var result = await context.Coordinates.Add(coordinate);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Coordinate created", true);
-            }
-            return new("Coordinate not created", false);
+            context.Coordinates.Add(coordinate);
+
+
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Coordinate created", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating coordinate");
+            transaction.Rollback();
             return new("Error creating coordinate", false);
         }
     }
 
     public async Task<ServiceResponse<CoordinateDto>> GetCoordinateById(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(id);
+            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id);
             if (coordinate == null)
             {
                 return new("Coordinate not found", false);
@@ -763,9 +739,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<CoordinateDto>>> GetCoordinates()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var coordinates = await context.Coordinates.Get();
+            var coordinates = await context.Coordinates.ToListAsync();
             if (coordinates == null)
             {
                 return new("Coordinates not found", false);
@@ -781,9 +758,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<CoordinateDto>>> GetCoordinatesWithAssets()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var coordinates = await context.Coordinates.Get(include: c => c.Include(a => a.Assets));
+            var coordinates = await context.Coordinates.Include(a => a.Assets).ToListAsync();
             if (coordinates == null)
             {
                 return new("Coordinates not found", false);
@@ -799,45 +777,43 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateCoordinate(int id, string userId, CoordinateUpdateDto coordinateUpdateDto)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(id);
+            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id);
             if (coordinate == null)
             {
                 return new("Coordinate not found", false);
             }
-            var exists = await context.Coordinates.Get(c => Equals(c.Name.ToLower().Trim(), coordinateUpdateDto.Name.ToLower().Trim()) && c.CoordinateId != id && c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId, include: c => c.Include(a => a.Space).ThenInclude(a => a.Area));
-            if (exists.Any())
+            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).Where(c => Equals(c.Name.ToLower().Trim(), coordinateUpdateDto.Name.ToLower().Trim()) && c.CoordinateId != id && c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId).AnyAsync();
+            if (exists)
             {
                 return new($"Coordinate with name {coordinateUpdateDto.Name} already exists", false);
             }
             coordinate.Name = coordinateUpdateDto.Name;
             coordinate.Description = coordinateUpdateDto.Description;
             coordinate.UserId = userId;
-            var result = await context.Coordinates.Update(coordinate);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Coordinate updated", true);
-            }
-            else
-            {
-                _logger.LogError("Coordinate not updated");
-                return new("Coordinate not updated", false);
-            }
+            context.Coordinates.Update(coordinate);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Coordinate updated", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating coordinate");
+            transaction.Rollback();
             return new("Error updating coordinate", false);
         }
     }
 
     public async Task<ServiceResponse> MarkDeleteCoordinate(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id, c => c.Include(a => a.Assets));
+            var coordinate = await context.Coordinates.Include(a => a.Assets).FirstOrDefaultAsync(c => c.CoordinateId == id);
             if (coordinate == null)
             {
                 return new("Coordinate not found", false);
@@ -852,26 +828,22 @@ public class DbService : IDbService
             }
             coordinate.IsDeleted = true;
             coordinate.UserId = userId;
-            var result = await context.Coordinates.Update(coordinate);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Coordinate deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Coordinate not deleted");
-                return new("Coordinate not deleted", false);
-            }
+            context.Coordinates.Update(coordinate);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Coordinate deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting coordinate");
+            transaction.Rollback();
             return new("Error deleting coordinate", false);
         }
     }
     public async Task<ServiceResponse> MarkUnDeleteCoordinate(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
             var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id);
@@ -883,36 +855,32 @@ public class DbService : IDbService
             {
                 return new("Coordinate already marked as not deleted", false);
             }
-            var exists = await context.Coordinates.Get(c => Equals(c.Name.ToLower().Trim(), coordinate.Name.ToLower().Trim()) && c.CoordinateId != id && c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId, include: c => c.Include(a => a.Space).ThenInclude(a => a.Area));
-            if (exists.Any())
+            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).Where(c => Equals(c.Name.ToLower().Trim(), coordinate.Name.ToLower().Trim()) && c.CoordinateId != id && c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId).AnyAsync();
+            if (exists)
             {
                 return new($"Coordinate with name {coordinate.Name} already exists", false);
             }
             coordinate.IsDeleted = false;
             coordinate.UserId = userId;
-            var result = await context.Coordinates.Update(coordinate);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Coordinate un-deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Coordinate not un-deleted");
-                return new("Coordinate not un-deleted", false);
-            }
+            context.Coordinates.Update(coordinate);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Coordinate un-deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error un-deleting coordinate");
+            transaction.Rollback();
             return new("Error un-deleting coordinate", false);
         }
     }
     public async Task<ServiceResponse> DeleteCoordinate(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(id);
+            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id);
             if (coordinate == null)
             {
                 _logger.LogError("Coordinate not found");
@@ -923,21 +891,15 @@ public class DbService : IDbService
                 _logger.LogError("Coordinate not marked as deleted");
                 return new("Coordinate not marked as deleted", false);
             }
-            var result = await context.Coordinates.Remove(coordinate);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Coordinate deleted", true);
-            }
-            else
-            {
-                _logger.LogError("Coordinate not deleted");
-                return new("Coordinate not deleted", false);
-            }
+            context.Coordinates.Remove(coordinate);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Coordinate deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting coordinate");
+            transaction.Rollback();
             return new("Error deleting coordinate", false);
         }
     }
@@ -945,9 +907,11 @@ public class DbService : IDbService
     #region asset service
     public async Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId, c => c.Include(a => a.Assets));
+            var coordinate = await context.Coordinates.Include(a => a.Assets).FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
             if (coordinate == null)
             {
                 _logger.LogWarning("Cannot create asset for coordinate with id {coordinateId}", assetCreateDto.CoordinateId);
@@ -964,36 +928,30 @@ public class DbService : IDbService
                 _logger.LogWarning("Cannot create asset for model with id {modelId}", assetCreateDto.ModelId);
                 return new($"Cannot create asset for model with id {assetCreateDto.ModelId}", false);
             }
-
             Asset asset = new();
             asset.Name = assetCreateDto.Name;
             asset.ModelId = assetCreateDto.ModelId;
             asset.CoordinateId = assetCreateDto.CoordinateId;
             asset.UserId = userId;
-            var result = await context.Assets.Add(asset);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Asset created", true);
-            }
-            else
-            {
-                _logger.LogError("Asset not created");
-                return new("Asset not created", false);
-            }
+            context.Assets.Add(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Asset created", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating asset");
+            transaction.Rollback();
             return new("Error creating asset", false);
         }
     }
 
     public async Task<ServiceResponse<AssetDto>> GetAssetById(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id, a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories));
+            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).FirstOrDefaultAsync(a => a.AssetId == id);
             if (asset == null)
             {
                 return new("Asset not found", false);
@@ -1009,9 +967,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var assets = await context.Assets.Get(include: a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories));
+            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).ToListAsync();
             if (assets == null)
             {
                 return new("Assets not found", false);
@@ -1027,9 +986,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssetsWithAllData()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var assets = await context.Assets.Get(include: a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories).Include(a => a.Coordinate).Include(c => c.CommunicateAssets).Include(a => a.SituationAssets).Include(a => a.Model));
+            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).Include(a => a.Coordinate).Include(c => c.CommunicateAssets).Include(a => a.SituationAssets).Include(a => a.Model).ToListAsync();
             if (assets == null)
             {
                 return new("Assets not found", false);
@@ -1045,9 +1005,11 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id, a => a.Include(a => a.AssetDetails).Include(a => a.AssetCategories));
+            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).FirstOrDefaultAsync(a => a.AssetId == id);
             if (asset == null)
             {
                 _logger.LogWarning("Asset not found");
@@ -1059,19 +1021,18 @@ public class DbService : IDbService
                 return new("Asset marked as deleted", false);
             }
             // check if asset name is unique
-            var exists = await context.Assets.Get(a => Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()) && a.AssetId != id && a.IsDeleted == false);
-            if (exists.Any())
+            var exists = await context.Assets.Where(a => Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()) && a.AssetId != id && a.IsDeleted == false).AnyAsync();
+            if (exists)
             {
                 _logger.LogWarning("Asset with name {assetName} already exists", assetUpdateDto.Name);
                 return new($"Asset with name {assetUpdateDto.Name} already exists", false);
             }
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(assetUpdateDto.CoordinateId);
+            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetUpdateDto.CoordinateId);
             if (coordinate == null || coordinate.IsDeleted)
             {
                 _logger.LogWarning("Cannot update asset to coordinate with id {coordinateId}", assetUpdateDto.CoordinateId);
                 return new($"Cannot update asset to coordinate with id {assetUpdateDto.CoordinateId}", false);
             }
-
             asset.Status = assetUpdateDto.Status;
             asset.Name = assetUpdateDto.Name;
             asset.Process = assetUpdateDto.Process;
@@ -1091,6 +1052,7 @@ public class DbService : IDbService
                         UserId = userId
                     };
                     asset.AssetDetails.Add(newAssetDetail);
+
                 }
                 if (assetDetailToUpdate != null && !Equals(assetDetailToUpdate.Value = assetDetailDto.Value))
                 {
@@ -1098,7 +1060,6 @@ public class DbService : IDbService
                     assetDetailToUpdate.UserId = userId;
                 }
             }
-
             foreach (var assetCategoryDto in assetUpdateDto.AssetCategories)
             {
                 var assetCategoryToUpdate = asset.AssetCategories.FirstOrDefault(ac => ac.AssetCategoryId == assetCategoryDto.AssetCategoryId);
@@ -1112,34 +1073,33 @@ public class DbService : IDbService
                     };
                     asset.AssetCategories.Add(newAssetCategory);
                 }
-
             }
-            var result = await context.Assets.Update(asset);
-            if (result)
-            {
-                _logger.LogInformation("Asset with id {assetId} updated", id);
-                return new($"Asset {id} updated", true);
-            }
-            _logger.LogWarning("Asset with id {assetId} not updated", id);
-            return new($"Asset {id} not updated", false);
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} updated", id);
+            return new($"Asset {id} updated", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating asset with id {assetId}", id);
+            transaction.Rollback();
             return new($"Error updating asset with id {id}", false);
         }
     }
     public async Task<ServiceResponse> AssetChangeModel(int assetId, string userId, int modelId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var model = await context.Models.FirstOrDefaultAsync(modelId);
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == modelId);
             if (model == null)
             {
                 _logger.LogWarning("Model not found");
                 return new("Model not found", false);
             }
-            var asset = await context.Assets.FirstOrDefaultAsync(assetId);
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
             if (asset == null)
             {
                 _logger.LogWarning("Asset not found");
@@ -1150,33 +1110,33 @@ public class DbService : IDbService
                 _logger.LogWarning("Asset marked as deleted");
                 return new("Asset marked as deleted", false);
             }
-            asset.AssetDetails = new List<AssetDetail>();
-            asset.AssetCategories = new List<AssetCategory>();
-            asset.CommunicateAssets = new List<CommunicateAsset>();
-            asset.SituationAssets = new List<SituationAsset>();
+            context.AssetDetails.RemoveRange(asset.AssetDetails);
+            context.AssetCategories.RemoveRange(asset.AssetCategories);
+            context.CommunicateAssets.RemoveRange(asset.CommunicateAssets);
+            context.SituationAssets.RemoveRange(asset.SituationAssets);
             asset.ModelId = modelId;
             asset.UserId = userId;
-            var result = await context.Assets.Update(asset);
-            if (result)
-            {
-                _logger.LogInformation("Asset with id {assetId} updated", assetId);
-                return new($"Asset {assetId} updated", true);
-            }
-            _logger.LogWarning("Asset with id {assetId} not updated", assetId);
-            return new($"Asset {assetId} not updated", false);
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} updated", assetId);
+            return new($"Asset {assetId} updated", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating asset with id {assetId}", assetId);
+            transaction.Rollback();
             return new($"Error updating asset with id {assetId}", false);
         }
     }
 
     public async Task<ServiceResponse> MarkDeleteAsset(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(id);
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
             if (asset == null)
             {
                 _logger.LogWarning("Asset not found");
@@ -1189,26 +1149,26 @@ public class DbService : IDbService
             }
             asset.IsDeleted = true;
             asset.UserId = userId;
-            var result = await context.Assets.Update(asset);
-            if (result)
-            {
-                _logger.LogInformation("Asset with id {assetId} marked as deleted", id);
-                return new($"Asset {id} marked as deleted", true);
-            }
-            _logger.LogWarning("Asset with id {assetId} not marked as deleted", id);
-            return new($"Asset {id} not marked as deleted", false);
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} marked as deleted", id);
+            return new($"Asset {id} marked as deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking asset with id {assetId} as deleted", id);
+            transaction.Rollback();
             return new($"Error marking asset with id {id} as deleted", false);
         }
     }
     public async Task<ServiceResponse> MarkUnDeleteAsset(int id, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(id);
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
             if (asset == null)
             {
                 _logger.LogWarning("Asset not found");
@@ -1221,43 +1181,41 @@ public class DbService : IDbService
             }
             asset.IsDeleted = false;
             asset.UserId = userId;
-            var result = await context.Assets.Update(asset);
-            if (result)
-            {
-                _logger.LogInformation("Asset with id {assetId} marked as not deleted", id);
-                return new($"Asset {id} marked as not deleted", true);
-            }
-            _logger.LogWarning("Asset with id {assetId} not marked as not deleted", id);
-            return new($"Asset {id} not marked as not deleted", false);
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} marked as not deleted", id);
+            return new($"Asset {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking asset with id {assetId} as not deleted", id);
+            transaction.Rollback();
             return new($"Error marking asset with id {id} as not deleted", false);
         }
     }
     public async Task<ServiceResponse> DeleteAsset(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(id);
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
             if (asset == null)
             {
                 _logger.LogWarning("Asset not found");
                 return new("Asset not found", false);
             }
-            var result = await context.Assets.Remove(asset);
-            if (result)
-            {
-                _logger.LogInformation("Asset with id {assetId} deleted", id);
-                return new($"Asset {id} deleted", true);
-            }
-            _logger.LogWarning("Asset with id {assetId} not deleted", id);
-            return new($"Asset {id} not deleted", false);
+            context.Assets.Remove(asset);
+            _logger.LogInformation("Asset with id {assetId} deleted", id);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new($"Asset {id} deleted", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting asset with id {assetId}", id);
+            transaction.Rollback();
             return new($"Error deleting asset with id {id}", false);
         }
     }
@@ -1265,6 +1223,8 @@ public class DbService : IDbService
     #region device service
     public async Task<ServiceResponse> CreateDevice(DeviceCreateDto deviceCreateDto, string userId)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
             Device device = new();
@@ -1276,30 +1236,26 @@ public class DbService : IDbService
             device.UserId = userId;
             device.Name = deviceCreateDto.Name;
             device.Description = deviceCreateDto.Description;
-            var result = await context.Devices.Add(device);
-            if (result)
-            {
-                await context.SaveChangesAsync();
-                return new("Device created", true);
-            }
-            else
-            {
-                _logger.LogWarning("Device not created");
-                return new("Device not created", false);
-            }
+            context.Devices.Add(device);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Device with id {deviceId} created", device.DeviceId);
+            return new("Device created", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating device");
+            transaction.Rollback();
             return new("Error creating device", false);
         }
     }
 
     public async Task<ServiceResponse<DeviceDto>> GetDeviceById(int id)
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var device = await context.Devices.FirstOrDefaultAsync(id);
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
             if (device == null)
             {
                 return new("Plant not found", false);
@@ -1315,9 +1271,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevices()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var devices = await context.Devices.Get();
+            var devices = await context.Devices.ToListAsync();
             if (devices == null)
             {
                 return new("Devices not found", false);
@@ -1333,9 +1290,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevicesWithModels()
     {
+        using var context = _contextFactory.CreateDbContext();
         try
         {
-            var devices = await context.Devices.Get(include: p => p.Include(d => d.Models));
+            var devices = await context.Devices.Include(d => d.Models).ToListAsync();
             if (devices == null)
             {
                 return new("Devices not found", false);
@@ -1351,33 +1309,41 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateDevice(int id, string userId, DeviceUpdateDto deviceUpdateDto)
     {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var device = await context.Devices.FirstOrDefaultAsync(id);
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
             if (device == null)
             {
                 _logger.LogWarning("Device not found");
                 return new("Device not found", false);
             }
+            if (device.IsDeleted)
+            {
+                _logger.LogWarning("Device marked as deleted");
+                return new("Device marked as deleted", false);
+            }
+
+            var exists = await context.Devices.Where(d => d.DeviceId != id && Equals(d.Name.ToLower().Trim(), deviceUpdateDto.Name.ToLower().Trim()) && !d.IsDeleted).AnyAsync();
+            if (exists)
+            {
+                _logger.LogWarning("Device with name {deviceUpdateDto.Name} already exists", deviceUpdateDto.Name);
+                return new($"Device with name {deviceUpdateDto.Name} already exists", false);
+            }
             device.UserId = userId;
             device.Name = deviceUpdateDto.Name;
             device.Description = deviceUpdateDto.Description;
-
-
-
-
-            var result = await context.Devices.Update(device);
-            if (result)
-            {
-                _logger.LogInformation("Device with id {deviceId} updated", id);
-                return new($"Device {id} updated", true);
-            }
-            _logger.LogWarning("Device with id {deviceId} not updated", id);
-            return new($"Device {id} not updated", false);
+            context.Devices.Update(device);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Device with id {deviceId} updated", id);
+            return new($"Device {id} updated", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating device with id {deviceId}", id);
+            transaction.Rollback();
             return new($"Error updating device with id {id}", false);
         }
     }
