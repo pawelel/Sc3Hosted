@@ -10,5 +10,5 @@ public class Area : BaseEntity
     public virtual Plant? Plant { get; set; }
 
     public virtual List<Space> Spaces { get; set; } = new();
-    public virtual List<AreaCommunicate> AreaCommunicates { get; set; } = new();
+    public virtual List<CommunicateArea> AreaCommunicates { get; set; } = new();
 }

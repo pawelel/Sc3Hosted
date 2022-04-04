@@ -27,13 +27,13 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
                .HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
 
         new AreaConfig().Configure(builder.Entity<Area>());
-        new AreaCommunicateConfig().Configure(builder.Entity<AreaCommunicate>());
-        new AssetCommunicateConfig().Configure(builder.Entity<AssetCommunicate>());
+        new CommunicateAreaConfig().Configure(builder.Entity<CommunicateArea>());
+        new CommunicateAssetConfig().Configure(builder.Entity<CommunicateAsset>());
         new CommunicateConfig().Configure(builder.Entity<Communicate>());
-        new CoordinateCommunicateConfig().Configure(builder.Entity<CoordinateCommunicate>());
-        new DeviceCommunicateConfig().Configure(builder.Entity<DeviceCommunicate>());
-        new ModelCommunicateConfig().Configure(builder.Entity<ModelCommunicate>());
-        new SpaceCommunicateConfig().Configure(builder.Entity<SpaceCommunicate>());
+        new CommunicateCoordinateConfig().Configure(builder.Entity<CommunicateCoordinate>());
+        new CommunicateDeviceConfig().Configure(builder.Entity<CommunicateDevice>());
+        new CommunicateModelConfig().Configure(builder.Entity<CommunicateModel>());
+        new CommunicateSpaceConfig().Configure(builder.Entity<CommunicateSpace>());
         new AreaConfig().Configure(builder.Entity<Area>());
         new CoordinateConfig().Configure(builder.Entity<Coordinate>());
         new SpaceConfig().Configure(builder.Entity<Space>());
@@ -66,13 +66,13 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Parameter> Parameters => Set<Parameter>();
     public DbSet<Plant> Plants => Set<Plant>();
     // information
-    public DbSet<AreaCommunicate> AreaCommunicates => Set<AreaCommunicate>();
-    public DbSet<AssetCommunicate> AssetCommunicates => Set<AssetCommunicate>();
+    public DbSet<CommunicateArea> AreaCommunicates => Set<CommunicateArea>();
+    public DbSet<CommunicateAsset> AssetCommunicates => Set<CommunicateAsset>();
     public DbSet<Communicate> Communicates => Set<Communicate>();
-    public DbSet<CoordinateCommunicate> CoordinateCommunicates => Set<CoordinateCommunicate>();
-    public DbSet<DeviceCommunicate> DeviceCommunicates => Set<DeviceCommunicate>();
-    public DbSet<ModelCommunicate> ModelCommunicates => Set<ModelCommunicate>();
-    public DbSet<SpaceCommunicate> SpaceCommunicates => Set<SpaceCommunicate>();
+    public DbSet<CommunicateCoordinate> CoordinateCommunicates => Set<CommunicateCoordinate>();
+    public DbSet<CommunicateDevice> DeviceCommunicates => Set<CommunicateDevice>();
+    public DbSet<CommunicateModel> ModelCommunicates => Set<CommunicateModel>();
+    public DbSet<CommunicateSpace> SpaceCommunicates => Set<CommunicateSpace>();
 
     // location
     public DbSet<Area> Areas => Set<Area>();

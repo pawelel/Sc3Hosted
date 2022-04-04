@@ -11,11 +11,11 @@ public class Communicate  : BaseEntity
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool IsArchived { get; set; }
-    public virtual List<AreaCommunicate> AreaCommunicates { get; set; } = new();
-    public virtual List<AssetCommunicate> AssetCommunicates { get; set; }  = new();
-    public virtual List<CoordinateCommunicate> CoordinateCommunicates { get; set; }=new(); 
-    public virtual List<DeviceCommunicate> DeviceCommunicates { get; set; } = new();
-    public virtual List<ModelCommunicate> ModelCommunicates { get; set; } = new();
-    public virtual List<SpaceCommunicate> SpaceCommunicates { get; set; } = new();
+    public virtual List<CommunicateArea> AreaCommunicates { get; set; } = new();
+    public virtual List<CommunicateAsset> AssetCommunicates { get; set; }  = new();
+    public virtual List<CommunicateCoordinate> CoordinateCommunicates { get; set; }=new(); 
+    public virtual List<CommunicateDevice> DeviceCommunicates { get; set; } = new();
+    public virtual List<CommunicateModel> ModelCommunicates { get; set; } = new();
+    public virtual List<CommunicateSpace> SpaceCommunicates { get; set; } = new();
 
 }

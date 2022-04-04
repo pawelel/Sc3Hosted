@@ -1,7 +1,7 @@
 ﻿namespace Sc3Hosted.Server.Entities;
-public class CoordinateCommunicate : BaseEntity
+public class CommunicateCoordinate : BaseEntity
 {
-    public int CoordinateCommunicateId { get; set; }
+    public int CommunicateCoordinateId { get; set; }
     public int CoordinateId { get; set; }
     public virtual Coordinate Coordinate { get; set; } = new();
     public int CommunicateId { get; set; }

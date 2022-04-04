@@ -11,5 +11,5 @@ public class AssetDto
     public List<AssetCategoryDto> AssetCategories { get; set; }= new();
     public int CoordinateId { get; set; }
     public int ModelId { get; set; }
-    public string? Process { get; set; }
+    public string Process { get; set; } = string.Empty;
 }

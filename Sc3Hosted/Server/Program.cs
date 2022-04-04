@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Reflection;
-using Sc3Hosted.Server.Repositories;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Services;
 
@@ -17,15 +16,14 @@ var jwtIssuer = builder.Configuration["JwtIssuer"];
 var jwtAudience = builder.Configuration["JwtAudience"];
 var jwtSecurityKey = builder.Configuration["JwtSecurityKey"];
 
-builder.Services.AddDbContext<Sc3HostedDbContext>(options =>
+builder.Services.AddDbContextFactory<Sc3HostedDbContext>(options =>
 	options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
 		.AddRoles<IdentityRole>()
 		.AddEntityFrameworkStores<Sc3HostedDbContext>();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IDbService, DbService>();
+builder.Services.AddTransient<IDbService, DbService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

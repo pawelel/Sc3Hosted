@@ -13,7 +13,7 @@ public class Asset : BaseEntity
     public int CoordinateId { get; set; }
     public virtual List<AssetCategory> AssetCategories { get; set; } = new();
     public virtual List<AssetDetail> AssetDetails { get; set; } = new();
-    public virtual List<SituationAsset> AssetSituations { get; set; } = new();
+    public virtual List<SituationAsset> SituationAssets { get; set; } = new();
     public string Process { get; set; }=string.Empty;
-    public virtual List<AssetCommunicate> AssetCommunicates { get; set; } = new();
+    public virtual List<CommunicateAsset> CommunicateAssets { get; set; } = new();
 }
