@@ -1,6 +1,6 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
 
-public class SituationQuestionDto
+public class SituationQuestionDto : BaseDto
 {
     public int SituationQuestionId { get; set; }
     public int SituationId { get; set; }

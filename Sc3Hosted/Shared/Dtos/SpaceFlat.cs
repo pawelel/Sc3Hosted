@@ -2,7 +2,7 @@
 
 namespace Sc3Hosted.Shared.Dtos;
 
-public class SpaceFlat
+public class SpaceFlat : BaseDto
 {
 
     

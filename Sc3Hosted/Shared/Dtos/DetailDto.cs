@@ -1,5 +1,5 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-public class DetailDto
+public class DetailDto : BaseDto
 {
     public int DetailId { get; set; }
     public string Name { get; set; } = string.Empty;

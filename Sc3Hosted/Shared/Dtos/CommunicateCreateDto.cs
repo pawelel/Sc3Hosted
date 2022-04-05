@@ -2,7 +2,7 @@
 using Sc3Hosted.Shared.Enumerations;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class CommunicateCreateDto
+public class CommunicateCreateDto : BaseDto
 {
   
     public string Name { get; set; } = string.Empty;

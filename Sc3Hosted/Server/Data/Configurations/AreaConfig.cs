@@ -13,6 +13,6 @@ public class AreaConfig : IEntityTypeConfiguration<Area>
         builder.Property(x => x.AreaId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).IsRequired();
         builder.HasMany(x => x.Spaces).WithOne(x => x.Area).HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(x=>x.AreaCommunicates).WithOne(x=>x.Area).HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(x=>x.CommunicateAreas).WithOne(x=>x.Area).HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.Cascade);
     }
 }

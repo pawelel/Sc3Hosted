@@ -6,5 +6,6 @@ public class Device : BaseEntity
     public string Description { get; set; } = string.Empty;
 
     public virtual List<Model> Models { get; set; } = new();
-    public virtual List<CommunicateDevice> DeviceCommunicates { get; set; } = new();
+    public virtual List<CommunicateDevice> CommunicateDevices { get; set; } = new();
+    public virtual List<DeviceSituation> DeviceSituations { get; set; } = new();
 }

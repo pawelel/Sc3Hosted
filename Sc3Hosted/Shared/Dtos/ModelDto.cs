@@ -2,7 +2,7 @@
 
 namespace Sc3Hosted.Shared.Dtos;
 
-public class ModelDto
+public class ModelDto : BaseDto
 {
     public int ModelId { get; set; }
     public string Name { get; set; } = string.Empty;

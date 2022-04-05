@@ -14,12 +14,12 @@ public class CommunicateConfig : IEntityTypeConfiguration<Communicate>
         builder.Property(x => x.CommunicateId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.Scope).IsRequired();
-        builder.HasMany(x => x.AssetCommunicates).WithOne(x => x.Communicate).HasForeignKey(x => x.CommunicateId);
-        builder.HasMany(x=>x.AreaCommunicates).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
-        builder.HasMany(x=>x.DeviceCommunicates).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
-        builder.HasMany(x=>x.CoordinateCommunicates).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
-builder.HasMany(x=>x.ModelCommunicates).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
-builder.HasMany(x=>x.SpaceCommunicates).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
+        builder.HasMany(x => x.CommunicateAssets).WithOne(x => x.Communicate).HasForeignKey(x => x.CommunicateId);
+        builder.HasMany(x=>x.CommunicateAreas).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
+        builder.HasMany(x=>x.CommunicateDevices).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
+        builder.HasMany(x=>x.CommunicateCoordinates).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
+builder.HasMany(x=>x.CommunicateModels).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
+builder.HasMany(x=>x.CommunicateSpaces).WithOne(x=>x.Communicate).HasForeignKey(x=>x.CommunicateId);
     }
        
 }

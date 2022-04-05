@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class SituationAssetDto
+public class BaseDto
 {
-    public int SituationAssetId { get; set; }
-    public int AssetId { get; set; }
-    public int SituationId { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public bool IsDeleted { get; set; }
 }

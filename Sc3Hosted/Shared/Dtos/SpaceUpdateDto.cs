@@ -14,5 +14,5 @@ public string Description { get; set; }=string.Empty;
     public List<CoordinateDto> Coordinates { get; set; }=new();
     public SpaceType SpaceType { get; set; }
     
-    public List<SpaceCommunicateDto> SpaceCommunicates { get; set; }=new();
+    public List<CommunicateSpaceDto> CommunicateSpaces { get; set; }=new();
 }

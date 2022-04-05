@@ -1,7 +1,7 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class CommunicateDto
+public class CommunicateDto : BaseDto
 {
     public int CommunicateId { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -11,10 +11,10 @@ public class CommunicateDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     
-    public List<AreaCommunicateDto> AreaCommunicates { get; set; } = new();
-    public List<AssetCommunicateDto> AssetCommunicates { get; set; } = new();
-    public List<CoordinateCommunicateDto> CoordinateCommunicates { get; set; } = new();
-    public List<DeviceCommunicateDto> DeviceCommunicates { get; set; } = new();
-    public List<ModelCommunicateDto> ModelCommunicates { get; set; } = new();
-    public List<SpaceCommunicateDto> SpaceCommunicates { get; set; } = new();
+    public List<CommunicateAreaDto> CommunicateAreas { get; set; } = new();
+    public List<CommunicateAssetDto> CommunicateAssets { get; set; } = new();
+    public List<CommunicateCoordinateDto> CommunicateCoordinates { get; set; } = new();
+    public List<CommunicateDeviceDto> CommunicateDevices { get; set; } = new();
+    public List<CommunicateModelDto> CommunicateModels { get; set; } = new();
+    public List<CommunicateSpaceDto> CommunicateSpaces { get; set; } = new();
 }

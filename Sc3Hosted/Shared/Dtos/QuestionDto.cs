@@ -3,7 +3,7 @@
 /// <summary>
 /// Trouble shooting question not from DB
 /// </summary>
-public class QuestionDto
+public class QuestionDto : BaseDto
 {
     public int QuestionId { get; set; }
     public string Name { get; set; } = string.Empty;

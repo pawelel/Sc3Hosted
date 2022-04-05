@@ -2,7 +2,7 @@
 
 namespace Sc3Hosted.Shared.Dtos;
 
-public class SpaceDto
+public class SpaceDto : BaseDto
 {
     public int SpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -10,5 +10,5 @@ public class SpaceDto
     public List<CoordinateDto> Coordinates { get; set; } =new();
     public SpaceType SpaceType { get; set; }
     
-    public List<SpaceCommunicateDto> SpaceCommunicates { get; set; }=new();
+    public List<CommunicateSpaceDto> CommunicateSpaces { get; set; }=new();
 }

@@ -17,7 +17,7 @@ builder.Property(x => x.Description).HasMaxLength(200);
 builder.HasMany(x=>x.SituationQuestions).WithOne(x=>x.Situation).HasForeignKey(x=>x.SituationId);
 builder.HasMany(x=>x.SituationDetails).WithOne(x=>x.Situation).HasForeignKey(x=>x.SituationId);
 builder.HasMany(x=>x.SituationParameters).WithOne(x=>x.Situation).HasForeignKey(x=>x.SituationId);
-builder.HasMany(x => x.SituationCategories).WithOne(x => x.Situation).HasForeignKey(x => x.SituationId);
-builder.HasMany(x => x.SituationAssets).WithOne(x => x.Situation).HasForeignKey(x => x.SituationId);
+builder.HasMany(x => x.CategorySituations).WithOne(x => x.Situation).HasForeignKey(x => x.SituationId);
+builder.HasMany(x => x.DeviceSituations).WithOne(x => x.Situation).HasForeignKey(x => x.SituationId);
     }
 }

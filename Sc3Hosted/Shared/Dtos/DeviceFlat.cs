@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class DeviceFlat
+public class DeviceFlat : BaseDto
 {
     public int DeviceId { get; set; }
     public string Name { get; set; } = string.Empty;

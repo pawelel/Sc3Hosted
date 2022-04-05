@@ -37,8 +37,8 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
         new AreaConfig().Configure(builder.Entity<Area>());
         new CoordinateConfig().Configure(builder.Entity<Coordinate>());
         new SpaceConfig().Configure(builder.Entity<Space>());
-        new SituationAssetConfig().Configure(builder.Entity<SituationAsset>());
-        new SituationCategoryConfig().Configure(builder.Entity<SituationCategory>());
+        new DeviceSituationConfig().Configure(builder.Entity<DeviceSituation>());
+        new CategorySituationConfig().Configure(builder.Entity<CategorySituation>());
         new SituationConfig().Configure(builder.Entity<Situation>());
         new QuestionConfig().Configure(builder.Entity<Question>());
         new SituationQuestionConfig().Configure(builder.Entity<SituationQuestion>());
@@ -80,8 +80,8 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Space> Spaces => Set<Space>();
 
     // occurence
-    public DbSet<SituationAsset> SituationAssets => Set<SituationAsset>();
-    public DbSet<SituationCategory> SituationCategories => Set<SituationCategory>();
+    public DbSet<DeviceSituation> DeviceSituations => Set<DeviceSituation>();
+    public DbSet<CategorySituation> CategorySituations => Set<CategorySituation>();
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<Situation> Situations => Set<Situation>();
     public DbSet<SituationQuestion> SituationQuestions => Set<SituationQuestion>();

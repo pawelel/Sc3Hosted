@@ -1,7 +1,7 @@
 ﻿
 
 namespace Sc3Hosted.Shared.Dtos;
-public class ParameterDto
+public class ParameterDto : BaseDto
 {
     public int ParameterId { get; set; }
     public string Name { get; set; } = string.Empty;

@@ -6,5 +6,5 @@ public class Category : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public virtual List<AssetCategory> AssetCategories { get; set; } = new();
-    public virtual List<SituationCategory> CategorySituations { get; set; } = new();
+    public virtual List<CategorySituation> CategorySituations { get; set; } = new();
 }

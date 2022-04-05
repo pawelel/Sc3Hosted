@@ -11,5 +11,5 @@ public class CoordinateUpdateDto
 
     public string Description { get; set; } = string.Empty;
     
-    public List<CoordinateCommunicateDto> CoordinateCommunicates { get; set; }= new();
+    public List<CommunicateCoordinateDto> CommunicateCoordinates { get; set; }= new();
 }

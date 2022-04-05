@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class SituationCategoryDto
+public class DeviceSituationDto : BaseDto
 {
-    public int SituationCategoryId { get; set; }
-    public int CategoryId { get; set; }
+    public int DeviceSituationId { get; set; }
     public int SituationId { get; set; }
+    public int DeviceId { get; set; }
 }

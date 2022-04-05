@@ -1,7 +1,7 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-public class AssetCommunicateDto
+public class CommunicateAssetDto : BaseDto
 {
-    public int AssetCommunicateId { get; set; }
+    public int CommunicateAssetId { get; set; }
     public int AssetId { get; set; }
     public int CommunicateId { get; set; }
 }

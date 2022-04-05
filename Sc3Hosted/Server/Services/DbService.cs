@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+
+using AutoMapper;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -22,6 +24,8 @@ public class DbService : IDbService
         _logger = logger;
         _contextFactory = contextFactory;
     }
+
+    
 
     #region plant service
     public async Task<ServiceResponse> CreatePlant(PlantCreateDto plantCreateDto, string userId)
@@ -77,12 +81,12 @@ public class DbService : IDbService
         using var context = _contextFactory.CreateDbContext();
         try
         {
-            var plants = await context.Plants.ToListAsync();
+            var plants = await _mapper.ProjectTo<PlantDto>(context.Plants).ToListAsync();
             if (plants == null)
             {
                 return new("Plants not found", false);
             }
-            return new(_mapper.Map<IEnumerable<PlantDto>>(plants), "List of plants returned", true);
+            return new(plants, "List of plants returned", true);
         }
         catch (Exception ex)
         {
@@ -904,320 +908,102 @@ public class DbService : IDbService
         }
     }
     #endregion
-    #region asset service
-    public async Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId)
+    #region category service
+    public async Task<ServiceResponse> CreateCategory(CategoryCreateDto categoryCreateDto, string userId)
     {
         using var context = _contextFactory.CreateDbContext();
         using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var coordinate = await context.Coordinates.Include(a => a.Assets).FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
-            if (coordinate == null)
-            {
-                _logger.LogWarning("Cannot create asset for coordinate with id {coordinateId}", assetCreateDto.CoordinateId);
-                return new($"Cannot create asset for coordinate with id {assetCreateDto.CoordinateId}", false);
-            }
-            if (coordinate.Assets.Any(a => !a.IsDeleted && Equals(a.Name.ToLower().Trim(), assetCreateDto.Name.ToLower().Trim())))
-            {
-                _logger.LogWarning("Asset with name {assetName} already exists", assetCreateDto.Name);
-                return new($"Asset with name {assetCreateDto.Name} already exists", false);
-            }
-            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == assetCreateDto.ModelId);
-            if (model == null)
-            {
-                _logger.LogWarning("Cannot create asset for model with id {modelId}", assetCreateDto.ModelId);
-                return new($"Cannot create asset for model with id {assetCreateDto.ModelId}", false);
-            }
-            Asset asset = new();
-            asset.Name = assetCreateDto.Name;
-            asset.ModelId = assetCreateDto.ModelId;
-            asset.CoordinateId = assetCreateDto.CoordinateId;
-            asset.UserId = userId;
-            context.Assets.Add(asset);
-            await context.SaveChangesAsync();
-            transaction.Commit();
-            return new("Asset created", true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating asset");
-            transaction.Rollback();
-            return new("Error creating asset", false);
-        }
-    }
-
-    public async Task<ServiceResponse<AssetDto>> GetAssetById(int id)
-    {
-        using var context = _contextFactory.CreateDbContext();
-        try
-        {
-            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).FirstOrDefaultAsync(a => a.AssetId == id);
-            if (asset == null)
-            {
-                return new("Asset not found", false);
-            }
-            return new(_mapper.Map<AssetDto>(asset), "Asset returned", true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting asset by id");
-            return new("Error getting asset by id", false);
-        }
-    }
-
-    public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets()
-    {
-        using var context = _contextFactory.CreateDbContext();
-        try
-        {
-            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).ToListAsync();
-            if (assets == null)
-            {
-                return new("Assets not found", false);
-            }
-            return new(_mapper.Map<IEnumerable<AssetDto>>(assets), "List of assets returned", true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all assets");
-            return new("Error getting all assets", false);
-        }
-    }
-
-    public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssetsWithAllData()
-    {
-        using var context = _contextFactory.CreateDbContext();
-        try
-        {
-            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).Include(a => a.Coordinate).Include(c => c.CommunicateAssets).Include(a => a.SituationAssets).Include(a => a.Model).ToListAsync();
-            if (assets == null)
-            {
-                return new("Assets not found", false);
-            }
-            return new(_mapper.Map<IEnumerable<AssetDto>>(assets), "List of assets returned", true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all assets");
-            return new("Error getting all assets", false);
-        }
-    }
-
-    public async Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto)
-    {
-        using var context = _contextFactory.CreateDbContext();
-        using IDbContextTransaction transaction = context.Database.BeginTransaction();
-        try
-        {
-            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).FirstOrDefaultAsync(a => a.AssetId == id);
-            if (asset == null)
-            {
-                _logger.LogWarning("Asset not found");
-                return new("Asset not found", false);
-            }
-            if (asset.IsDeleted)
-            {
-                _logger.LogWarning("Asset marked as deleted");
-                return new("Asset marked as deleted", false);
-            }
-            // check if asset name is unique
-            var exists = await context.Assets.Where(a => Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()) && a.AssetId != id && a.IsDeleted == false).AnyAsync();
+            var exists = await context.Categories.Where(c => c.Name.ToLower().Trim() == categoryCreateDto.Name.ToLower().Trim() && c.IsDeleted == false).AnyAsync();
             if (exists)
             {
-                _logger.LogWarning("Asset with name {assetName} already exists", assetUpdateDto.Name);
-                return new($"Asset with name {assetUpdateDto.Name} already exists", false);
+                return new($"Category with name {categoryCreateDto.Name} already exists", false);
             }
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetUpdateDto.CoordinateId);
-            if (coordinate == null || coordinate.IsDeleted)
+            Category category = new()
             {
-                _logger.LogWarning("Cannot update asset to coordinate with id {coordinateId}", assetUpdateDto.CoordinateId);
-                return new($"Cannot update asset to coordinate with id {assetUpdateDto.CoordinateId}", false);
-            }
-            asset.Status = assetUpdateDto.Status;
-            asset.Name = assetUpdateDto.Name;
-            asset.Process = assetUpdateDto.Process;
-            asset.UserId = userId;
-            asset.AssetDetails = asset.AssetDetails.Where(ad => assetUpdateDto.AssetDetails.Any(a => a.AssetDetailId == ad.AssetDetailId)).ToList();
-            asset.AssetCategories = asset.AssetCategories.Where(ac => assetUpdateDto.AssetCategories.Any(a => a.AssetCategoryId == ac.AssetCategoryId)).ToList();
-            foreach (var assetDetailDto in assetUpdateDto.AssetDetails)
-            {
-                var assetDetailToUpdate = asset.AssetDetails.FirstOrDefault(ad => ad.AssetDetailId == assetDetailDto.AssetDetailId);
-                if (assetDetailToUpdate == null)
-                {
-                    AssetDetail newAssetDetail = new()
-                    {
-                        AssetId = asset.AssetId,
-                        DetailId = assetDetailDto.DetailId,
-                        Value = assetDetailDto.Value,
-                        UserId = userId
-                    };
-                    asset.AssetDetails.Add(newAssetDetail);
-
-                }
-                if (assetDetailToUpdate != null && !Equals(assetDetailToUpdate.Value = assetDetailDto.Value))
-                {
-                    assetDetailToUpdate.Value = assetDetailDto.Value;
-                    assetDetailToUpdate.UserId = userId;
-                }
-            }
-            foreach (var assetCategoryDto in assetUpdateDto.AssetCategories)
-            {
-                var assetCategoryToUpdate = asset.AssetCategories.FirstOrDefault(ac => ac.AssetCategoryId == assetCategoryDto.AssetCategoryId);
-                if (assetCategoryToUpdate == null)
-                {
-                    AssetCategory newAssetCategory = new()
-                    {
-                        AssetId = asset.AssetId,
-                        CategoryId = assetCategoryDto.CategoryId,
-                        UserId = userId
-                    };
-                    asset.AssetCategories.Add(newAssetCategory);
-                }
-            }
-            context.Assets.Update(asset);
+                Name = categoryCreateDto.Name,
+                Description = categoryCreateDto.Description,
+                UserId = userId
+            };
+            context.Categories.Add(category);
             await context.SaveChangesAsync();
             transaction.Commit();
-            _logger.LogInformation("Asset with id {assetId} updated", id);
-            return new($"Asset {id} updated", true);
+            return new("Category created", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating asset with id {assetId}", id);
+            _logger.LogError(ex, "Error creating category");
             transaction.Rollback();
-            return new($"Error updating asset with id {id}", false);
-        }
-    }
-    public async Task<ServiceResponse> AssetChangeModel(int assetId, string userId, int modelId)
-    {
-        using var context = _contextFactory.CreateDbContext();
-        using IDbContextTransaction transaction = context.Database.BeginTransaction();
-        try
-        {
-            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == modelId);
-            if (model == null)
-            {
-                _logger.LogWarning("Model not found");
-                return new("Model not found", false);
-            }
-            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
-            if (asset == null)
-            {
-                _logger.LogWarning("Asset not found");
-                return new("Asset not found", false);
-            }
-            if (asset.IsDeleted)
-            {
-                _logger.LogWarning("Asset marked as deleted");
-                return new("Asset marked as deleted", false);
-            }
-            context.AssetDetails.RemoveRange(asset.AssetDetails);
-            context.AssetCategories.RemoveRange(asset.AssetCategories);
-            context.CommunicateAssets.RemoveRange(asset.CommunicateAssets);
-            context.SituationAssets.RemoveRange(asset.SituationAssets);
-            asset.ModelId = modelId;
-            asset.UserId = userId;
-            context.Assets.Update(asset);
-            await context.SaveChangesAsync();
-            transaction.Commit();
-            _logger.LogInformation("Asset with id {assetId} updated", assetId);
-            return new($"Asset {assetId} updated", true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating asset with id {assetId}", assetId);
-            transaction.Rollback();
-            return new($"Error updating asset with id {assetId}", false);
+            return new("Error creating category", false);
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteAsset(int id, string userId)
+    public async Task<ServiceResponse<CategoryDto>> GetCategoryById(int id)
     {
         using var context = _contextFactory.CreateDbContext();
-        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
-            if (asset == null)
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (category == null)
             {
-                _logger.LogWarning("Asset not found");
-                return new("Asset not found", false);
+                return new("Category not found", false);
             }
-            if (asset.IsDeleted)
-            {
-                _logger.LogWarning("Asset marked as deleted");
-                return new("Asset marked as deleted", false);
-            }
-            asset.IsDeleted = true;
-            asset.UserId = userId;
-            context.Assets.Update(asset);
-            await context.SaveChangesAsync();
-            transaction.Commit();
-            _logger.LogInformation("Asset with id {assetId} marked as deleted", id);
-            return new($"Asset {id} marked as deleted", true);
+            return new(_mapper.Map<CategoryDto>(category), "Category found", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking asset with id {assetId} as deleted", id);
-            transaction.Rollback();
-            return new($"Error marking asset with id {id} as deleted", false);
+            _logger.LogError(ex, "Error getting category");
+            return new("Error getting category", false);
         }
     }
-    public async Task<ServiceResponse> MarkUnDeleteAsset(int id, string userId)
+
+    public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategories()
     {
         using var context = _contextFactory.CreateDbContext();
-        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
-            if (asset == null)
-            {
-                _logger.LogWarning("Asset not found");
-                return new("Asset not found", false);
-            }
-            if (!asset.IsDeleted)
-            {
-                _logger.LogWarning("Asset not marked as deleted");
-                return new("Asset not marked as deleted", false);
-            }
-            asset.IsDeleted = false;
-            asset.UserId = userId;
-            context.Assets.Update(asset);
-            await context.SaveChangesAsync();
-            transaction.Commit();
-            _logger.LogInformation("Asset with id {assetId} marked as not deleted", id);
-            return new($"Asset {id} marked as not deleted", true);
+            var categories = await context.Categories.ToListAsync();
+            return new(_mapper.Map<IEnumerable<CategoryDto>>(categories), "Categories found", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking asset with id {assetId} as not deleted", id);
-            transaction.Rollback();
-            return new($"Error marking asset with id {id} as not deleted", false);
+            _logger.LogError(ex, "Error getting categories");
+            return new("Error getting categories", false);
         }
     }
-    public async Task<ServiceResponse> DeleteAsset(int id)
+
+    public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategoriesWithAssets()
     {
         using var context = _contextFactory.CreateDbContext();
-        using IDbContextTransaction transaction = context.Database.BeginTransaction();
         try
         {
-            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
-            if (asset == null)
-            {
-                _logger.LogWarning("Asset not found");
-                return new("Asset not found", false);
-            }
-            context.Assets.Remove(asset);
-            _logger.LogInformation("Asset with id {assetId} deleted", id);
-            await context.SaveChangesAsync();
-            transaction.Commit();
-            return new($"Asset {id} deleted", true);
+            var categories = await context.Categories.Include(a => a.AssetCategories).ThenInclude(a=>a.Asset).ToListAsync();
+            return new(_mapper.Map<IEnumerable<CategoryDto>>(categories), "Categories found", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting asset with id {assetId}", id);
-            transaction.Rollback();
-            return new($"Error deleting asset with id {id}", false);
+            _logger.LogError(ex, "Error getting categories");
+            return new("Error getting categories", false);
         }
+    }
+
+    public async Task<ServiceResponse> UpdateCategory(int id, string userId, CategoryUpdateDto categoryUpdateDto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> MarkDeleteCategory(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> MarkUnDeleteCategory(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> DeleteCategory(int id)
+    {
+        throw new NotImplementedException();
     }
     #endregion
     #region device service
@@ -1350,215 +1136,344 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteDevice(int id, string userId)
     {
-        throw new NotImplementedException();
+            using var context = _contextFactory.CreateDbContext();
+            using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
+            if (device == null)
+            {
+                _logger.LogWarning("Device not found");
+                return new("Device not found", false);
+            }
+            if (device.IsDeleted)
+            {
+                _logger.LogWarning("Device marked as deleted");
+                return new("Device marked as deleted", false);
+            }
+            device.UserId = userId;
+            device.IsDeleted = true;
+            context.Devices.Update(device);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Device with id {deviceId} marked as deleted", id);
+            return new($"Device {id} marked as deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking device as deleted with id {deviceId}", id);
+            transaction.Rollback();
+            return new($"Error marking device as deleted with id {id}", false);
+        }
     }
     public async Task<ServiceResponse> MarkUnDeleteDevice(int id, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
+            if (device == null)
+            {
+                _logger.LogWarning("Device not found");
+                return new("Device not found", false);
+            }
+            if (!device.IsDeleted)
+            {
+                _logger.LogWarning("Device not marked as deleted");
+                return new("Device not marked as deleted", false);
+            }
+            device.UserId = userId;
+            device.IsDeleted = false;
+            context.Devices.Update(device);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Device with id {deviceId} marked as undeleted", id);
+            return new($"Device {id} marked as undeleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking device as undeleted with id {deviceId}", id);
+            transaction.Rollback();
+            return new($"Error marking device as undeleted with id {id}", false);
+        }
     }
     public async Task<ServiceResponse> DeleteDevice(int id)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
+            if (device == null)
+            {
+                _logger.LogWarning("Device not found");
+                return new("Device not found", false);
+            }
+            if (!device.IsDeleted)
+            {
+                _logger.LogWarning("Device not marked as deleted");
+                return new("Device not marked as deleted", false);
+            }
+            context.Devices.Remove(device);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Device with id {deviceId} deleted", id);
+            return new($"Device {id} deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting device with id {deviceId}", id);
+            transaction.Rollback();
+            return new($"Error deleting device with id {id}", false);
+        }
     }
     #endregion
     #region model service
     public async Task<ServiceResponse> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == deviceId);
+            if (device == null)
+            {
+                _logger.LogWarning("Device not found");
+                return new("Device not found", false);
+            }
+            if (device.IsDeleted)
+            {
+                _logger.LogWarning("Device marked as deleted");
+                return new("Device marked as deleted", false);
+            }
+            var exists = await context.Models.Where(m => m.DeviceId == deviceId && Equals(m.Name.ToLower().Trim(), modelCreateDto.Name.ToLower().Trim()) && !m.IsDeleted).AnyAsync();
+            if (exists)
+            {
+                _logger.LogWarning("Model with name {modelCreateDto.Name} already exists", modelCreateDto.Name);
+                return new($"Model with name {modelCreateDto.Name} already exists", false);
+            }
+            var model = new Model
+            {
+                DeviceId = deviceId,
+                Name = modelCreateDto.Name,
+                Description = modelCreateDto.Description,
+                UserId = userId
+            };
+            context.Models.Add(model);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Model with id {modelId} created", model.ModelId);
+            return new($"Model {model.ModelId} created", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating model");
+            transaction.Rollback();
+            return new("Error creating model", false);
+        }
     }
 
     public async Task<ServiceResponse<ModelDto>> GetModelById(int id)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == id);
+            if (model == null)
+            {
+                _logger.LogWarning("Model not found");
+                return new( "Model not found", false);
+            }
+            _logger.LogInformation("Model with id {modelId} retrieved", model.ModelId);
+            return new(_mapper.Map<ModelDto>(model), $"Model with id {model.ModelId} retrieved",true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving model with id {modelId}", id);
+            return new($"Error retrieving model with id {id}", false);
+        }
+
     }
 
     public async Task<ServiceResponse<IEnumerable<ModelDto>>> GetModels()
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var models = await context.Models.ToListAsync();
+            _logger.LogInformation("Models retrieved");
+            return new(_mapper.Map<IEnumerable<ModelDto>>(models), "Models retrieved", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving models");
+            return new("Error retrieving models", false);
+        }
     }
 
     public async Task<ServiceResponse<IEnumerable<ModelDto>>> GetModelsWithAssets()
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var models = await context.Models.Include(m => m.Assets).ToListAsync();
+            _logger.LogInformation("Models retrieved");
+            return new(_mapper.Map<IEnumerable<ModelDto>>(models), "Models retrieved", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving models");
+            return new("Error retrieving models", false);
+        }
     }
 
     public async Task<ServiceResponse> UpdateModel(int id, string userId, ModelUpdateDto modelUpdateDto)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == id);
+            if (model == null)
+            {
+                _logger.LogWarning("Model not found");
+                return new("Model not found", false);
+            }
+            if (model.IsDeleted)
+            {
+                _logger.LogWarning("Model marked as deleted");
+                return new("Model marked as deleted", false);
+            }
+            var exists = await context.Models.Where(m => m.DeviceId == model.DeviceId && Equals(m.Name.ToLower().Trim(), modelUpdateDto.Name.ToLower().Trim()) && !m.IsDeleted && m.ModelId != id).AnyAsync();
+            if (exists)
+            {
+                _logger.LogWarning("Model with name {modelUpdateDto.Name} already exists", modelUpdateDto.Name);
+                return new($"Model with name {modelUpdateDto.Name} already exists", false);
+            }
+            if(!Equals(model.Name.ToLower().Trim(), modelUpdateDto.Name.ToLower().Trim()))
+                {
+                model.Name = modelUpdateDto.Name;
+                model.UserId = userId;
+            }
+            if (!Equals(model.Description.ToLower().Trim(), modelUpdateDto.Description.ToLower().Trim()))
+            {
+                model.Description = modelUpdateDto.Description;
+                model.UserId = userId;
+            }
+            context.Models.Update(model);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Model with id {modelId} updated", model.ModelId);
+            return new($"Model {model.ModelId} updated", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating model with id {modelId}", id);
+            transaction.Rollback();
+            return new($"Error updating model with id {id}", false);
+        }
     }
 
     public async Task<ServiceResponse> MarkDeleteModel(int id, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var model = await context.Models.Include(m=>m.Assets).FirstOrDefaultAsync(m => m.ModelId == id);
+            if (model == null)
+            {
+                _logger.LogWarning("Model not found");
+                return new("Model not found", false);
+            }
+            if (model.IsDeleted)
+            {
+                _logger.LogWarning("Model marked as deleted");
+                return new("Model marked as deleted", false);
+            }
+         
+            if (model.Assets.Count > 0)
+            {
+                _logger.LogWarning("Model has assets");
+                return new("Model has assets", false);
+            }
+            model.IsDeleted = true;
+            model.UserId = userId;
+            context.Models.Update(model);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Model with id {modelId} marked as deleted", model.ModelId);
+            return new($"Model {model.ModelId} marked as deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking model with id {modelId} as deleted", id);
+            transaction.Rollback();
+            return new($"Error marking model with id {id} as deleted", false);
+        }
     }
     public async Task<ServiceResponse> MarkUnDeleteModel(int id, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == id);
+            if (model == null)
+            {
+                _logger.LogWarning("Model not found");
+                return new("Model not found", false);
+            }
+            if (!model.IsDeleted)
+            {
+                _logger.LogWarning("Model not marked as deleted");
+                return new("Model not marked as deleted", false);
+            }
+            model.IsDeleted = false;
+            model.UserId = userId;
+            context.Models.Update(model);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Model with id {modelId} marked as undeleted", model.ModelId);
+            return new($"Model {model.ModelId} marked as undeleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking model with id {modelId} as undeleted", id);
+            transaction.Rollback();
+            return new($"Error marking model with id {id} as undeleted", false);
+        }
     }
     public async Task<ServiceResponse> DeleteModel(int id)
     {
-        throw new NotImplementedException();
-    }
-    #endregion
-    #region situation service
-    public async Task<ServiceResponse> CreateSituation(SituationCreateDto situationCreateDto, string userId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<SituationDto>> GetSituationById(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituations()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituationsWithAssets()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituationsWithCategories()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> UpdateSituation(int id, string userId, SituationUpdateDto situationUpdateDto)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> MarkDeleteSituation(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> MarkUnDeleteSituation(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> DeleteSituation(int id)
-    {
-        throw new NotImplementedException();
-    }
-    #endregion
-    #region category service
-    public async Task<ServiceResponse> CreateCategory(CategoryCreateDto categoryCreateDto, string userId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<CategoryDto>> GetCategoryById(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategories()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategoriesWithAssets()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> UpdateCategory(int id, string userId, CategoryUpdateDto categoryUpdateDto)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> MarkDeleteCategory(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> MarkUnDeleteCategory(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> DeleteCategory(int id)
-    {
-        throw new NotImplementedException();
-    }
-    #endregion
-    #region communicate service
-    public async Task<ServiceResponse> CreateCommunicate(CommunicateCreateDto communicateCreateDto, string userId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<CommunicateDto>> GetCommunicateById(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicates()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicatesWithAssets()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> UpdateCommunicate(int id, string userId, CommunicateUpdateDto communicateUpdateDto)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> MarkDeleteCommunicate(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> MarkUnDeleteCommunicate(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> DeleteCommunicate(int id)
-    {
-        throw new NotImplementedException();
-    }
-    #endregion
-    #region detail service
-    public async Task<ServiceResponse> CreateDetail(DetailCreateDto detailCreateDto, string userId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<DetailDto>> GetDetailById(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetails()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetailsWithAssets()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> UpdateDetail(int id, string userId, DetailUpdateDto detailUpdateDto)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ServiceResponse> MarkDeleteDetail(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> MarkUnDeleteDetail(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-    public async Task<ServiceResponse> DeleteDetail(int id)
-    {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == id);
+            if (model == null)
+            {
+                _logger.LogWarning("Model not found");
+                return new("Model not found", false);
+            }
+            if (!model.IsDeleted)
+            {
+                _logger.LogWarning("Model not marked as deleted");
+                return new("Model not marked as deleted", false);
+            }
+            context.Models.Remove(model);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Model with id {modelId} deleted", model.ModelId);
+            return new($"Model {model.ModelId} deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting model with id {modelId}", id);
+            transaction.Rollback();
+            return new($"Error deleting model with id {id}", false);
+        }
     }
     #endregion
     #region parameter service
@@ -1600,6 +1515,431 @@ public class DbService : IDbService
         throw new NotImplementedException();
     }
     #endregion
+    #region asset service
+    public async Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var coordinate = await context.Coordinates.Include(a => a.Assets).FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
+            if (coordinate == null)
+            {
+                _logger.LogWarning("Cannot create asset for coordinate with id {coordinateId}", assetCreateDto.CoordinateId);
+                return new($"Cannot create asset for coordinate with id {assetCreateDto.CoordinateId}", false);
+            }
+            if (coordinate.Assets.Any(a => !a.IsDeleted && Equals(a.Name.ToLower().Trim(), assetCreateDto.Name.ToLower().Trim())))
+            {
+                _logger.LogWarning("Asset with name {assetName} already exists", assetCreateDto.Name);
+                return new($"Asset with name {assetCreateDto.Name} already exists", false);
+            }
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == assetCreateDto.ModelId);
+            if (model == null)
+            {
+                _logger.LogWarning("Cannot create asset for model with id {modelId}", assetCreateDto.ModelId);
+                return new($"Cannot create asset for model with id {assetCreateDto.ModelId}", false);
+            }
+            Asset asset = new();
+            asset.Name = assetCreateDto.Name;
+            asset.ModelId = assetCreateDto.ModelId;
+            asset.CoordinateId = assetCreateDto.CoordinateId;
+            asset.UserId = userId;
+            context.Assets.Add(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Asset created", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating asset");
+            transaction.Rollback();
+            return new("Error creating asset", false);
+        }
+    }
+
+    public async Task<ServiceResponse<AssetDto>> GetAssetById(int id)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).FirstOrDefaultAsync(a => a.AssetId == id);
+            if (asset == null)
+            {
+                return new("Asset not found", false);
+            }
+            return new(_mapper.Map<AssetDto>(asset), "Asset returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting asset by id");
+            return new("Error getting asset by id", false);
+        }
+    }
+
+    public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets()
+    {
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).ToListAsync();
+            if (assets == null)
+            {
+                return new("Assets not found", false);
+            }
+            return new(_mapper.Map<IEnumerable<AssetDto>>(assets), "List of assets returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all assets");
+            return new("Error getting all assets", false);
+        }
+    }
+
+    public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssetsWithAllData()
+    {
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).Include(a => a.Coordinate).Include(c => c.CommunicateAssets).Include(a => a.Model).ToListAsync();
+            if (assets == null)
+            {
+                return new("Assets not found", false);
+            }
+            return new(_mapper.Map<IEnumerable<AssetDto>>(assets), "List of assets returned", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all assets");
+            return new("Error getting all assets", false);
+        }
+    }
+
+    public async Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories).FirstOrDefaultAsync(a => a.AssetId == id);
+            if (asset == null)
+            {
+                _logger.LogWarning("Asset not found");
+                return new("Asset not found", false);
+            }
+            if (asset.IsDeleted)
+            {
+                _logger.LogWarning("Asset marked as deleted");
+                return new("Asset marked as deleted", false);
+            }
+            // check if asset name is unique
+            var exists = await context.Assets.Where(a => Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()) && a.AssetId != id && a.IsDeleted == false).AnyAsync();
+            if (exists)
+            {
+                _logger.LogWarning("Asset with name {assetName} already exists", assetUpdateDto.Name);
+                return new($"Asset with name {assetUpdateDto.Name} already exists", false);
+            }
+            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetUpdateDto.CoordinateId);
+            if (coordinate == null || coordinate.IsDeleted)
+            {
+                _logger.LogWarning("Cannot update asset to coordinate with id {coordinateId}", assetUpdateDto.CoordinateId);
+                return new($"Cannot update asset to coordinate with id {assetUpdateDto.CoordinateId}", false);
+            }
+            asset.Status = assetUpdateDto.Status;
+            asset.Name = assetUpdateDto.Name;
+            asset.Process = assetUpdateDto.Process;
+            asset.UserId = userId;
+            asset.AssetDetails = asset.AssetDetails.Where(ad => assetUpdateDto.AssetDetails.Any(a => a.AssetDetailId == ad.AssetDetailId)).ToList();
+            asset.AssetCategories = asset.AssetCategories.Where(ac => assetUpdateDto.AssetCategories.Any(a => a.AssetCategoryId == ac.AssetCategoryId)).ToList();
+            foreach (var assetDetailDto in assetUpdateDto.AssetDetails)
+            {
+                var assetDetailToUpdate = asset.AssetDetails.FirstOrDefault(ad => ad.AssetDetailId == assetDetailDto.AssetDetailId);
+                if (assetDetailToUpdate == null)
+                {
+                    AssetDetail newAssetDetail = new()
+                    {
+                        AssetId = asset.AssetId,
+                        DetailId = assetDetailDto.DetailId,
+                        Value = assetDetailDto.Value,
+                        UserId = userId
+                    };
+                    asset.AssetDetails.Add(newAssetDetail);
+
+                }
+                if (assetDetailToUpdate != null && !Equals(assetDetailToUpdate.Value = assetDetailDto.Value))
+                {
+                    assetDetailToUpdate.Value = assetDetailDto.Value;
+                    assetDetailToUpdate.UserId = userId;
+                }
+            }
+            foreach (var assetCategoryDto in assetUpdateDto.AssetCategories)
+            {
+                var assetCategoryToUpdate = asset.AssetCategories.FirstOrDefault(ac => ac.AssetCategoryId == assetCategoryDto.AssetCategoryId);
+                if (assetCategoryToUpdate == null)
+                {
+                    AssetCategory newAssetCategory = new()
+                    {
+                        AssetId = asset.AssetId,
+                        CategoryId = assetCategoryDto.CategoryId,
+                        UserId = userId
+                    };
+                    asset.AssetCategories.Add(newAssetCategory);
+                }
+            }
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} updated", id);
+            return new($"Asset {id} updated", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating asset with id {assetId}", id);
+            transaction.Rollback();
+            return new($"Error updating asset with id {id}", false);
+        }
+    }
+    public async Task<ServiceResponse> AssetChangeModel(int assetId, string userId, int modelId)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == modelId);
+            if (model == null)
+            {
+                _logger.LogWarning("Model not found");
+                return new("Model not found", false);
+            }
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
+            if (asset == null)
+            {
+                _logger.LogWarning("Asset not found");
+                return new("Asset not found", false);
+            }
+            if (asset.IsDeleted)
+            {
+                _logger.LogWarning("Asset marked as deleted");
+                return new("Asset marked as deleted", false);
+            }
+            context.AssetDetails.RemoveRange(asset.AssetDetails);
+            context.AssetCategories.RemoveRange(asset.AssetCategories);
+            context.CommunicateAssets.RemoveRange(asset.CommunicateAssets);
+            asset.ModelId = modelId;
+            asset.UserId = userId;
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} updated", assetId);
+            return new($"Asset {assetId} updated", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating asset with id {assetId}", assetId);
+            transaction.Rollback();
+            return new($"Error updating asset with id {assetId}", false);
+        }
+    }
+
+    public async Task<ServiceResponse> MarkDeleteAsset(int id, string userId)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
+            if (asset == null)
+            {
+                _logger.LogWarning("Asset not found");
+                return new("Asset not found", false);
+            }
+            if (asset.IsDeleted)
+            {
+                _logger.LogWarning("Asset marked as deleted");
+                return new("Asset marked as deleted", false);
+            }
+            asset.IsDeleted = true;
+            asset.UserId = userId;
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} marked as deleted", id);
+            return new($"Asset {id} marked as deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking asset with id {assetId} as deleted", id);
+            transaction.Rollback();
+            return new($"Error marking asset with id {id} as deleted", false);
+        }
+    }
+    public async Task<ServiceResponse> MarkUnDeleteAsset(int id, string userId)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
+            if (asset == null)
+            {
+                _logger.LogWarning("Asset not found");
+                return new("Asset not found", false);
+            }
+            if (!asset.IsDeleted)
+            {
+                _logger.LogWarning("Asset not marked as deleted");
+                return new("Asset not marked as deleted", false);
+            }
+            asset.IsDeleted = false;
+            asset.UserId = userId;
+            context.Assets.Update(asset);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Asset with id {assetId} marked as not deleted", id);
+            return new($"Asset {id} marked as not deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking asset with id {assetId} as not deleted", id);
+            transaction.Rollback();
+            return new($"Error marking asset with id {id} as not deleted", false);
+        }
+    }
+    public async Task<ServiceResponse> DeleteAsset(int id)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == id);
+            if (asset == null)
+            {
+                _logger.LogWarning("Asset not found");
+                return new("Asset not found", false);
+            }
+            context.Assets.Remove(asset);
+            _logger.LogInformation("Asset with id {assetId} deleted", id);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new($"Asset {id} deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting asset with id {assetId}", id);
+            transaction.Rollback();
+            return new($"Error deleting asset with id {id}", false);
+        }
+    }
+    #endregion
+    #region detail service
+    public async Task<ServiceResponse> CreateDetail(DetailCreateDto detailCreateDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<DetailDto>> GetDetailById(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetails()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetailsWithAssets()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateDetail(int id, string userId, DetailUpdateDto detailUpdateDto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> MarkDeleteDetail(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> MarkUnDeleteDetail(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> DeleteDetail(int id)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
+    #region situation service
+    public async Task<ServiceResponse> CreateSituation(SituationCreateDto situationCreateDto, string userId)
+    {
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var exists = await context.Situations.Where(s => Equals(s.Name.ToLower().Trim(), situationCreateDto.Name.ToLower().Trim()) && !s.IsDeleted).AnyAsync();
+            if (exists)
+            {
+                _logger.LogWarning("Situation with name {situationCreateDto.Name} already exists", situationCreateDto.Name);
+                return new($"Situation with name {situationCreateDto.Name} already exists", false);
+            }
+            var situation = new Situation
+            {
+                Name = situationCreateDto.Name,
+                Description = situationCreateDto.Description,
+                UserId = userId
+            };
+            context.Situations.Add(situation);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Situation with id {situationId} created", situation.SituationId);
+            return new($"Situation {situation.SituationId} created", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating situation");
+            transaction.Rollback();
+            return new($"Error creating situation", false);
+        }
+    }
+
+    public async Task<ServiceResponse<SituationDto>> GetSituationById(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituations()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituationsWithAssets()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituationsWithCategories()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateSituation(int id, string userId, SituationUpdateDto situationUpdateDto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> MarkDeleteSituation(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> MarkUnDeleteSituation(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> DeleteSituation(int id)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
     #region question service
     public async Task<ServiceResponse> CreateQuestion(QuestionCreateDto questionCreateDto, string userId)
     {
@@ -1635,6 +1975,45 @@ public class DbService : IDbService
         throw new NotImplementedException();
     }
     public async Task<ServiceResponse> DeleteQuestion(int id)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
+    #region communicate service
+    public async Task<ServiceResponse> CreateCommunicate(CommunicateCreateDto communicateCreateDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<CommunicateDto>> GetCommunicateById(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicates()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicatesWithAssets()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicate(int id, string userId, CommunicateUpdateDto communicateUpdateDto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> MarkDeleteCommunicate(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> MarkUnDeleteCommunicate(int id, string userId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ServiceResponse> DeleteCommunicate(int id)
     {
         throw new NotImplementedException();
     }

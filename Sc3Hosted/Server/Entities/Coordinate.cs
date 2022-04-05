@@ -8,6 +8,6 @@ public class Coordinate  : BaseEntity
     public Space Space { get; set; } = new();
     public int SpaceId { get; set; }
     
-    public virtual List<CommunicateCoordinate> CoordinateCommunicates { get; set; } = new();
+    public virtual List<CommunicateCoordinate> CommunicateCoordinates { get; set; } = new();
     public virtual List<Asset> Assets { get; set; } = new();
 }

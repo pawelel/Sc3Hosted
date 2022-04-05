@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class SituationDetailDto
+public class SituationDetailDto : BaseDto
 {
     public int SituationDetailId { get; set; }
     public int SituationId { get; set; }

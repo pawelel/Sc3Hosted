@@ -1,7 +1,7 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-public class ModelCommunicateDto
+public class CommunicateModelDto : BaseDto
 {
-    public int ModelCommunicateId { get; set; }
+    public int CommunicateModelId { get; set; }
     public int ModelId { get; set; }
     public int CommunicateId { get; set; }
 }

@@ -1,7 +1,7 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class AssetDisplayDto
+public class AssetDisplayDto : BaseDto
 {
 
     public int AssetId { get; set; }
