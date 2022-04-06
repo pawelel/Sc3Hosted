@@ -25,7 +25,8 @@ public class DbService : IDbService
         _contextFactory = contextFactory;
     }
 
-    
+
+
 
     #region plant service
     public async Task<ServiceResponse> CreatePlant(PlantCreateDto plantCreateDto, string userId)
@@ -990,20 +991,136 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateCategory(int id, string userId, CategoryUpdateDto categoryUpdateDto)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (category == null)
+            {
+                return new("Category not found", false);
+            }
+            var exists = await context.Categories.Where(c => c.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim() && c.IsDeleted == false && c.CategoryId != id).AnyAsync();
+            if (exists)
+            {
+                return new($"Category with name {categoryUpdateDto.Name} already exists", false);
+            }
+            if (!Equals(categoryUpdateDto.Name.ToLower().Trim(), category.Name.ToLower().Trim()))
+            {
+                category.Name = categoryUpdateDto.Name;
+                category.UserId = userId;
+            }
+            if (!Equals(categoryUpdateDto.Description.ToLower().Trim(), category.Description.ToLower().Trim()))
+            {
+                category.Description = categoryUpdateDto.Description;
+                category.UserId = userId;
+            }
+            context.Categories.Update(category);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Category updated", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating category");
+            transaction.Rollback();
+            return new("Error updating category", false);
+        }
     }
 
     public async Task<ServiceResponse> MarkDeleteCategory(int id, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var category = await context.Categories.Include(c=>c.AssetCategories).FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (category == null)
+            {
+                return new("Category not found", false);
+            }
+            if (category.IsDeleted == true)
+            {
+                return new("Category already marked as deleted", false);
+            }
+            if (category.AssetCategories.Count > 0)
+            {
+                return new("Category has assets assigned to it", false);
+            }
+            category.IsDeleted = true;
+            category.UserId = userId;
+            context.Categories.Update(category);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Category marked as deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking category as deleted");
+            transaction.Rollback();
+            return new("Error marking category as deleted", false);
+        }
     }
     public async Task<ServiceResponse> MarkUnDeleteCategory(int id, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (category == null)
+            {
+                return new("Category not found", false);
+            }
+            if (category.IsDeleted == false)
+            {
+                return new("Category already marked as not deleted", false);
+            }
+            if (await context.Categories.Where(c=> Equals(category.Name.ToLower().Trim(), c.Name.ToLower().Trim())&&c.CategoryId != category.CategoryId && c.IsDeleted == false).AnyAsync())
+            {
+                return new($"Category with name {category.Name} already exists", false);
+            }
+            category.IsDeleted = false;
+            category.UserId = userId;
+            context.Categories.Update(category);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Category marked as not deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking category as not deleted");
+            transaction.Rollback();
+            return new("Error marking category as not deleted", false);
+        }
     }
     public async Task<ServiceResponse> DeleteCategory(int id)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (category == null)
+            {
+                return new("Category not found", false);
+            }
+            if (category.IsDeleted == false)
+            {
+                return new("Category not marked as deleted", false);
+            }
+            
+            context.Categories.Remove(category);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            return new("Category deleted", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting category");
+            transaction.Rollback();
+            return new("Error deleting category", false);
+        }
     }
     #endregion
     #region device service
@@ -1479,12 +1596,61 @@ public class DbService : IDbService
     #region parameter service
     public async Task<ServiceResponse> CreateParameter(ParameterCreateDto parameterCreateDto, string userId)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        using IDbContextTransaction transaction = context.Database.BeginTransaction();
+        try
+        {
+            var exists = await context.Parameters.Where(p => Equals(p.Name.ToLower().Trim(), parameterCreateDto.Name.ToLower().Trim()) && !p.IsDeleted).AnyAsync();
+            if (exists)
+            {
+                _logger.LogWarning("Parameter with name {parameterCreateDto.Name} already exists", parameterCreateDto.Name);
+                return new($"Parameter with name {parameterCreateDto.Name} already exists", false);
+            }
+            var parameter = new Parameter
+            {
+                Name = parameterCreateDto.Name,
+                Description = parameterCreateDto.Description,
+                UserId = userId
+            };
+            context.Parameters.Add(parameter);
+            await context.SaveChangesAsync();
+            transaction.Commit();
+            _logger.LogInformation("Parameter with id {parameterId} created", parameter.ParameterId);
+            return new($"Parameter {parameter.ParameterId} created", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating parameter");
+            transaction.Rollback();
+            return new("Error creating parameter", false);
+        }
     }
 
     public async Task<ServiceResponse<ParameterDto>> GetParameterById(int id)
     {
-        throw new NotImplementedException();
+        using var context = _contextFactory.CreateDbContext();
+        try
+        {
+            var parameter = await _mapper.ProjectTo<ParameterDto>(context.Parameters).FirstOrDefaultAsync(p => p.ParameterId == id);
+            if (parameter == null)
+            {
+                _logger.LogWarning("Parameter not found");
+                return new("Parameter not found", false);
+            }
+            var parameterDto = new ParameterDto
+            {
+                ParameterId = parameter.ParameterId,
+                Name = parameter.Name,
+                Description = parameter.Description
+            };
+            _logger.LogInformation("Parameter with id {parameterId} retrieved", parameter.ParameterId);
+            return new(parameterDto,$"Parameter {parameter.ParameterId} retrieved", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving parameter with id {parameterId}", id);
+            return new($"Error retrieving parameter with id {id}", false);
+        }
     }
 
     public async Task<ServiceResponse<IEnumerable<ParameterDto>>> GetParameters()

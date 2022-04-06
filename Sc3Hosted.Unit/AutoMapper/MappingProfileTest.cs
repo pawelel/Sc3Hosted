@@ -8,7 +8,7 @@ using Sc3Hosted.Server.Services;
 
 using Xunit;
 
-namespace Sc3Hosted.Unit;
+namespace Sc3Hosted.UnitTests.AutoMapper;
 public class MappingProfileTest
 {
     [Fact]
@@ -24,5 +24,5 @@ public class MappingProfileTest
         // asssert
         config.AssertConfigurationIsValid();
     }
-    
+
 }

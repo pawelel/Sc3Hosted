@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sc3Hosted.Client", "Sc3Host
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sc3Hosted.Shared", "Sc3Hosted\Shared\Sc3Hosted.Shared.csproj", "{67D5F244-2B8F-49CA-96F8-1F45EA205A56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sc3Hosted.Unit", "Sc3Hosted.Unit\Sc3Hosted.Unit.csproj", "{B921EDB2-095E-4CB1-AAC9-7DB62D348531}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sc3Hosted.UnitTests", "Sc3Hosted.Unit\Sc3Hosted.UnitTests.csproj", "{B921EDB2-095E-4CB1-AAC9-7DB62D348531}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

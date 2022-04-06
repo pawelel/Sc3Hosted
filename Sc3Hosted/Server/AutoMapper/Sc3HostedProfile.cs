@@ -38,5 +38,11 @@ public class Sc3HostedProfile : Profile
         CreateMap<SituationQuestion, SituationQuestionDto>();
         CreateMap<SituationDetail, SituationDetailDto>();
         CreateMap<SituationParameter, SituationParameterDto>();
+        CreateMap<Coordinate, LocationDto>()
+            .ForMember(dest => dest.AreaId, opt => opt.MapFrom(src => src.Space.AreaId))
+            .ForMember(dest => dest.Area, opt => opt.MapFrom(src => src.Space.Area.Name))
+            .ForMember(dest => dest.PlantId, opt => opt.MapFrom(src => src.Space.Area.PlantId))
+            .ForMember(dest => dest.Plant, opt => opt.MapFrom(src => src.Space.Area.Plant.Name))
+            .ForMember(dest => dest.Coordinate, opt => opt.MapFrom(src => src.Name));
     }
 }
