@@ -52,7 +52,7 @@ public interface IDbService
     Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets();
     Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssetsWithAllData();
     Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto);
-    Task<ServiceResponse> AssetChangeModel(int assetId, string userId, int modelId);
+    Task<ServiceResponse> ChangeAssetsModel(int assetId, string userId, int modelId);
     Task<ServiceResponse> MarkDeleteAsset(int id, string userId);
     Task<ServiceResponse> MarkUnDeleteAsset(int id, string userId);
     Task<ServiceResponse> DeleteAsset(int id);

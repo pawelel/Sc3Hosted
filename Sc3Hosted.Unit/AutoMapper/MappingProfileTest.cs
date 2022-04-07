@@ -15,12 +15,11 @@ public class MappingProfileTest
     public void TestConfig()
     {
         // arrange
-
-        // act
         var config = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile<Sc3HostedProfile>();
         });
+
         // asssert
         config.AssertConfigurationIsValid();
     }
