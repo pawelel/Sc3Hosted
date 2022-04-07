@@ -10,4 +10,5 @@ public class Model : BaseEntity
     public virtual Device Device { get; set; } = new();
     public virtual List<ModelParameter> ModelParameters { get; set; } = new();
     public virtual List<Asset> Assets { get; set; } = new();
+    public virtual List<CommunicateModel> CommunicateModels { get; set; } = new();
 }

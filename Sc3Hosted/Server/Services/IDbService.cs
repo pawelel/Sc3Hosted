@@ -1,5 +1,4 @@
-﻿
-using Sc3Hosted.Shared.Dtos;
+﻿using Sc3Hosted.Shared.Dtos;
 using Sc3Hosted.Shared.Helpers;
 
 namespace Sc3Hosted.Server.Services;
@@ -27,6 +26,7 @@ public interface IDbService
     Task<ServiceResponse> CreateParameter(ParameterCreateDto parameterCreateDto, string userId);
 
     Task<ServiceResponse> CreatePlant(PlantCreateDto plantCreateDto, string userId);
+
     Task<ServiceResponse> CreateQuestion(QuestionCreateDto questionCreateDto, string userId);
 
     Task<ServiceResponse> CreateSituation(SituationCreateDto situationCreateDto, string userId);
@@ -76,7 +76,9 @@ public interface IDbService
     Task<ServiceResponse<IEnumerable<CategoryWithAssetsDto>>> GetCategoriesWithAssets();
 
     Task<ServiceResponse<CategoryDto>> GetCategoryById(int id);
+
     Task<ServiceResponse<CategoryWithAssetsDto>> GetCategoryByIdWithAssets(int id);
+
     Task<ServiceResponse<CommunicateDto>> GetCommunicateById(int id);
 
     Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicates();
@@ -111,24 +113,27 @@ public interface IDbService
 
     Task<ServiceResponse<IEnumerable<ParameterDto>>> GetParameters();
 
-    Task<ServiceResponse<IEnumerable<ParameterDto>>> GetParametersWithModels();
+    Task<ServiceResponse<IEnumerable<ParameterWithModelsDto>>> GetParametersWithModels();
 
     Task<ServiceResponse<PlantDto>> GetPlantById(int id);
+
     Task<ServiceResponse<IEnumerable<PlantDto>>> GetPlants();
+
     Task<ServiceResponse<IEnumerable<PlantDto>>> GetPlantsWithAreas();
+
     Task<ServiceResponse<QuestionDto>> GetQuestionById(int id);
 
     Task<ServiceResponse<IEnumerable<QuestionDto>>> GetQuestions();
 
-    Task<ServiceResponse<IEnumerable<QuestionDto>>> GetQuestionsWithSituations();
+    Task<ServiceResponse<IEnumerable<QuestionWithSituationsDto>>> GetQuestionsWithSituations();
 
     Task<ServiceResponse<SituationDto>> GetSituationById(int id);
 
     Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituations();
 
-    Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituationsWithAssets();
+    Task<ServiceResponse<IEnumerable<SituationWithAssetsDto>>> GetSituationsWithAssets();
 
-    Task<ServiceResponse<IEnumerable<SituationDto>>> GetSituationsWithCategories();
+    Task<ServiceResponse<IEnumerable<SituationWithCategoriesDto>>> GetSituationsWithCategories();
 
     Task<ServiceResponse<SpaceDto>> GetSpaceById(int id);
 
@@ -213,5 +218,4 @@ public interface IDbService
     Task<ServiceResponse> UpdateSituation(int id, string userId, SituationUpdateDto situationUpdateDto);
 
     Task<ServiceResponse> UpdateSpace(int id, string userId, SpaceUpdateDto spaceUpdateDto);
-
 }

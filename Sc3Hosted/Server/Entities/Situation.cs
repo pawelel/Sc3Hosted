@@ -10,5 +10,5 @@ public class Situation : BaseEntity
     public virtual List<SituationParameter> SituationParameters { get; set; } = new();
     public virtual List<CategorySituation> CategorySituations { get; set; } = new();
     public virtual List<DeviceSituation> DeviceSituations { get; set; } = new();
-
+    public virtual List<AssetSituation> AssetSituations { get; set; } = new();
 }

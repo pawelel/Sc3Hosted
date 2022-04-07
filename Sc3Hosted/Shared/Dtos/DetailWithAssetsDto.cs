@@ -1,5 +1,5 @@
-﻿
-namespace Sc3Hosted.Shared.Dtos;
+﻿namespace Sc3Hosted.Shared.Dtos;
+
 public class DetailWithAssetsDto
 {
     public int DetailId { get; set; }

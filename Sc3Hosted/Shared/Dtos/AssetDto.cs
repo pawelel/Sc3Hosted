@@ -13,4 +13,5 @@ public class AssetDto : BaseDto
     public int CoordinateId { get; set; }
     public int ModelId { get; set; }
     public string Process { get; set; } = string.Empty;
+    public  List<AssetSituationDto> AssetSituations { get; set; } = new();
 }

@@ -22,7 +22,7 @@ public class Sc3HostedProfile : Profile
         CreateMap<Category, CategoryDto>();
         CreateMap<Situation, SituationDto>();
         CreateMap<Communicate, CommunicateDto>();
-        
+
         // navigation properties
         CreateMap<CommunicateCoordinate, CommunicateCoordinateDto>();
         CreateMap<CommunicateSpace, CommunicateSpaceDto>();
@@ -38,7 +38,7 @@ public class Sc3HostedProfile : Profile
         CreateMap<SituationQuestion, SituationQuestionDto>();
         CreateMap<SituationDetail, SituationDetailDto>();
         CreateMap<SituationParameter, SituationParameterDto>();
-        
+
         // custom
         CreateMap<Coordinate, LocationDto>()
             .ForMember(dest => dest.AreaId, opt => opt.MapFrom(src => src.Space.AreaId))
@@ -50,13 +50,30 @@ public class Sc3HostedProfile : Profile
             .ForMember(dest => dest.Assets, opt => opt.MapFrom(x => x.AssetCategories.Select(y => y.Asset).ToList()))
             .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(x => x.CategoryId))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name));
-       CreateMap<Communicate, CommunicateWithAssetsDto>()
-            .ForMember(dest => dest.Assets, opt => opt.MapFrom(x => x.CommunicateAssets.Select(y => y.Asset).ToList()))
-            .ForMember(dest => dest.CommunicateId, opt => opt.MapFrom(x => x.CommunicateId))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name));
+        CreateMap<Communicate, CommunicateWithAssetsDto>()
+             .ForMember(dest => dest.Assets, opt => opt.MapFrom(x => x.CommunicateAssets.Select(y => y.Asset).ToList()))
+             .ForMember(dest => dest.CommunicateId, opt => opt.MapFrom(x => x.CommunicateId))
+             .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name));
         CreateMap<Detail, DetailWithAssetsDto>()
             .ForMember(dest => dest.Assets, opt => opt.MapFrom(x => x.AssetDetails.Select(y => y.Asset).ToList()))
             .ForMember(dest => dest.DetailId, opt => opt.MapFrom(x => x.DetailId))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name));
+        CreateMap<Parameter, ParameterWithModelsDto>()
+            .ForMember(dest => dest.Models, opt => opt.MapFrom(x => x.ModelParameters.Select(y => y.Model).ToList()))
+            .ForMember(dest => dest.ParameterId, opt => opt.MapFrom(x => x.ParameterId))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name));
+        CreateMap<Question, QuestionWithSituationsDto>()
+            .ForMember(dest => dest.Situations, opt => opt.MapFrom(x => x.SituationQuestions.Select(y => y.Situation).ToList()))
+            .ForMember(dest => dest.QuestionId, opt => opt.MapFrom(x => x.QuestionId))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name));
+        CreateMap<Situation, SituationWithAssetsDto>()
+            .ForMember(dest => dest.SituationId, opt => opt.MapFrom(x => x.SituationId))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
+            .ForMember(dest => dest.Assets, opt => opt.MapFrom(x => x.AssetSituations.Select(y => y.Asset).ToList()));
+        CreateMap<Situation, SituationWithCategoriesDto>()
+            .ForMember(dest => dest.Categories, opt => opt.MapFrom(x => x.CategorySituations.Select(y => y.Category).ToList()))
+            .ForMember(dest => dest.SituationId, opt => opt.MapFrom(x => x.SituationId))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(x => x.Description));
     }
 }

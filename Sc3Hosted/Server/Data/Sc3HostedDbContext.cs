@@ -53,6 +53,7 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
         new ModelConfig().Configure(builder.Entity<Model>());
         new ModelParameterConfig().Configure(builder.Entity<ModelParameter>());
         new ParameterConfig().Configure(builder.Entity<Parameter>());
+        new AssetSituationConfig().Configure(builder.Entity<AssetSituation>());
     }
     //stuff
     public DbSet<Asset> Assets => Set<Asset>();
@@ -87,6 +88,6 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SituationQuestion> SituationQuestions => Set<SituationQuestion>();
     public DbSet<SituationDetail> SituationDetails => Set<SituationDetail>();
     public DbSet<SituationParameter> SituationParameters => Set<SituationParameter>();
-
+    public DbSet<AssetSituation> AssetSituations => Set<AssetSituation>();
 
 }
