@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+
 using Microsoft.EntityFrameworkCore;
+
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Shared.Dtos;
@@ -19,8 +21,23 @@ public class DbService : IDbService
         _contextFactory = contextFactory;
     }
 
+    /// <summary>
+    /// Allows to assign different model to an asset. Deletes all data related to asset. Irreversible through application
+    /// Requires existing model not marked as deleted
+    /// Removes any existing asset details from asset
+    /// Removes any existing asset categories from asset
+    /// Removes any existing communicate assets from asset
+    /// </summary>
+    /// <param name="assetId"></param>
+    /// <param name="userId"></param>
+    /// <param name="modelId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> ChangeAssetsModel(int assetId, string userId, int modelId)
     {
+        if (assetId <= 0 || modelId <= 0)
+        {
+            return new ServiceResponse("Invalid asset or model id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -30,6 +47,11 @@ public class DbService : IDbService
             {
                 _logger.LogWarning("Model not found");
                 return new ServiceResponse("Model not found");
+            }
+            if (model.IsDeleted)
+            {
+                _logger.LogWarning("Model marked as deleted");
+                return new ServiceResponse("Model marked as deleted");
             }
 
             var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
@@ -64,21 +86,37 @@ public class DbService : IDbService
         }
     }
 
+    /// <summary>
+    /// Creates Area if name is unique.
+    /// Requires existing plant not marked as deleted.
+    /// </summary>
+    /// <param name="plantId"></param>
+    /// <param name="areaCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateArea(int plantId, AreaCreateDto areaCreateDto, string userId)
     {
+        if (plantId <= 0)
+        {
+            return new ServiceResponse("Invalid plant id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var plant = await context.Plants.Include(a => a.Areas).FirstOrDefaultAsync(p => p.PlantId == plantId);
-            if (plant == null || plant.IsDeleted)
+            if (plant == null)
             {
                 _logger.LogWarning("Cannot create area for plant with id {PlantId}", plantId);
                 return new ServiceResponse($"Cannot create area for plant with id {plantId}");
             }
-
+            if (plant.IsDeleted)
+            {
+                _logger.LogWarning("Cannot create area for plant with id {PlantId}", plantId);
+                return new ServiceResponse($"Cannot create area for plant with id {plantId}");
+            }
             if (plant.Areas.Any(a =>
-                    !a.IsDeleted && Equals(a.Name.ToLower().Trim(), areaCreateDto.Name.ToLower().Trim())))
+                    Equals(a.Name.ToLower().Trim(), areaCreateDto.Name.ToLower().Trim())))
             {
                 _logger.LogWarning("Area with name {AreaName} already exists", areaCreateDto.Name);
                 return new ServiceResponse($"Area with name {areaCreateDto.Name} already exists");
@@ -103,7 +141,14 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating area");
         }
     }
-
+    /// <summary>
+    /// Creates asset if name is unique.
+    /// Requires existing model not marked as deleted
+    /// Requires existing coordinate not marked as deleted
+    /// </summary>
+    /// <param name="assetCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -118,9 +163,15 @@ public class DbService : IDbService
                     assetCreateDto.CoordinateId);
                 return new ServiceResponse($"Cannot create asset for coordinate with id {assetCreateDto.CoordinateId}");
             }
+            if (coordinate.IsDeleted)
+            {
+                _logger.LogWarning("Cannot create asset for coordinate with id {CoordinateId}",
+                    assetCreateDto.CoordinateId);
+                return new ServiceResponse($"Cannot create asset for coordinate with id {assetCreateDto.CoordinateId}");
+            }
 
             if (coordinate.Assets.Any(a =>
-                    !a.IsDeleted && Equals(a.Name.ToLower().Trim(), assetCreateDto.Name.ToLower().Trim())))
+                     Equals(a.Name.ToLower().Trim(), assetCreateDto.Name.ToLower().Trim())))
             {
                 _logger.LogWarning("Asset with name {AssetName} already exists", assetCreateDto.Name);
                 return new ServiceResponse($"Asset with name {assetCreateDto.Name} already exists");
@@ -132,7 +183,11 @@ public class DbService : IDbService
                 _logger.LogWarning("Cannot create asset for model with id {ModelId}", assetCreateDto.ModelId);
                 return new ServiceResponse($"Cannot create asset for model with id {assetCreateDto.ModelId}");
             }
-
+            if (model.IsDeleted)
+            {
+                _logger.LogWarning("Cannot create asset for model with id {ModelId}", assetCreateDto.ModelId);
+                return new ServiceResponse($"Cannot create asset for model with id {assetCreateDto.ModelId}");
+            }
             Asset asset = new()
             {
                 Name = assetCreateDto.Name,
@@ -152,17 +207,23 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating asset");
         }
     }
-
+    /// <summary>
+    /// Creates category if name is unique.
+    /// </summary>
+    /// <param name="categoryCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateCategory(CategoryCreateDto categoryCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            var exists = await context.Categories.Where(c =>
-                c.Name.ToLower().Trim() == categoryCreateDto.Name.ToLower().Trim() && c.IsDeleted == false).AnyAsync();
+            var exists = await context.Categories.AnyAsync(c =>
+                c.Name.ToLower().Trim() == categoryCreateDto.Name.ToLower().Trim());
             if (exists)
             {
+                _logger.LogWarning("Category with name {CategoryName} already exists", categoryCreateDto.Name);
                 return new ServiceResponse($"Category with name {categoryCreateDto.Name} already exists");
             }
 
@@ -184,35 +245,62 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating category");
         }
     }
-
+    /// <summary>
+    /// Creates communicate if name is unique.
+    /// </summary>
+    /// <param name="communicateCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateCommunicate(CommunicateCreateDto communicateCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
+            var exists = await context.Communicates.AnyAsync(c =>
+                c.Name.ToLower().Trim() == communicateCreateDto.Name.ToLower().Trim());
+            if (exists)
+            {
+                _logger.LogWarning("Communicate with name {CommunicateName} already exists",
+                    communicateCreateDto.Name);
+                return new ServiceResponse($"Communicate with name {communicateCreateDto.Name} already exists");
+            }
+
             var communicate = new Communicate
             {
                 UserId = userId,
                 Name = communicateCreateDto.Name,
-                Description = communicateCreateDto.Description,
-                
-                
+                Description = communicateCreateDto.Description
             };
             context.Communicates.Add(communicate);
             await context.SaveChangesAsync();
+            await transaction.CommitAsync();
             _logger.LogInformation("Communicate created");
-            return new ServiceResponse();
+            return new ServiceResponse("Communicate created", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating communicate");
+            await transaction.RollbackAsync();
             return new ServiceResponse($"Error creating communicate");
         }
     }
-
+    /// <summary>
+    /// Creates coordinate if name is unique or another coordinate with the name is marked as deleted.
+    /// Requires that space exists and is not marked as deleted.
+    /// </summary>
+    /// <param name="spaceId"></param>
+    /// <param name="coordinateCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto,
         string userId)
     {
+        if (spaceId <= 0)
+        {
+            _logger.LogWarning("SpaceId is invalid");
+            return new ServiceResponse("SpaceId is invalid");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -223,9 +311,14 @@ public class DbService : IDbService
                 _logger.LogWarning("Cannot create coordinate for space with id {SpaceId}", spaceId);
                 return new ServiceResponse($"Cannot create coordinate for space with id {spaceId}");
             }
+            if (space.IsDeleted)
+            {
+                _logger.LogWarning("Cannot create coordinate for space with id {SpaceId}", spaceId);
+                return new ServiceResponse($"Cannot create coordinate for space with id {spaceId}");
+            }
 
             if (space.Coordinates.Any(c =>
-                    !c.IsDeleted && Equals(c.Name.ToLower().Trim(), coordinateCreateDto.Name.ToLower().Trim())))
+                    Equals(c.Name.ToLower().Trim(), coordinateCreateDto.Name.ToLower().Trim())))
             {
                 _logger.LogWarning("Coordinate with {CoordinateName} already exists", coordinateCreateDto.Name);
                 return new ServiceResponse($"Coordinate with name {coordinateCreateDto.Name} already exists");
@@ -252,7 +345,12 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating coordinate");
         }
     }
-
+    /// <summary>
+    /// Creates detail if name is unique.
+    /// </summary>
+    /// <param name="detailCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateDetail(DetailCreateDto detailCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -286,7 +384,12 @@ public class DbService : IDbService
             return new ServiceResponse($"Error creating detail");
         }
     }
-
+    /// <summary>
+    /// Creates device if name is unique.
+    /// </summary>
+    /// <param name="deviceCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateDevice(DeviceCreateDto deviceCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -294,9 +397,9 @@ public class DbService : IDbService
         try
         {
             Device device = new();
-            var exist = await context.Devices.FirstOrDefaultAsync(p =>
+            var exist = await context.Devices.AnyAsync(p =>
                 Equals(p.Name.ToLower().Trim(), device.Name.ToLower().Trim()));
-            if (exist is { IsDeleted: false })
+            if (exist)
             {
                 return new ServiceResponse("Device already exists");
             }
@@ -317,14 +420,26 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating device");
         }
     }
-
+    /// <summary>
+    /// Creates model if name is unique.
+    /// Requires that device exists and is not marked as deleted.
+    /// </summary>
+    /// <param name="deviceId"></param>
+    /// <param name="modelCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId)
     {
+        if (deviceId <= 0)
+        {
+            _logger.LogWarning("DeviceId is invalid");
+            return new ServiceResponse("DeviceId is invalid");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == deviceId);
+            var device = await context.Devices.Include(d => d.Models).FirstOrDefaultAsync(d => d.DeviceId == deviceId);
             if (device == null)
             {
                 _logger.LogWarning("Device not found");
@@ -337,9 +452,7 @@ public class DbService : IDbService
                 return new ServiceResponse("Device marked as deleted");
             }
 
-            var exists = await context.Models.Where(m =>
-                m.DeviceId == deviceId && Equals(m.Name.ToLower().Trim(), modelCreateDto.Name.ToLower().Trim()) &&
-                !m.IsDeleted).AnyAsync();
+            var exists = device.Models.Any(m => Equals(m.Name.ToLower().Trim(), modelCreateDto.Name.ToLower().Trim()));
             if (exists)
             {
                 _logger.LogWarning("Model with name {modelCreateDto.Name} already exists", modelCreateDto.Name);
@@ -366,15 +479,20 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating model");
         }
     }
-
+    /// <summary>
+    /// Creates parameter if name is unique.
+    /// </summary>
+    /// <param name="parameterCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateParameter(ParameterCreateDto parameterCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            var exists = await context.Parameters.Where(p =>
-                Equals(p.Name.ToLower().Trim(), parameterCreateDto.Name.ToLower().Trim()) && !p.IsDeleted).AnyAsync();
+            var exists = await context.Parameters.AnyAsync(p =>
+                Equals(p.Name.ToLower().Trim(), parameterCreateDto.Name.ToLower().Trim()));
             if (exists)
             {
                 _logger.LogWarning("Parameter with name {parameterCreateDto.Name} already exists",
@@ -401,24 +519,31 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating parameter");
         }
     }
-
+    /// <summary>
+    /// Creates plant if name is unique.
+    /// </summary>
+    /// <param name="plantCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreatePlant(PlantCreateDto plantCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            Plant plant = new();
-            var exist = await context.Plants.FirstOrDefaultAsync(p =>
-                Equals(p.Name.ToLower().Trim(), plant.Name.ToLower().Trim()));
-            if (exist is {IsDeleted: false})
+            var exist = await context.Plants.AnyAsync(p =>
+                Equals(p.Name.ToLower().Trim(), plantCreateDto.Name.ToLower().Trim()));
+            if (exist)
             {
                 return new ServiceResponse($"Plant with name {plantCreateDto.Name} already exists");
             }
 
-            plant.UserId = userId;
-            plant.Name = plantCreateDto.Name;
-            plant.Description = plantCreateDto.Description;
+            Plant plant = new()
+            {
+                UserId = userId,
+                Name = plantCreateDto.Name,
+                Description = plantCreateDto.Description
+            };
             context.Plants.Add(plant);
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -431,12 +556,25 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating plant");
         }
     }
-
+    /// <summary>
+    /// Creates Question if name is unique.
+    /// </summary>
+    /// <param name="questionCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateQuestion(QuestionCreateDto questionCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
+            var exists = await context.Questions.AnyAsync(q =>
+                Equals(q.Name.ToLower().Trim(), questionCreateDto.Name.ToLower().Trim()));
+            if (exists)
+            {
+                return new ServiceResponse($"Question with name {questionCreateDto.Name} already exists");
+            }
+
             var question = new Question
             {
                 Name = questionCreateDto.Name,
@@ -454,15 +592,20 @@ public class DbService : IDbService
             return new ServiceResponse($"Error creating question");
         }
     }
-
+    /// <summary>
+    /// Creates situation if name is unique.
+    /// </summary>
+    /// <param name="situationCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateSituation(SituationCreateDto situationCreateDto, string userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            var exists = await context.Situations.Where(s =>
-                Equals(s.Name.ToLower().Trim(), situationCreateDto.Name.ToLower().Trim()) && !s.IsDeleted).AnyAsync();
+            var exists = await context.Situations.AnyAsync(s =>
+                Equals(s.Name.ToLower().Trim(), situationCreateDto.Name.ToLower().Trim()));
             if (exists)
             {
                 _logger.LogWarning("Situation with name {situationCreateDto.Name} already exists",
@@ -489,9 +632,20 @@ public class DbService : IDbService
             return new ServiceResponse($"Error creating situation");
         }
     }
-
+    /// <summary>
+    /// Creates space if name is unique.
+    /// Requires area exists and is not marked as deleted.
+    /// </summary>
+    /// <param name="areaId"></param>
+    /// <param name="spaceCreateDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto, string userId)
     {
+        if (areaId <= 0)
+        {
+            return new ServiceResponse("AreaId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -502,9 +656,14 @@ public class DbService : IDbService
                 _logger.LogWarning("Cannot create space for area with id {AreaId}", areaId);
                 return new ServiceResponse($"Cannot create space for area with id {areaId}");
             }
+            if (area.IsDeleted)
+            {
+                _logger.LogWarning("Cannot create space for area with id {AreaId}", areaId);
+                return new ServiceResponse($"Cannot create space for area with id {areaId}");
+            }
 
             if (area.Spaces.Any(s =>
-                    !s.IsDeleted && Equals(s.Name.ToLower().Trim(), spaceCreateDto.Name.ToLower().Trim())))
+                   Equals(s.Name.ToLower().Trim(), spaceCreateDto.Name.ToLower().Trim())))
             {
                 _logger.LogWarning("Space with name {SpaceName} already exists", spaceCreateDto.Name);
                 return new ServiceResponse($"Space with name {spaceCreateDto.Name} already exists");
@@ -529,9 +688,18 @@ public class DbService : IDbService
             return new ServiceResponse("Error creating space");
         }
     }
-
+    /// <summary>
+    /// Deletes area if it is marked as deleted and exists.
+    /// Deletion is permanent.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteArea(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("AreaId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -543,16 +711,16 @@ public class DbService : IDbService
                 return new ServiceResponse("Area not found");
             }
 
-            if (area.IsDeleted == false)
+            if (area.IsDeleted)
             {
-                _logger.LogError("Area not marked as deleted");
-                return new ServiceResponse("Area not marked as deleted");
+                context.Areas.Remove(area);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Area {AreaId} deleted", area.AreaId);
+                return new ServiceResponse("Area deleted", true);
             }
-
-            context.Areas.Remove(area);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return new ServiceResponse("Area deleted", true);
+            _logger.LogError("Area not marked as deleted");
+            return new ServiceResponse("Area not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -561,9 +729,18 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting area");
         }
     }
-
+    /// <summary>
+    /// Deletes question if it is marked as deleted and exists.
+    /// Deletion is pemanent
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteAsset(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("AssetId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -574,12 +751,16 @@ public class DbService : IDbService
                 _logger.LogWarning("Asset not found");
                 return new ServiceResponse("Asset not found");
             }
-
-            context.Assets.Remove(asset);
-            _logger.LogInformation("Asset with id {AssetId} deleted", id);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return new ServiceResponse($"Asset {id} deleted", true);
+            if (asset.IsDeleted)
+            {
+                context.Assets.Remove(asset);
+                _logger.LogInformation("Asset with id {AssetId} deleted", id);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return new ServiceResponse($"Asset {id} deleted", true);
+            }
+            _logger.LogWarning("Asset not marked as deleted");
+            return new ServiceResponse("Asset not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -588,9 +769,17 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting asset with id {id}");
         }
     }
-
+    /// <summary>
+    /// Deletes category if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteCategory(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("CategoryId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -598,18 +787,20 @@ public class DbService : IDbService
             var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
             if (category == null)
             {
+                _logger.LogWarning("Category not found");
                 return new ServiceResponse("Category not found");
             }
 
-            if (category.IsDeleted == false)
+            if (category.IsDeleted)
             {
-                return new ServiceResponse("Category not marked as deleted");
+                context.Categories.Remove(category);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Category {CategoryId} deleted", id);
+                return new ServiceResponse("Category deleted", true);
             }
-
-            context.Categories.Remove(category);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return new ServiceResponse("Category deleted", true);
+            _logger.LogWarning("Category not marked as deleted");
+            return new ServiceResponse("Category not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -618,10 +809,19 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting category");
         }
     }
-
+    /// <summary>
+    /// Deletes communicate if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteCommunicate(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("CommunicateId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var communicate = await context.Communicates.FirstOrDefaultAsync(c => c.CommunicateId == id);
@@ -630,21 +830,35 @@ public class DbService : IDbService
                 _logger.LogError("Communicate with id {Id} not found", id);
                 return new ServiceResponse($"Communicate with id {id} not found");
             }
-
-            context.Communicates.Remove(communicate);
-            await context.SaveChangesAsync();
-            _logger.LogInformation("Communicate with id {Id} deleted", id);
-            return new ServiceResponse($"Communicate with id {id} deleted");
+            if (communicate.IsDeleted)
+            {
+                context.Communicates.Remove(communicate);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Communicate with id {Id} deleted", id);
+                return new ServiceResponse($"Communicate with id {id} deleted");
+            }
+            _logger.LogError("Communicate with id {Id} not marked as deleted", id);
+            return new ServiceResponse($"Communicate with id {id} not marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting communicate with id {Id}", id);
+            await transaction.RollbackAsync();
             return new ServiceResponse($"Error deleting communicate with id {id}");
         }
     }
-
+    /// <summary>
+    /// Deletes coordinate if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteCoordinate(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("CoordinateId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -656,16 +870,16 @@ public class DbService : IDbService
                 return new ServiceResponse("Coordinate not found");
             }
 
-            if (coordinate.IsDeleted == false)
+            if (coordinate.IsDeleted)
             {
-                _logger.LogError("Coordinate not marked as deleted");
-                return new ServiceResponse("Coordinate not marked as deleted");
+                context.Coordinates.Remove(coordinate);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Coordinate {CoordinateId} deleted", id);
+                return new ServiceResponse("Coordinate deleted", true);
             }
-
-            context.Coordinates.Remove(coordinate);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return new ServiceResponse("Coordinate deleted", true);
+            _logger.LogError("Coordinate not marked as deleted");
+            return new ServiceResponse("Coordinate not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -674,9 +888,17 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting coordinate");
         }
     }
-
+    /// <summary>
+    /// Deletes detail if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteDetail(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("DetailId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -687,12 +909,16 @@ public class DbService : IDbService
                 _logger.LogWarning("Detail not found");
                 return new ServiceResponse("Detail not found");
             }
-
-            detail.IsDeleted = true;
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("Detail with id {DetailId} deleted", detail.DetailId);
-            return new ServiceResponse($"Detail {detail.DetailId} deleted", true);
+            if (detail.IsDeleted)
+            {
+                context.Details.Remove(detail);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Detail with id {DetailId} deleted", detail.DetailId);
+                return new ServiceResponse($"Detail {detail.DetailId} deleted", true);
+            }
+            _logger.LogWarning("Detail not marked as deleted");
+            return new ServiceResponse("Detail not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -701,9 +927,17 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting detail");
         }
     }
-
+    /// <summary>
+    /// Deletes device if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteDevice(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("DeviceId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -715,28 +949,37 @@ public class DbService : IDbService
                 return new ServiceResponse("Device not found");
             }
 
-            if (!device.IsDeleted)
+            if (device.IsDeleted)
             {
-                _logger.LogWarning("Device not marked as deleted");
-                return new ServiceResponse("Device not marked as deleted");
+                context.Devices.Remove(device);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Device with id {DeviceId} deleted", id);
+                return new ServiceResponse($"Device {id} deleted", true);
             }
-
-            context.Devices.Remove(device);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("Device with id {DeviceId} deleted", id);
-            return new ServiceResponse($"Device {id} deleted", true);
+            _logger.LogWarning("Device not marked as deleted");
+            return new ServiceResponse("Device not marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting device with id {DeviceId}", id);
+
             await transaction.RollbackAsync();
+
             return new ServiceResponse($"Error deleting device with id {id}");
         }
     }
-
+    /// <summary>
+    /// Deletes model if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteModel(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("ModelId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -748,17 +991,16 @@ public class DbService : IDbService
                 return new ServiceResponse("Model not found");
             }
 
-            if (!model.IsDeleted)
+            if (model.IsDeleted)
             {
-                _logger.LogWarning("Model not marked as deleted");
-                return new ServiceResponse("Model not marked as deleted");
+                context.Models.Remove(model);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Model with id {ModelId} deleted", model.ModelId);
+                return new ServiceResponse($"Model {model.ModelId} deleted", true);
             }
-
-            context.Models.Remove(model);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("Model with id {ModelId} deleted", model.ModelId);
-            return new ServiceResponse($"Model {model.ModelId} deleted", true);
+            _logger.LogWarning("Model not marked as deleted");
+            return new ServiceResponse("Model not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -767,9 +1009,17 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting model with id {id}");
         }
     }
-
+    /// <summary>
+    /// Deletes parameter if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteParameter(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("ParameterId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -781,17 +1031,16 @@ public class DbService : IDbService
                 return new ServiceResponse("Parameter not found");
             }
 
-            if (!parameter.IsDeleted)
+            if (parameter.IsDeleted)
             {
-                _logger.LogWarning("Parameter with id {ParameterId} not marked as deleted", parameter.ParameterId);
-                return new ServiceResponse($"Parameter with id {parameter.ParameterId} not marked as deleted");
+                context.Remove(parameter);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Parameter with id {ParameterId} deleted", parameter.ParameterId);
+                return new ServiceResponse($"Parameter {parameter.ParameterId} deleted");
             }
-
-            context.Remove(parameter);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("Parameter with id {ParameterId} deleted", parameter.ParameterId);
-            return new ServiceResponse($"Parameter {parameter.ParameterId} deleted");
+            _logger.LogWarning("Parameter with id {ParameterId} not marked as deleted", parameter.ParameterId);
+            return new ServiceResponse($"Parameter with id {parameter.ParameterId} not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -800,9 +1049,17 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting parameter with id {id}");
         }
     }
-
+    /// <summary>
+    /// Deletes plant if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeletePlant(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("PlantId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -814,17 +1071,16 @@ public class DbService : IDbService
                 return new ServiceResponse("Plant not found");
             }
 
-            if (plant.IsDeleted == false)
+            if (plant.IsDeleted)
             {
-                _logger.LogError("Plant not marked as deleted");
-                return new ServiceResponse("Plant not marked as deleted");
+                context.Plants.Remove(plant);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Plant with id {PlantId} deleted", plant.PlantId);
+                return new ServiceResponse("Plant deleted", true);
             }
-
-            context.Plants.Remove(plant);
-
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return new ServiceResponse("Plant deleted", true);
+            _logger.LogError("Plant not marked as deleted");
+            return new ServiceResponse("Plant not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -833,10 +1089,20 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting plant");
         }
     }
-
+    /// <summary>
+    /// Deletes question if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteQuestion(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("QuestionId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
         try
         {
             var question = await context.Questions.FirstOrDefaultAsync(q => q.QuestionId == id);
@@ -845,23 +1111,38 @@ public class DbService : IDbService
                 _logger.LogInformation("Question not found");
                 return new ServiceResponse($"Question not found");
             }
-
-            question.IsDeleted = true;
-            question.;
-            await context.SaveChangesAsync();
-            _logger.LogInformation("Question deleted");
-            return new ServiceResponse();
+            if (question.IsDeleted)
+            {
+                context.Questions.Remove(question);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Question with id {QuestionId} deleted", question.QuestionId);
+                return new ServiceResponse($"Question {question.QuestionId} deleted", true);
+            }
+            _logger.LogInformation("Question not marked as deleted");
+            return new ServiceResponse($"Question not marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting question");
+            await transaction.RollbackAsync();
             return new ServiceResponse($"Error deleting question");
         }
     }
-
+    /// <summary>
+    /// Deletes situation if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteSituation(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("SituationId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
         try
         {
             var situation = await context.Situations.Where(s => s.SituationId == id).FirstOrDefaultAsync();
@@ -870,23 +1151,35 @@ public class DbService : IDbService
                 _logger.LogWarning("SituationId {id} not found", id);
                 return new ServiceResponse($"SituationId {id} not found");
             }
-
-            situation.IsDeleted = true;
-            situation.UpdatedAt = DateTime.UtcNow;
-
-            await context.SaveChangesAsync();
-            _logger.LogInformation("SituationId {id} deleted", id);
-            return new ServiceResponse($"SituationId {id} deleted");
+            if (situation.IsDeleted)
+            {
+                context.Situations.Remove(situation);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("SituationId {SituationId} deleted", situation.SituationId);
+                return new ServiceResponse($"SituationId {situation.SituationId} deleted", true);
+            }
+            _logger.LogWarning("SituationId {SituationId} not marked as deleted", situation.SituationId);
+            return new ServiceResponse($"SituationId {situation.SituationId} not marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting situation");
+            await transaction.RollbackAsync();
             return new ServiceResponse($"Error deleting situation");
         }
     }
-
+    /// <summary>
+    /// Deletes space if it is marked as deleted and exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> DeleteSpace(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("SpaceId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -897,17 +1190,16 @@ public class DbService : IDbService
                 _logger.LogError("Space not found");
                 return new ServiceResponse("Space not found");
             }
-
-            if (space.IsDeleted == false)
+            if (space.IsDeleted)
             {
-                _logger.LogError("Space not marked as deleted");
-                return new ServiceResponse("Space not marked as deleted");
+                context.Spaces.Remove(space);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                _logger.LogInformation("Space with id {SpaceId} deleted", space.SpaceId);
+                return new ServiceResponse("Space deleted", true);
             }
-
-            context.Spaces.Remove(space);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return new ServiceResponse("Space deleted", true);
+            _logger.LogError("Space not marked as deleted");
+            return new ServiceResponse("Space not marked as deleted");
         }
         catch (Exception ex)
         {
@@ -916,20 +1208,28 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting space");
         }
     }
-
+    /// <summary>
+    /// Returns service response with area if it exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<AreaDto>> GetAreaById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<AreaDto>("AreaId is invalid.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
-
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id);
+            var area = await _mapper.ProjectTo<AreaDto>(context.Areas).FirstOrDefaultAsync(a => a.AreaId == id);
             if (area == null)
             {
-                return new ServiceResponse<AreaDto>("Area not found");
+                _logger.LogWarning("AreaId {id} not found", id);
+                return new ServiceResponse<AreaDto>($"AreaId {id} not found");
             }
 
-            return new ServiceResponse<AreaDto>( area, "Area returned");
+            return new ServiceResponse<AreaDto>(area, "Area returned");
         }
         catch (Exception ex)
         {
@@ -937,21 +1237,23 @@ public class DbService : IDbService
             return new ServiceResponse<AreaDto>("Error getting area by id");
         }
     }
-
+    /// <summary>
+    /// Returns service response with areas if they exist.
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<AreaDto>>> GetAreas()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var areas = await context.Areas.ToListAsync();
+            var areas = await _mapper.ProjectTo<AreaDto>(context.Areas).ToListAsync();
             if (areas.Count == 0)
             {
-                return new ServiceResponse<IEnumerable<AreaDto>>(new List<AreaDto>(), "No areas found");
+                _logger.LogWarning("No areas found");
+                return new ServiceResponse<IEnumerable<AreaDto>>("No areas found");
             }
-            else
-            {
-                return new ServiceResponse<IEnumerable<AreaDto>>("Areas not found");
-            }
+            return new ServiceResponse<IEnumerable<AreaDto>>(areas, "Areas returned");
+
         }
         catch (Exception ex)
         {
@@ -959,19 +1261,21 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<AreaDto>>("Error getting all areas");
         }
     }
-
+    /// <summary>
+    /// Returns service response with areas and spaces if they exist.
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<AreaDto>>> GetAreasWithSpaces()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var areas = await context.Areas.Include(s => s.Spaces).ToListAsync();
+            var areas = await _mapper.ProjectTo<AreaDto>(context.Areas.Include(s => s.Spaces)).ToListAsync();
             if (areas.Count == 0)
             {
                 return new ServiceResponse<IEnumerable<AreaDto>>("Areas not found");
             }
-
-            return new ServiceResponse<IEnumerable<AreaDto>>( < IEnumerable < AreaDto >> (areas),
+            return new ServiceResponse<IEnumerable<AreaDto>>(areas,
             "List of areas with spaces returned");
         }
         catch (Exception ex)
@@ -980,20 +1284,34 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<AreaDto>>("Error getting areas with spaces");
         }
     }
-
+    /// <summary>
+    /// Returns service response with asset by id if it exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<AssetDto>> GetAssetById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<AssetDto>("AssetId is invalid.");
+        }
+        if (id <= 0)
+        {
+            _logger.LogWarning("AssetId {id} not valid", id);
+            return new ServiceResponse<AssetDto>($"AssetId {id} not valid");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories)
+            var asset = await _mapper.ProjectTo<AssetDto>(context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories))
                 .FirstOrDefaultAsync(a => a.AssetId == id);
             if (asset == null)
             {
+                _logger.LogWarning("AssetId {id} not found", id);
                 return new ServiceResponse<AssetDto>("Asset not found");
             }
 
-            return new ServiceResponse<AssetDto>( < AssetDto > (asset), "Asset returned");
+            return new ServiceResponse<AssetDto>(asset, "Asset returned");
         }
         catch (Exception ex)
         {
@@ -1001,21 +1319,23 @@ public class DbService : IDbService
             return new ServiceResponse<AssetDto>("Error getting asset by id");
         }
     }
-
+    /// <summary>
+    /// Returns service response with assets if they exist.
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories)
+            var assets = await _mapper.ProjectTo<AssetDto>(context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories))
                 .ToListAsync();
             if (assets.Count == 0)
             {
-                return new ServiceResponse<IEnumerable<AssetDto>>(new List<AssetDto>(), "No assets found");
+                _logger.LogWarning("No assets found");
+                return new ServiceResponse<IEnumerable<AssetDto>>("No assets found");
             }
-
-            return new ServiceResponse<IEnumerable<AssetDto>>( < IEnumerable < AssetDto >> (assets),
-            "List of assets returned");
+            return new ServiceResponse<IEnumerable<AssetDto>>(assets, "List of assets returned");
         }
         catch (Exception ex)
         {
@@ -1023,21 +1343,23 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<AssetDto>>("Error getting all assets");
         }
     }
-
+    /// <summary>
+    /// Returns service response with assets and all data if they exist.
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssetsWithAllData()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var assets = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories)
-                .Include(a => a.Coordinate).Include(c => c.CommunicateAssets).Include(a => a.Model).ToListAsync();
+            var assets = await _mapper.ProjectTo<AssetDto>(context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories)
+                .Include(a => a.Coordinate).Include(c => c.CommunicateAssets).Include(a => a.Model)).ToListAsync();
             if (assets.Count == 0)
             {
+                _logger.LogWarning("No assets found");
                 return new ServiceResponse<IEnumerable<AssetDto>>("Assets not found");
             }
-
-            return new ServiceResponse<IEnumerable<AssetDto>>( < IEnumerable < AssetDto >> (assets),
-            "List of assets returned");
+            return new ServiceResponse<IEnumerable<AssetDto>>(assets, "List of assets returned");
         }
         catch (Exception ex)
         {
@@ -1045,15 +1367,17 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<AssetDto>>("Error getting all assets");
         }
     }
-
+    /// <summary>
+    /// Returns categories if they exist.
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategories()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var categories = await context.Categories.ToListAsync();
-            return new ServiceResponse<IEnumerable<CategoryDto>>( < IEnumerable < CategoryDto >> (categories),
-            "Categories found");
+            var categories = await _mapper.ProjectTo<CategoryDto>(context.Categories).ToListAsync();
+            return new ServiceResponse<IEnumerable<CategoryDto>>(categories, "Categories found");
         }
         catch (Exception ex)
         {
@@ -1061,36 +1385,70 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<CategoryDto>>("Error getting categories");
         }
     }
-
-    public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategoriesWithAssets()
+    /// <summary>
+    /// Returns service response with categories and assets if they exist.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<ServiceResponse<IEnumerable<CategoryWithAssetsDto>>> GetCategoriesWithAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var categories = await context.Categories.Include(a => a.AssetCategories).ThenInclude(a => a.Asset)
+            var categories = await _mapper.ProjectTo<CategoryWithAssetsDto>(context.Categories.Include(a => a.AssetCategories).ThenInclude(a => a.Asset))
                 .ToListAsync();
-            return new ServiceResponse<IEnumerable<CategoryDto>>( < IEnumerable < CategoryDto >> (categories),
-            "Categories found");
+            return new ServiceResponse<IEnumerable<CategoryWithAssetsDto>>(categories, "Categories found");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting categories");
-            return new ServiceResponse<IEnumerable<CategoryDto>>("Error getting categories");
+            return new ServiceResponse<IEnumerable<CategoryWithAssetsDto>>("Error getting categories");
         }
     }
-
+    public async Task<ServiceResponse<CategoryWithAssetsDto>> GetCategoryByIdWithAssets(int id)
+    {
+        if (id <= 0)
+        {
+            return new ServiceResponse<CategoryWithAssetsDto>("Invalid category id");
+        }
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        try
+        {
+            var category = await _mapper.ProjectTo<CategoryWithAssetsDto>(context.Categories.Include(a => a.AssetCategories).ThenInclude(a => a.Asset))
+                .FirstOrDefaultAsync(a => a.CategoryId == id);
+            if (category == null)
+            {
+                _logger.LogWarning("CategoryId {id} not found", id);
+                return new ServiceResponse<CategoryWithAssetsDto>("Category not found");
+            }
+            return new ServiceResponse<CategoryWithAssetsDto>(category, "Category returned");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting category");
+            return new ServiceResponse<CategoryWithAssetsDto>("Error getting category with assets");
+        }
+    }
+    /// <summary>
+    /// Returns service response with category by id if exists
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<CategoryDto>> GetCategoryById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<CategoryDto>("Invalid category id.");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+            var category = await _mapper.ProjectTo<CategoryDto>(context.Categories).FirstOrDefaultAsync(c => c.CategoryId == id);
             if (category == null)
             {
                 return new ServiceResponse<CategoryDto>("Category not found");
             }
 
-            return new ServiceResponse<CategoryDto>( < CategoryDto > (category), "Category found");
+            return new ServiceResponse<CategoryDto>(category, "Category found");
         }
         catch (Exception ex)
         {
@@ -1098,29 +1456,28 @@ public class DbService : IDbService
             return new ServiceResponse<CategoryDto>("Error getting category");
         }
     }
-
+    /// <summary>
+    /// Returns service response with communicate if exists
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<CommunicateDto>> GetCommunicateById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<CommunicateDto>("Invalid communicate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var communicate = await context.Communicates.FirstOrDefaultAsync(c => c.CommunicateId == id);
+            var communicate = await _mapper.ProjectTo<CommunicateDto>(context.Communicates).FirstOrDefaultAsync(c => c.CommunicateId == id);
             if (communicate == null)
             {
                 _logger.LogInformation("Communicate not found");
                 return new ServiceResponse<CommunicateDto>($"Communicate not found");
             }
-
-            var communicateDto = new CommunicateDto
-            {
-                CommunicateId = communicate.CommunicateId,
-                Name = communicate.Name,
-                Description = communicate.Description,
-                CreatedAt = communicate.CreatedAt,
-                UpdatedAt = communicate.UpdatedAt
-            };
             _logger.LogInformation("Communicate found");
-            return new ServiceResponse<CommunicateDto>(communicateDto);
+            return new ServiceResponse<CommunicateDto>(communicate, "Communicate found");
         }
         catch (Exception ex)
         {
@@ -1128,29 +1485,24 @@ public class DbService : IDbService
             return new ServiceResponse<CommunicateDto>($"Error getting communicate");
         }
     }
-
+    /// <summary>
+    /// Returns service response with communicates if they exists
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicates()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var communicates = await context.Communicates.Where(c => c.IsDeleted == false).ToListAsync();
-            var communicateDtos = new List<CommunicateDto>();
-            foreach (var communicate in communicates)
+            var communicates = await _mapper.ProjectTo<CommunicateDto>(context.Communicates).ToListAsync();
+            if (communicates.Count == 0)
             {
-                var communicateDto = new CommunicateDto
-                {
-                    CommunicateId = communicate.CommunicateId,
-                    Name = communicate.Name,
-                    Description = communicate.Description,
-                    CreatedAt = communicate.CreatedAt,
-                    UpdatedAt = communicate.UpdatedAt
-                };
-                communicateDtos.Add(communicateDto);
+                _logger.LogWarning("No communicates found");
+                return new ServiceResponse<IEnumerable<CommunicateDto>>("No communicates found");
             }
 
             _logger.LogInformation("Communicates found");
-            return new ServiceResponse<IEnumerable<CommunicateDto>>(communicateDtos);
+            return new ServiceResponse<IEnumerable<CommunicateDto>>(communicates, "Communicates found");
         }
         catch (Exception ex)
         {
@@ -1158,64 +1510,53 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<CommunicateDto>>($"Error getting communicates");
         }
     }
-
-    public async Task<ServiceResponse<IEnumerable<CommunicateDto>>> GetCommunicatesWithAssets()
+    /// <summary>
+    /// Returns service response of communicates with assets if they exist
+    /// </summary>
+    /// <returns></returns>
+    public async Task<ServiceResponse<IEnumerable<CommunicateWithAssetsDto>>> GetCommunicatesWithAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var communicates = await context.Communicates.Where(c => c.IsDeleted == false).ToListAsync();
-            var communicateDtos = new List<CommunicateDto>();
-            foreach (var communicate in communicates)
+            var communicates = await _mapper.ProjectTo<CommunicateWithAssetsDto>(context.Communicates.Include(a => a.CommunicateAssets).ThenInclude(a => a.Asset)).ToListAsync();
+            if (communicates.Count == 0)
             {
-                var communicateDto = new CommunicateDto
-                {
-                    CommunicateId = communicate.CommunicateId,
-                    Name = communicate.Name,
-                    Description = communicate.Description,
-                    CreatedAt = communicate.CreatedAt,
-                    UpdatedAt = communicate.UpdatedAt
-                };
-                var assets = await context.Assets.Where(a => a.CommunicateId == communicate.CommunicateId)
-                    .ToListAsync();
-                foreach (var asset in assets)
-                {
-                    var assetDto = new AssetDto
-                    {
-                        AssetId = asset.AssetId,
-                        Name = asset.Name,
-                        Description = asset.Description,
-                        CreatedAt = asset.CreatedAt,
-                        UpdatedAt = asset.UpdatedAt
-                    };
-                    communicateDto.Assets.Add(assetDto);
-                }
-
-                communicateDtos.Add(communicateDto);
+                _logger.LogWarning("No communicates found");
+                return new ServiceResponse<IEnumerable<CommunicateWithAssetsDto>>("No communicates found");
             }
 
             _logger.LogInformation("Communicates found");
-            return new ServiceResponse<IEnumerable<CommunicateDto>>(communicateDtos);
+            return new ServiceResponse<IEnumerable<CommunicateWithAssetsDto>>(communicates, "Communicates found");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting communicates");
-            return new ServiceResponse<IEnumerable<CommunicateDto>>($"Error getting communicates");
+            return new ServiceResponse<IEnumerable<CommunicateWithAssetsDto>>($"Error getting communicates");
         }
     }
-
-    public async Task<ServiceResponse<CoordinateDto>> GetCoordinateById(int id)
+    /// <summary>
+    /// Returns service response with coordinate by id with assets if exists
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public async Task<ServiceResponse<CoordinateDto>> GetCoordinateByIdWithAssets(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<CoordinateDto>("Invalid coordinate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id);
+            var coordinate = await _mapper.ProjectTo<CoordinateDto>(context.Coordinates.Include(a => a.Assets)).FirstOrDefaultAsync(c => c.CoordinateId == id);
             if (coordinate == null)
             {
+                _logger.LogWarning("Coordinate not found");
                 return new ServiceResponse<CoordinateDto>("Coordinate not found");
             }
 
-            return new ServiceResponse<CoordinateDto>( < CoordinateDto > (coordinate), "Coordinate returned");
+            return new ServiceResponse<CoordinateDto>(coordinate, "Coordinate returned");
         }
         catch (Exception ex)
         {
@@ -1223,20 +1564,21 @@ public class DbService : IDbService
             return new ServiceResponse<CoordinateDto>("Error getting coordinate by id");
         }
     }
-
+    /// <summary>
+    /// Returns service response with coordinates if they exists
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<CoordinateDto>>> GetCoordinates()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var coordinates = await context.Coordinates.ToListAsync();
+            var coordinates = await _mapper.ProjectTo<CoordinateDto>(context.Coordinates).ToListAsync();
             if (coordinates.Count == 0)
             {
                 return new ServiceResponse<IEnumerable<CoordinateDto>>("Coordinates not found");
             }
-
-            return new ServiceResponse<IEnumerable<CoordinateDto>>( < IEnumerable < CoordinateDto >> (coordinates),
-            "List of coordinates returned");
+            return new ServiceResponse<IEnumerable<CoordinateDto>>(coordinates, "List of coordinates returned");
         }
         catch (Exception ex)
         {
@@ -1244,20 +1586,22 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<CoordinateDto>>("Error getting all coordinates");
         }
     }
-
+    /// <summary>
+    /// Returns service response with coordinates and assets if they exists
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<CoordinateDto>>> GetCoordinatesWithAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var coordinates = await context.Coordinates.Include(a => a.Assets).ToListAsync();
+            var coordinates = await _mapper.ProjectTo<CoordinateDto>(context.Coordinates.Include(a => a.Assets)).ToListAsync();
             if (coordinates.Count == 0)
             {
                 return new ServiceResponse<IEnumerable<CoordinateDto>>("Coordinates not found");
             }
 
-            return new ServiceResponse<IEnumerable<CoordinateDto>>( < IEnumerable < CoordinateDto >> (coordinates),
-            "List of coordinates with assets returned");
+            return new ServiceResponse<IEnumerable<CoordinateDto>>(coordinates, "List of coordinates with assets returned");
         }
         catch (Exception ex)
         {
@@ -1265,9 +1609,17 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<CoordinateDto>>("Error getting all coordinates with assets");
         }
     }
-
+    /// <summary>
+    /// Returns service response with detail by id if it exists
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<DetailDto>> GetDetailById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<DetailDto>("Invalid detail id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -1277,8 +1629,6 @@ public class DbService : IDbService
                 _logger.LogWarning("Detail not found");
                 return new ServiceResponse<DetailDto>("Detail not found");
             }
-
-
             _logger.LogInformation("Detail with id {DetailId} found", detail.DetailId);
             return new ServiceResponse<DetailDto>(detail, "Detail found");
         }
@@ -1288,7 +1638,10 @@ public class DbService : IDbService
             return new ServiceResponse<DetailDto>($"Error getting detail with id {id}");
         }
     }
-
+    /// <summary>
+    /// Returns service response with details if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetails()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1305,35 +1658,42 @@ public class DbService : IDbService
         }
     }
 
-    public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetailsWithAssets()
+    public async Task<ServiceResponse<IEnumerable<DetailWithAssetsDto>>> GetDetailsWithAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var details = await _mapper.ProjectTo<DetailDto>(context.Details.Include(d => d.AssetDetails))
-                .ToListAsync();
+            var details = await _mapper.ProjectTo<DetailWithAssetsDto>(context.Details.Include(d => d.AssetDetails).ThenInclude(a => a.Asset)).ToListAsync();
             _logger.LogInformation("{DetailCount} details found", details.Count);
-            return new ServiceResponse<IEnumerable<DetailDto>>(details, $"{details.Count} details found");
+            return new ServiceResponse<IEnumerable<DetailWithAssetsDto>>(details, $"{details.Count} details found");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting details");
-            return new ServiceResponse<IEnumerable<DetailDto>>("Error getting details");
+            return new ServiceResponse<IEnumerable<DetailWithAssetsDto>>("Error getting details");
         }
     }
-
+    /// <summary>
+    /// Returns service response with device by id if exist
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<DeviceDto>> GetDeviceById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<DeviceDto>("Invalid device id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
+            var device = await _mapper.ProjectTo<DeviceDto>(context.Devices).FirstOrDefaultAsync(d => d.DeviceId == id);
             if (device == null)
             {
-                return new ServiceResponse<DeviceDto>("Plant not found");
+                return new ServiceResponse<DeviceDto>("Device not found");
             }
 
-            return new ServiceResponse<DeviceDto>( < DeviceDto > (device), "Device returned");
+            return new ServiceResponse<DeviceDto>( device, "Device returned");
         }
         catch (Exception ex)
         {
@@ -1341,20 +1701,22 @@ public class DbService : IDbService
             return new ServiceResponse<DeviceDto>("Error getting device by id");
         }
     }
-
+    /// <summary>
+    /// Returns service response with devices if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevices()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var devices = await context.Devices.ToListAsync();
+            var devices = await _mapper.ProjectTo<DeviceDto>(context.Devices).ToListAsync();
             if (devices.Count == 0)
             {
                 return new ServiceResponse<IEnumerable<DeviceDto>>("Devices not found");
             }
 
-            return new ServiceResponse<IEnumerable<DeviceDto>>( < IEnumerable < DeviceDto >> (devices),
-            "Devices returned");
+            return new ServiceResponse<IEnumerable<DeviceDto>>(devices,"Devices returned");
         }
         catch (Exception ex)
         {
@@ -1362,19 +1724,22 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<DeviceDto>>("Error getting devices");
         }
     }
-
+    /// <summary>
+    /// Returns service response with device and models if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevicesWithModels()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var devices = await context.Devices.Include(d => d.Models).ToListAsync();
+            var devices = await _mapper.ProjectTo<DeviceDto>(context.Devices.Include(d => d.Models)).ToListAsync();
             if (devices.Count == 0)
             {
                 return new ServiceResponse<IEnumerable<DeviceDto>>("Devices not found");
             }
 
-            return new ServiceResponse<IEnumerable<DeviceDto>>( < IEnumerable < DeviceDto >> (devices),
+            return new ServiceResponse<IEnumerable<DeviceDto>>(devices,
             "Devices returned");
         }
         catch (Exception ex)
@@ -1383,13 +1748,17 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<DeviceDto>>("Error getting devices");
         }
     }
-
+    /// <summary>
+    /// Returns service response with model if exist
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<ModelDto>> GetModelById(int id)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == id);
+            var model = await _mapper.ProjectTo<ModelDto>(context.Models).FirstOrDefaultAsync(m => m.ModelId == id);
             if (model == null)
             {
                 _logger.LogWarning("Model not found");
@@ -1397,8 +1766,7 @@ public class DbService : IDbService
             }
 
             _logger.LogInformation("Model with id {ModelId} retrieved", model.ModelId);
-            return new ServiceResponse<ModelDto>( < ModelDto > (model),
-            $"Model with id {model.ModelId} retrieved");
+            return new ServiceResponse<ModelDto>( model,$"Model with id {model.ModelId} retrieved");
         }
         catch (Exception ex)
         {
@@ -1406,16 +1774,18 @@ public class DbService : IDbService
             return new ServiceResponse<ModelDto>($"Error retrieving model with id {id}");
         }
     }
-
+    /// <summary>
+    /// Returns service response with models if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<ModelDto>>> GetModels()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var models = await context.Models.ToListAsync();
+            var models = await _mapper.ProjectTo<ModelDto>(context.Models).ToListAsync();
             _logger.LogInformation("Models retrieved");
-            return new ServiceResponse<IEnumerable<ModelDto>>( < IEnumerable < ModelDto >> (models),
-            "Models retrieved");
+            return new ServiceResponse<IEnumerable<ModelDto>>( models,"Models retrieved");
         }
         catch (Exception ex)
         {
@@ -1423,16 +1793,18 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<ModelDto>>("Error retrieving models");
         }
     }
-
+    /// <summary>
+    /// Returns service response with model and assets if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<ModelDto>>> GetModelsWithAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
-            var models = await context.Models.Include(m => m.Assets).ToListAsync();
+            var models = await _mapper.ProjectTo<ModelDto>(context.Models.Include(m => m.Assets)).ToListAsync();
             _logger.LogInformation("Models retrieved");
-            return new ServiceResponse<IEnumerable<ModelDto>>( < IEnumerable < ModelDto >> (models),
-            "Models retrieved");
+            return new ServiceResponse<IEnumerable<ModelDto>>( models,"Models with assets retrieved");
         }
         catch (Exception ex)
         {
@@ -1443,6 +1815,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<ParameterDto>> GetParameterById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<ParameterDto>("Invalid parameter id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -1520,6 +1896,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<PlantDto>> GetPlantById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<PlantDto>("Invalid plant id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         try
@@ -1576,6 +1956,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<QuestionDto>> GetQuestionById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<QuestionDto>("Invalid question id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -1590,8 +1974,8 @@ public class DbService : IDbService
             {
                 QuestionId = question.QuestionId,
                 Name = question.Name,
-                CreatedAt = question.CreatedAt,
-                UpdatedAt = question.UpdatedAt,
+                 = question
+                 = question
                 IsDeleted = question.IsDeleted,
                 UserId = question.UserId
             };
@@ -1619,8 +2003,8 @@ public class DbService : IDbService
                 {
                     QuestionId = question.QuestionId,
                     Name = question.Name,
-                    CreatedAt = question.CreatedAt,
-                    UpdatedAt = question.UpdatedAt,
+                     = question
+                     = question
                     IsDeleted = question.IsDeleted,
                     UserId = question.UserId
                 };
@@ -1650,8 +2034,8 @@ public class DbService : IDbService
                 {
                     QuestionId = question.QuestionId,
                     Name = question.Name,
-                    CreatedAt = question.CreatedAt,
-                    UpdatedAt = question.UpdatedAt,
+                     = question
+                     = question
                     IsDeleted = question.IsDeleted,
                     UserId = question.UserId
                 };
@@ -1664,8 +2048,8 @@ public class DbService : IDbService
                     {
                         QuestionId = questionSituation.QuestionId,
                         SituationId = questionSituation.SituationId,
-                        CreatedAt = questionSituation.CreatedAt,
-                        UpdatedAt = questionSituation.UpdatedAt,
+                         = questionSituation
+                         = questionSituation
                         IsDeleted = questionSituation.IsDeleted
                     };
                     questionSituationsDto.Add(questionSituationDto);
@@ -1687,6 +2071,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<SituationDto>> GetSituationById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<SituationDto>("Invalid situation id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -1765,6 +2153,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse<SpaceDto>> GetSpaceById(int id)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse<SpaceDto>("Invalid space id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -1827,6 +2219,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteArea(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid area id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -1861,6 +2257,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteAsset(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid asset id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -1896,6 +2296,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteCategory(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid category id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -1934,6 +2338,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteCommunicate(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid communicate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -1945,7 +2353,7 @@ public class DbService : IDbService
             }
 
             communicate.IsDeleted = true;
-            communicate.UpdatedAt = DateTime.UtcNow;
+            communicate. = DateTime.UtcNow;
             communicate.UpdatedBy = userId;
             await context.SaveChangesAsync();
             _logger.LogInformation("Communicate with id {id} marked as deleted");
@@ -1960,6 +2368,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteCoordinate(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid coordinate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -1998,6 +2410,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteDetail(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid detail id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2026,6 +2442,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteDevice(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid device id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2061,6 +2481,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteModel(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid model id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2102,6 +2526,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteParameter(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid parameter id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2136,6 +2564,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeletePlant(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid plant id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2169,6 +2601,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteQuestion(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid question id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -2200,6 +2636,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteSituation(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid situation id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -2219,7 +2659,7 @@ public class DbService : IDbService
             }
 
             situation.IsDeleted = true;
-            situation.UpdatedAt = DateTime.UtcNow;
+            situation. = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
             _logger.LogInformation("SituationId {id} deleted", id);
@@ -2234,6 +2674,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkDeleteSpace(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid space id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2266,6 +2710,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteArea(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid area id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2303,6 +2751,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteAsset(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid asset id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2338,6 +2790,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteCategory(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid category id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2353,9 +2809,9 @@ public class DbService : IDbService
                 return new ServiceResponse("Category already marked as not deleted");
             }
 
-            if (await context.Categories.Where(c =>
+            if (await context.Categories.AnyAsync(c =>
                     Equals(category.Name.ToLower().Trim(), c.Name.ToLower().Trim()) &&
-                    c.CategoryId != category.CategoryId && c.IsDeleted == false).AnyAsync())
+                    c.CategoryId != category.CategoryId && c.IsDeleted == false))
             {
                 return new ServiceResponse($"Category with name {category.Name} already exists");
             }
@@ -2377,6 +2833,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteCommunicate(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid communicate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -2388,7 +2848,7 @@ public class DbService : IDbService
             }
 
             communicate.IsDeleted = false;
-            communicate.UpdatedAt = DateTime.UtcNow;
+            communicate. = DateTime.UtcNow;
             communicate.UpdatedBy = userId;
             await context.SaveChangesAsync();
             _logger.LogInformation("Communicate with id {id} marked as un-deleted");
@@ -2403,6 +2863,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteCoordinate(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid coordinate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2418,9 +2882,9 @@ public class DbService : IDbService
                 return new ServiceResponse("Coordinate already marked as not deleted");
             }
 
-            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).Where(c =>
+            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).AnyAsync(c =>
                 Equals(c.Name.ToLower().Trim(), coordinate.Name.ToLower().Trim()) && c.CoordinateId != id &&
-                c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId).AnyAsync();
+                c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId);
             if (exists)
             {
                 return new ServiceResponse($"Coordinate with name {coordinate.Name} already exists");
@@ -2443,6 +2907,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteDetail(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid detail id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2471,6 +2939,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteDevice(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid device id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2506,6 +2978,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteModel(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid model id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2541,6 +3017,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteParameter(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid parameter id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2577,6 +3057,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeletePlant(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid plant id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2619,6 +3103,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteQuestion(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid question id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -2650,6 +3138,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteSituation(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid situation id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -2669,7 +3161,7 @@ public class DbService : IDbService
             }
 
             situation.IsDeleted = false;
-            situation.UpdatedAt = DateTime.UtcNow;
+            situation. = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
             _logger.LogInformation("SituationId {id} un-deleted", id);
@@ -2684,6 +3176,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> MarkUnDeleteSpace(int id, string userId)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid space id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2725,6 +3221,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateArea(int id, string userId, AreaUpdateDto areaUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid area id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2762,6 +3262,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid asset id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2781,9 +3285,9 @@ public class DbService : IDbService
             }
 
             // check if asset name is unique
-            var exists = await context.Assets.Where(a =>
+            var exists = await context.Assets.AnyAsync(a =>
                 Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()) && a.AssetId != id &&
-                a.IsDeleted == false).AnyAsync();
+                a.IsDeleted == false);
             if (exists)
             {
                 _logger.LogWarning("Asset with name {AssetName} already exists", assetUpdateDto.Name);
@@ -2859,6 +3363,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateCategory(int id, string userId, CategoryUpdateDto categoryUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid category id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2869,9 +3377,9 @@ public class DbService : IDbService
                 return new ServiceResponse("Category not found");
             }
 
-            var exists = await context.Categories.Where(c =>
+            var exists = await context.Categories.AnyAsync(c =>
                 c.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim() && c.IsDeleted == false &&
-                c.CategoryId != id).AnyAsync();
+                c.CategoryId != id);
             if (exists)
             {
                 return new ServiceResponse($"Category with name {categoryUpdateDto.Name} already exists");
@@ -2905,6 +3413,10 @@ public class DbService : IDbService
     public async Task<ServiceResponse> UpdateCommunicate(int id, string userId,
         CommunicateUpdateDto communicateUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid communicate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -2917,7 +3429,7 @@ public class DbService : IDbService
 
             communicate.Name = communicateUpdateDto.Name;
             communicate.Description = communicateUpdateDto.Description;
-            communicate.UpdatedAt = DateTime.UtcNow;
+            communicate. = DateTime.UtcNow;
             communicate.UpdatedBy = userId;
             await context.SaveChangesAsync();
             _logger.LogInformation("Communicate with id {id} updated");
@@ -2932,6 +3444,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateCoordinate(int id, string userId, CoordinateUpdateDto coordinateUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid coordinate id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -2942,9 +3458,9 @@ public class DbService : IDbService
                 return new ServiceResponse("Coordinate not found");
             }
 
-            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).Where(c =>
+            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).AnyAsync(c =>
                 Equals(c.Name.ToLower().Trim(), coordinateUpdateDto.Name.ToLower().Trim()) && c.CoordinateId != id &&
-                c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId).AnyAsync();
+                c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId);
             if (exists)
             {
                 return new ServiceResponse($"Coordinate with name {coordinateUpdateDto.Name} already exists");
@@ -2968,6 +3484,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateDetail(int id, string userId, DetailUpdateDto detailUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid detail id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -3015,6 +3535,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateDevice(int id, string userId, DeviceUpdateDto deviceUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid device id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -3032,9 +3556,9 @@ public class DbService : IDbService
                 return new ServiceResponse("Device marked as deleted");
             }
 
-            var exists = await context.Devices.Where(d =>
+            var exists = await context.Devices.AnyAsync(d =>
                 d.DeviceId != id && Equals(d.Name.ToLower().Trim(), deviceUpdateDto.Name.ToLower().Trim()) &&
-                !d.IsDeleted).AnyAsync();
+                !d.IsDeleted);
             if (exists)
             {
                 _logger.LogWarning("Device with name {deviceUpdateDto.Name} already exists", deviceUpdateDto.Name);
@@ -3060,6 +3584,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateModel(int id, string userId, ModelUpdateDto modelUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid model id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -3077,9 +3605,9 @@ public class DbService : IDbService
                 return new ServiceResponse("Model marked as deleted");
             }
 
-            var exists = await context.Models.Where(m =>
+            var exists = await context.Models.AnyAsync(m =>
                 m.DeviceId == model.DeviceId && Equals(m.Name.ToLower().Trim(), modelUpdateDto.Name.ToLower().Trim()) &&
-                !m.IsDeleted && m.ModelId != id).AnyAsync();
+                !m.IsDeleted && m.ModelId != id);
             if (exists)
             {
                 _logger.LogWarning("Model with name {modelUpdateDto.Name} already exists", modelUpdateDto.Name);
@@ -3114,6 +3642,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateParameter(int id, string userId, ParameterUpdateDto parameterUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid parameter id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -3161,6 +3693,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdatePlant(int id, string userId, PlantUpdateDto plantUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid plant id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -3208,6 +3744,10 @@ public class DbService : IDbService
     }
     public async Task<ServiceResponse> UpdateQuestion(int id, string userId, QuestionUpdateDto questionUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid question id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -3239,6 +3779,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateSituation(int id, string userId, SituationUpdateDto situationUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid situation id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         try
         {
@@ -3259,10 +3803,8 @@ public class DbService : IDbService
 
             situation.Name = situationUpdateDto.Name;
             situation.Description = situationUpdateDto.Description;
-            situation.CategoryId = situationUpdateDto.CategoryId;
-            situation.AssetId = situationUpdateDto.AssetId;
-            situation.IsDeleted = situationUpdateDto.IsDeleted;
-            situation.UpdatedAt = DateTime.UtcNow;
+            situation.UserId = userId;
+
 
             await context.SaveChangesAsync();
             _logger.LogInformation("SituationId {id} updated", id);
@@ -3277,6 +3819,10 @@ public class DbService : IDbService
 
     public async Task<ServiceResponse> UpdateSpace(int id, string userId, SpaceUpdateDto spaceUpdateDto)
     {
+        if (id <= 0)
+        {
+            return new ServiceResponse("Invalid space id");
+        }
         await using var context = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
