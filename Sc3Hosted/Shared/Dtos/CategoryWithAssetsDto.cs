@@ -10,5 +10,5 @@ public class CategoryWithAssetsDto
     public int CategoryId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public List<AssetDto> Assets { get; set; } = new();
+    public virtual List<AssetDto> Assets { get; set; } = new();
 }

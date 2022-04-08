@@ -16,5 +16,5 @@ public class CommunicateWithAssetsDto
     public CommunicationType CommunicationType { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public List<AssetDto> Assets { get; set; } = new();
+    public virtual List<AssetDto> Assets { get; set; } = new();
 }

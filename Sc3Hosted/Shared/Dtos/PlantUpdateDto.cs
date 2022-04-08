@@ -9,5 +9,5 @@ public class PlantUpdateDto
 {
     public string Name { get; set; }= string.Empty;
 public string Description { get; set; }=string.Empty;
-    public List<AreaDto> Areas { get; set; }= new();
+    public virtual List<AreaDto> Areas { get; set; }= new();
 }

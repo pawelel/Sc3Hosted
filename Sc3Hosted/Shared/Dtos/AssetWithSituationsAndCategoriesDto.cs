@@ -11,6 +11,6 @@ public class AssetWithSituationsAndCategoriesDto
     public string Name { get; set; } = string.Empty;
     public string DeviceName { get; set; } = string.Empty;
     public string ModelName { get; set; } = string.Empty;
-    public List<CategoryDto> Categories { get; set; } = new();
-    public List<SituationDto> Situations { get; set; } = new();
+    public virtual List<CategoryDto> Categories { get; set; } = new();
+    public virtual List<SituationDto> Situations { get; set; } = new();
 }

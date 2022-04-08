@@ -17,5 +17,6 @@ public class Communicate  : BaseEntity
     public virtual List<CommunicateDevice> CommunicateDevices { get; set; } = new();
     public virtual List<CommunicateModel> CommunicateModels { get; set; } = new();
     public virtual List<CommunicateSpace> CommunicateSpaces { get; set; } = new();
+    public virtual List<CommunicateCategory> CommunicateCategories { get; set; } = new();
 
 }

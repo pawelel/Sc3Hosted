@@ -33,12 +33,14 @@ public class Sc3HostedProfile : Profile
         CreateMap<ModelParameter, ModelParameterDto>();
         CreateMap<AssetDetail, AssetDetailDto>();
         CreateMap<AssetCategory, AssetCategoryDto>();
+        CreateMap<AssetSituation, AssetSituationDto>();
         CreateMap<DeviceSituation, DeviceSituationDto>();
         CreateMap<CategorySituation, CategorySituationDto>();
         CreateMap<SituationQuestion, SituationQuestionDto>();
         CreateMap<SituationDetail, SituationDetailDto>();
         CreateMap<SituationParameter, SituationParameterDto>();
-
+        CreateMap<CommunicateCategory, CommunicateCategoryDto>();
+        
         // custom
         CreateMap<Coordinate, LocationDto>()
             .ForMember(dest => dest.AreaId, opt => opt.MapFrom(src => src.Space.AreaId))

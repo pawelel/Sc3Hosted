@@ -34,6 +34,7 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
         new CommunicateDeviceConfig().Configure(builder.Entity<CommunicateDevice>());
         new CommunicateModelConfig().Configure(builder.Entity<CommunicateModel>());
         new CommunicateSpaceConfig().Configure(builder.Entity<CommunicateSpace>());
+        new CommunicateCategoryConfig().Configure(builder.Entity<CommunicateCategory>());
         new AreaConfig().Configure(builder.Entity<Area>());
         new CoordinateConfig().Configure(builder.Entity<Coordinate>());
         new SpaceConfig().Configure(builder.Entity<Space>());
@@ -74,6 +75,7 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CommunicateDevice> CommunicateDevices => Set<CommunicateDevice>();
     public DbSet<CommunicateModel> CommunicateModels => Set<CommunicateModel>();
     public DbSet<CommunicateSpace> CommunicateSpaces => Set<CommunicateSpace>();
+    public DbSet<CommunicateCategory> CommunicateCategories => Set<CommunicateCategory>();
 
     // location
     public DbSet<Area> Areas => Set<Area>();

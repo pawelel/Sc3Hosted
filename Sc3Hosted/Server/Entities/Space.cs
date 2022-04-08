@@ -11,6 +11,5 @@ public class Space : BaseEntity
     public int AreaId { get; set; }
     public Area Area { get; set; } = new();
     public SpaceType SpaceType { get; set; }
-    
     public virtual List<CommunicateSpace> CommunicateSpaces { get; set; } = new();
 }

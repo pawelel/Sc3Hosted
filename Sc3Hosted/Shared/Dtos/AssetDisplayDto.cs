@@ -20,6 +20,6 @@ public class AssetDisplayDto : BaseDto
     public int ModelId { get; set; }
     public DeviceFlat Device { get; set; } = new();
     public int DeviceId { get; set; }
-    public List<CategoryDto> Categories { get; set; } = new();
+    public virtual List<CategoryDto> Categories { get; set; } = new();
     public bool ShowDetails { get; set; }
 }

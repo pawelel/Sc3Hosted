@@ -11,8 +11,8 @@ public class SpaceUpdateDto
 {
     public string Name { get; set; }= string.Empty;
 public string Description { get; set; }=string.Empty;
-    public List<CoordinateDto> Coordinates { get; set; }=new();
+    public virtual List<CoordinateDto> Coordinates { get; set; }=new();
     public SpaceType SpaceType { get; set; }
     
-    public List<CommunicateSpaceDto> CommunicateSpaces { get; set; }=new();
+    public virtual List<CommunicateSpaceDto> CommunicateSpaces { get; set; }=new();
 }

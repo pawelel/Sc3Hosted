@@ -9,5 +9,5 @@ public class QuestionWithSituationsDto
 {
     public int QuestionId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public List<SituationDto> Situations { get; set; } = new();
+    public virtual List<SituationDto> Situations { get; set; } = new();
 }

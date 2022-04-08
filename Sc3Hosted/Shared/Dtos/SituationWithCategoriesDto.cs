@@ -10,5 +10,5 @@ public class SituationWithCategoriesDto
     public int SituationId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public List<CategoryDto> Categories { get; set; } = new();
+    public virtual List<CategoryDto> Categories { get; set; } = new();
 }
