@@ -594,7 +594,7 @@ public class DbService : IDbService
             context.Questions.Add(question);
             await context.SaveChangesAsync();
             _logger.LogInformation("QuestionId {id} created", question.QuestionId);
-            return new ServiceResponse($"QuestionId {question.QuestionId} created");
+            return new ServiceResponse($"QuestionId {question.QuestionId} created", true);
         }
         catch (Exception ex)
         {
@@ -852,7 +852,7 @@ public class DbService : IDbService
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 _logger.LogInformation("Communicate with id {Id} deleted", id);
-                return new ServiceResponse($"Communicate with id {id} deleted");
+                return new ServiceResponse($"Communicate with id {id} deleted", true);
             }
             _logger.LogError("Communicate with id {Id} not marked as deleted", id);
             return new ServiceResponse($"Communicate with id {id} not marked as deleted");
@@ -1058,7 +1058,7 @@ public class DbService : IDbService
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 _logger.LogInformation("Parameter with id {ParameterId} deleted", parameter.ParameterId);
-                return new ServiceResponse($"Parameter {parameter.ParameterId} deleted");
+                return new ServiceResponse($"Parameter {parameter.ParameterId} deleted", true);
             }
             _logger.LogWarning("Parameter with id {ParameterId} not marked as deleted", parameter.ParameterId);
             return new ServiceResponse($"Parameter with id {parameter.ParameterId} not marked as deleted");
@@ -2348,7 +2348,7 @@ public class DbService : IDbService
             if (asset.IsDeleted)
             {
                 _logger.LogWarning("Asset marked as deleted");
-                return new ServiceResponse("Asset marked as deleted");
+                return new ServiceResponse("Asset marked as deleted", true);
             }
             foreach (var communicateAsset in asset.CommunicateAssets)
             {
@@ -2655,8 +2655,8 @@ public class DbService : IDbService
 
             if (device.IsDeleted)
             {
-                _logger.LogWarning("Device marked as deleted");
-                return new ServiceResponse("Device marked as deleted");
+                _logger.LogWarning("Device already marked as deleted");
+                return new ServiceResponse("Device already marked as deleted");
             }
             if (device.Models.Any(m => m.IsDeleted == false))
             {
@@ -2717,8 +2717,8 @@ public class DbService : IDbService
 
             if (model.IsDeleted)
             {
-                _logger.LogWarning("Model marked as deleted");
-                return new ServiceResponse("Model marked as deleted");
+                _logger.LogWarning("Model already marked as deleted");
+                return new ServiceResponse("Model already marked as deleted");
             }
 
             if (model.Assets.Any(m => m.IsDeleted == false))
@@ -2789,7 +2789,7 @@ public class DbService : IDbService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("Parameter with id {ParameterId} marked as deleted", parameter.ParameterId);
-            return new ServiceResponse($"Parameter {parameter.ParameterId} marked as deleted");
+            return new ServiceResponse($"Parameter {parameter.ParameterId} marked as deleted", true);
         }
         catch (Exception ex)
         {
@@ -2818,6 +2818,11 @@ public class DbService : IDbService
             if (plant == null)
             {
                 return new ServiceResponse("Plant not found");
+            }
+            if (plant.IsDeleted)
+            {
+                _logger.LogWarning("Plant with id {PlantId} already marked as deleted", plant.PlantId);
+                return new ServiceResponse("Plant already marked as deleted");
             }
 
             if (plant.Areas.Any(p => p.IsDeleted == false))
@@ -2861,6 +2866,11 @@ public class DbService : IDbService
             {
                 _logger.LogInformation("Question not found");
                 return new ServiceResponse($"Question not found");
+            }
+            if (question.IsDeleted)
+            {
+                _logger.LogWarning("Question with id {QuestionId} already marked as deleted", question.QuestionId);
+                return new ServiceResponse($"Question with id {question.QuestionId} already deleted");
             }
             foreach (var situationQuestion in question.SituationQuestions)
             {
@@ -2986,7 +2996,11 @@ public class DbService : IDbService
             {
                 return new ServiceResponse("Space not found");
             }
-
+            if (space.IsDeleted)
+            {
+                _logger.LogWarning("Space with id {SpaceId} already marked as deleted", space.SpaceId);
+                return new ServiceResponse("Space already marked as deleted");
+            }
             if (space.Coordinates.Any(s => s.IsDeleted == false))
             {
                 return new ServiceResponse("Cannot delete space with coordinates");
@@ -3040,10 +3054,10 @@ public class DbService : IDbService
                 return new ServiceResponse("Area not found");
             }
             //7 check if entity is marked as deleted
-            if (area.IsDeleted)
+            if (area.IsDeleted == false)
             {
-                _logger.LogWarning("AreaId {Id} already marked as deleted", id);
-                return new ServiceResponse($"Area with id {id} already marked as deleted");
+                _logger.LogWarning("AreaId {Id} already marked as not deleted", id);
+                return new ServiceResponse($"Area with id {id} already marked as not deleted");
             }
             //8 get parent with entities
             var plant = await context.Plants.Include(p => p.Areas).FirstOrDefaultAsync(p => p.PlantId == area.PlantId);
@@ -3070,17 +3084,15 @@ public class DbService : IDbService
             //13 update entity
             context.Areas.Update(area);
             //14 check if related parents are not marked as deleted and exist
-            if (area.CommunicateAreas.Any(c => c.Communicate.IsDeleted == false))
+            //15 undelete relations
+            foreach (var communicateArea in area.CommunicateAreas.Where(a => a.Communicate.IsDeleted == false))
             {
-                //15 undelete relations
-                foreach (var communicateArea in area.CommunicateAreas)
-                {
-                    communicateArea.IsDeleted = false;
-                    communicateArea.UserId = userId;
-                }
-                //16 update relations
-                context.CommunicateAreas.UpdateRange(area.CommunicateAreas);
+                communicateArea.IsDeleted = false;
+                communicateArea.UserId = userId;
             }
+            //16 update relations
+            context.CommunicateAreas.UpdateRange(area.CommunicateAreas);
+
             //17 save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -3124,10 +3136,10 @@ public class DbService : IDbService
                 return new ServiceResponse("Asset not found");
             }
             //7	check if entity is marked as deleted
-            if (asset.IsDeleted)
+            if (asset.IsDeleted == false)
             {
-                _logger.LogWarning("AssetId {Id} already marked as deleted", id);
-                return new ServiceResponse($"Asset with id {id} already marked as deleted");
+                _logger.LogWarning("AssetId {Id} already marked as not deleted", id);
+                return new ServiceResponse($"Asset with id {id} already marked as not deleted");
             }
             //8 	get parent with entities
             var model = await context.Models.Include(m => m.Assets).FirstOrDefaultAsync(m => m.ModelId == asset.ModelId);
@@ -3164,50 +3176,40 @@ public class DbService : IDbService
             //13	update entity
             context.Assets.Update(asset);
             //14	check if related parents are not marked as deleted and exist
-            if (asset.AssetDetails.Any(d => d.Detail.IsDeleted == false))
+
+            //15	undelete relations
+            foreach (var assetDetail in asset.AssetDetails.Where(a => a.Detail.IsDeleted == false))
             {
-                //15	undelete relations
-                foreach (var assetDetail in asset.AssetDetails)
-                {
-                    assetDetail.IsDeleted = false;
-                    assetDetail.UserId = userId;
-                }
-                //16	update relations
-                context.AssetDetails.UpdateRange(asset.AssetDetails);
+                assetDetail.IsDeleted = false;
+                assetDetail.UserId = userId;
             }
-            if (asset.CommunicateAssets.Any(c => c.Communicate.IsDeleted == false))
+
+            //16	update relations
+            context.AssetDetails.UpdateRange(asset.AssetDetails);
+
+            foreach (var communicateAsset in asset.CommunicateAssets.Where(a => a.Communicate.IsDeleted == false))
             {
-                //15	undelete relations
-                foreach (var communicateAsset in asset.CommunicateAssets)
-                {
-                    communicateAsset.IsDeleted = false;
-                    communicateAsset.UserId = userId;
-                }
-                //16	update relations
-                context.CommunicateAssets.UpdateRange(asset.CommunicateAssets);
+                communicateAsset.IsDeleted = false;
+                communicateAsset.UserId = userId;
             }
-            if (asset.AssetCategories.Any(c => c.Category.IsDeleted == false))
+            //16	update relations
+            context.CommunicateAssets.UpdateRange(asset.CommunicateAssets);
+
+            foreach (var assetCategory in asset.AssetCategories.Where(a => a.Category.IsDeleted == false))
             {
-                //15	undelete relations
-                foreach (var assetCategory in asset.AssetCategories)
-                {
-                    assetCategory.IsDeleted = false;
-                    assetCategory.UserId = userId;
-                }
-                //16	update relations
-                context.AssetCategories.UpdateRange(asset.AssetCategories);
+                assetCategory.IsDeleted = false;
+                assetCategory.UserId = userId;
             }
-            if (asset.AssetSituations.Any(c => c.Situation.IsDeleted == false))
+            //16	update relations
+            context.AssetCategories.UpdateRange(asset.AssetCategories);
+
+            foreach (var assetSituation in asset.AssetSituations.Where(a => a.Situation.IsDeleted == false))
             {
-                //15	undelete relations
-                foreach (var assetSituation in asset.AssetSituations)
-                {
-                    assetSituation.IsDeleted = false;
-                    assetSituation.UserId = userId;
-                }
-                //16	update relations
-                context.AssetSituations.UpdateRange(asset.AssetSituations);
+                assetSituation.IsDeleted = false;
+                assetSituation.UserId = userId;
             }
+            //16	update relations
+            context.AssetSituations.UpdateRange(asset.AssetSituations);
 
             //17	save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
@@ -3261,39 +3263,46 @@ public class DbService : IDbService
                 return new ServiceResponse($"Category with id {id} not marked as deleted");
             }
             //8 	get parent with entities or entities group
-            Category c; //todo get all categories
+            var categories = await context.Categories.ToListAsync();
             //9 	check if parent is not null
+            if (categories == null)
+            {
+                return new ServiceResponse("Categories not found");
+            }
             //10 	check if parent is marked as deleted
             //11	check if parent has not marked as deleted entities with the same name as the entity
+            var exist = categories.Any(c => Equals(c.Name.ToLower().Trim(), category.Name.ToLower().Trim()) && c.CategoryId != category.CategoryId && c.IsDeleted == false);
+            if (exist)
+            {
+                _logger.LogWarning("Category with name {Name} already exists", category.Name);
+                return new ServiceResponse("Category with the same name already exists");
+            }
             //12	undelete entity
             category.IsDeleted = false;
             category.UserId = userId;
             //13	update entity
             context.Categories.Update(category);
             //14	check if related parents are not marked as deleted and exist
-            if (category.AssetCategories.Any(c => c.Asset.IsDeleted == false))
+
+            //15-1	undelete relations
+            foreach (var assetCategory in category.AssetCategories.Where(c => c.Asset.IsDeleted == false))
             {
-                //15	undelete relations
-                foreach (var assetCategory in category.AssetCategories)
-                {
-                    assetCategory.IsDeleted = false;
-                    assetCategory.UserId = userId;
-                }
-                //16	update relations
-                context.AssetCategories.UpdateRange(category.AssetCategories);
-            }
-            if (category.CommunicateCategories.Any(c => c.Communicate.IsDeleted == false))
-            {
-                //15	undelete relations
-                foreach (var communicateCategory in category.CommunicateCategories)
-                {
-                    communicateCategory.IsDeleted = false;
-                    communicateCategory.UserId = userId;
-                }
-                //16	update relations
-                context.CommunicateCategories.UpdateRange(category.CommunicateCategories);
+                assetCategory.IsDeleted = false;
+                assetCategory.UserId = userId;
             }
 
+            //16-1	update relations
+            context.AssetCategories.UpdateRange(category.AssetCategories);
+
+            //15-2	undelete relations
+            foreach (var communicateCategory in category.CommunicateCategories.Where(a => a.Communicate.IsDeleted == false))
+            {
+                communicateCategory.IsDeleted = false;
+                communicateCategory.UserId = userId;
+            }
+
+            //16-2	update relations
+            context.CommunicateCategories.UpdateRange(category.CommunicateCategories);
             //17	save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -3331,7 +3340,7 @@ public class DbService : IDbService
         try
         {
             //5	get entity by id including children and relations with parents
-            var communicate = await context.Communicates.Include(c => c.CommunicateAreas).ThenInclude(a => a.Area).Include(c => c.CommunicateAssets).ThenInclude(c => c.Asset).Include(c => c.CommunicateCoordinates).ThenInclude(c => c.Coordinate).Include(c=>c.CommunicateDevices).ThenInclude(c=>c.Device).Include(c=>c.CommunicateModels).ThenInclude(c=>c.Model).Include(c=>c.CommunicateSpaces).ThenInclude(c=>c.Space).Include(c=>c.CommunicateCategories).ThenInclude(c=>c.Category).FirstOrDefaultAsync(c => c.CommunicateId == id);
+            var communicate = await context.Communicates.Include(c => c.CommunicateAreas).ThenInclude(a => a.Area).Include(c => c.CommunicateAssets).ThenInclude(c => c.Asset).Include(c => c.CommunicateCoordinates).ThenInclude(c => c.Coordinate).Include(c => c.CommunicateDevices).ThenInclude(c => c.Device).Include(c => c.CommunicateModels).ThenInclude(c => c.Model).Include(c => c.CommunicateSpaces).ThenInclude(c => c.Space).Include(c => c.CommunicateCategories).ThenInclude(c => c.Category).FirstOrDefaultAsync(c => c.CommunicateId == id);
             //6	check if entity is null
             if (communicate == null)
             {
@@ -3343,412 +3352,867 @@ public class DbService : IDbService
                 _logger.LogWarning("CommunicateId {Id} not marked as deleted", id);
                 return new ServiceResponse($"Communicate with id {id} not marked as deleted");
             }
-            //8 	get parent with entities
+            //8 	get parent with entities or entities group
+            var communicates = await context.Communicates.ToListAsync();
             //9 	check if parent is not null
             //10 	check if parent is marked as deleted
-            //11	check if parent has not marked as deleted entities with the same name as the entity
+            //11	check if parent or entities group has not marked as deleted entities with the same name as the entity
+            var exist = communicates.Any(c => Equals(c.Name.ToLower().Trim(), communicate.Name.ToLower().Trim()) && c.CommunicateId != communicate.CommunicateId && c.IsDeleted == false);
             //12	undelete entity
+            communicate.IsDeleted = false;
+            communicate.UserId = userId;
             //13	update entity
+            context.Communicates.Update(communicate);
             //14	check if related parents are not marked as deleted and exist
-            //15	undelete relations
-            //16 	update relations
+            //15-1	undelete relations
+            foreach (var communicateArea in communicate.CommunicateAreas.Where(c => c.Area.IsDeleted == false))
+            {
+                communicateArea.IsDeleted = false;
+                communicateArea.UserId = userId;
+            }
+            //16-1	update relations
+            context.CommunicateAreas.UpdateRange(communicate.CommunicateAreas);
+
+
+            //15-2	undelete relations
+            foreach (var communicateAsset in communicate.CommunicateAssets.Where(c => c.Asset.IsDeleted == false))
+            {
+                communicateAsset.IsDeleted = false;
+                communicateAsset.UserId = userId;
+            }
+            //16-2	update relations
+            context.CommunicateAssets.UpdateRange(communicate.CommunicateAssets);
+
+            //15-3	undelete relations
+            foreach (var communicateCoordinate in communicate.CommunicateCoordinates.Where(c => c.Coordinate.IsDeleted == false))
+            {
+                communicateCoordinate.IsDeleted = false;
+                communicateCoordinate.UserId = userId;
+            }
+            //16-3	update relations
+            context.CommunicateCoordinates.UpdateRange(communicate.CommunicateCoordinates.Where(c => c.Coordinate.IsDeleted == false));
+
+            //15-4	undelete relations
+            foreach (var communicateDevice in communicate.CommunicateDevices)
+            {
+                communicateDevice.IsDeleted = false;
+                communicateDevice.UserId = userId;
+            }
+            //16-4	update relations
+            context.CommunicateDevices.UpdateRange(communicate.CommunicateDevices);
+
+
+            //15-5	undelete relations
+            foreach (var communicateModel in communicate.CommunicateModels.Where(c => c.Model.IsDeleted == false))
+            {
+                communicateModel.IsDeleted = false;
+                communicateModel.UserId = userId;
+            }
+
+            //16-5	update relations
+            context.CommunicateModels.UpdateRange(communicate.CommunicateModels);
+
+
+            //15-6	undelete relations
+            foreach (var communicateSpace in communicate.CommunicateSpaces.Where(c => c.Space.IsDeleted == false))
+            {
+                communicateSpace.IsDeleted = false;
+                communicateSpace.UserId = userId;
+            }
+
+            //16-6	update relations
+            context.CommunicateSpaces.UpdateRange(communicate.CommunicateSpaces);
+
+            foreach (var communicateCategory in communicate.CommunicateCategories.Where(c => c.Category.IsDeleted == false))
+            {
+                communicateCategory.IsDeleted = false;
+                communicateCategory.UserId = userId;
+            }
+            //16-7	update relations
+            context.CommunicateCategories.UpdateRange(communicate.CommunicateCategories);
             //17	save changes, await transaction commit, log, return response
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            _logger.LogInformation("CommunicateId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Communicate with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
 
             //18	catch await transaction rollback, log, return response
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "CommunicateId {Id} not marked as not deleted", id);
+            return new ServiceResponse($"Communicate with id {id} not marked as not deleted");
         }
-       
-
-
     }
-
+    /// <summary>
+    /// Returns service response with true if coordinate by id is not marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeleteCoordinate(int id, string userId)
     {
+        //1 	id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid coordinate id");
+            _logger.LogWarning("Invalid coordinate id {Id}", id);
+            return new ServiceResponse($"Invalid coordinate id {id}");
         }
+        //2 	await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 	await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 	try-catch
         try
         {
-            var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == id);
+            //5	get entity by id including children and relations with parents
+            var coordinate = await context.Coordinates.Include(c => c.Assets).Include(c => c.CommunicateCoordinates).ThenInclude(c => c.Communicate).FirstOrDefaultAsync(c => c.CoordinateId == id);
+            //6	check if entity is null
             if (coordinate == null)
             {
-                return new ServiceResponse("Coordinate not found");
+                _logger.LogWarning("CoordinateId {Id} not found", id);
+                return new ServiceResponse($"Coordinate with id {id} not found");
             }
-
-            if (!coordinate.IsDeleted)
+            //7	check if entity is marked as deleted
+            if (coordinate.IsDeleted == false)
             {
-                return new ServiceResponse("Coordinate already marked as not deleted");
+                _logger.LogWarning("CoordinateId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Coordinate with id {id} not marked as deleted");
             }
-
-            var exists = await context.Coordinates.Include(a => a.Space).ThenInclude(a => a.Area).AnyAsync(c =>
-                Equals(c.Name.ToLower().Trim(), coordinate.Name.ToLower().Trim()) && c.CoordinateId != id &&
-                c.IsDeleted == false && c.Space.Area.PlantId == coordinate.Space.Area.PlantId);
-            if (exists)
+            //8 	get parent with entities or entities group
+            var space = await context.Spaces.Include(c => c.Coordinates).FirstOrDefaultAsync(s => s.SpaceId == coordinate.SpaceId);
+            //9 	check if parent is not null
+            if (space == null)
             {
-                return new ServiceResponse($"Coordinate with name {coordinate.Name} already exists");
+                _logger.LogWarning("Space with id {Id} not found", coordinate.SpaceId);
+                return new ServiceResponse($"Space with id {coordinate.SpaceId} not found");
             }
-
+            //10 	check if parent is marked as deleted
+            if (space.IsDeleted == true)
+            {
+                _logger.LogWarning("Space with id {Id} marked as deleted", coordinate.SpaceId);
+                return new ServiceResponse($"Space with id {coordinate.SpaceId} also marked as deleted");
+            }
+            //11	check if parent or entities group has not marked as deleted entities with the same name as the entity
+            if (space.Coordinates.Any(c => c.CoordinateId != id && c.IsDeleted == false && Equals(c.Name.ToLower().Trim() == coordinate.Name.ToLower().Trim())))
+            {
+                _logger.LogWarning("Space with id {Id} has not marked as deleted coordinate with the same name", coordinate.SpaceId);
+                return new ServiceResponse($"Space with id {coordinate.SpaceId} has not marked as deleted coordinate with the same name");
+            }
+            //12	undelete entity
             coordinate.IsDeleted = false;
             coordinate.UserId = userId;
+            //13	update entity
             context.Coordinates.Update(coordinate);
+            //14	check if related parents are not marked as deleted and exist
+            foreach (var communicateCoordinate in coordinate.CommunicateCoordinates.Where(c => c.Communicate.IsDeleted == false))
+            {
+                //15	undelete relations
+                communicateCoordinate.IsDeleted = false;
+                communicateCoordinate.UserId = userId;
+                //16	update relations
+                context.CommunicateCoordinates.Update(communicateCoordinate);
+            }
+
+            //17	save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            return new ServiceResponse("Coordinate un-deleted", true);
+            _logger.LogInformation("CoordinateId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Coordinate with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error un-deleting coordinate");
+
+            //18	catch await transaction rollback, log, return response
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error un-deleting coordinate");
+            _logger.LogError(ex, "CoordinateId {Id} not marked as not deleted", id);
+            return new ServiceResponse($"Coordinate with id {id} not marked as not deleted");
         }
     }
-
+    /// <summary>
+    /// Returns service response with true if detail by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeleteDetail(int id, string userId)
     {
+        //1 	id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid detail id");
+            _logger.LogWarning("Invalid detail id {Id}", id);
+            return new ServiceResponse($"Invalid detail id {id}");
         }
+        //2 	await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 	await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 	try-catch
         try
         {
-            var detail = await context.Details.FirstOrDefaultAsync(d => d.DetailId == id);
+            //5	get entity by id including children and relations with parents
+            var detail = await context.Details.Include(d => d.AssetDetails).ThenInclude(d => d.Asset).Include(d => d.SituationDetails).ThenInclude(s => s.Situation).FirstOrDefaultAsync(d => d.DetailId == id);
+            //6	check if entity is null
             if (detail == null)
             {
-                _logger.LogWarning("Detail not found");
-                return new ServiceResponse("Detail not found");
+                _logger.LogWarning("DetailId {Id} not found", id);
+                return new ServiceResponse($"Detail with id {id} not found");
             }
-
+            //7	check if entity is not marked as deleted
+            if (detail.IsDeleted == false)
+            {
+                _logger.LogWarning("DetailId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Detail with id {id} not marked as deleted");
+            }
+            //8 check if duplicate name exists
+            var exists = await context.Details.AnyAsync(d => Equals(d.Name.ToLower().Trim(), detail.Name.ToLower().Trim()) && d.DetailId != id && d.IsDeleted == false);
+            if (exists)
+            {
+                _logger.LogWarning("Detail with name {Name} already exists", detail.Name);
+                return new ServiceResponse($"Detail with name {detail.Name} already exists");
+            }
+            //9 undelete entity
             detail.IsDeleted = false;
+            detail.UserId = userId;
+            //10 update entity
+            context.Details.Update(detail);
+            //11 check if related parents are not marked as deleted and exist
+            foreach (var assetDetail in detail.AssetDetails.Where(d => d.Asset.IsDeleted == false))
+            {
+                //12 undelete relations
+                assetDetail.IsDeleted = false;
+                assetDetail.UserId = userId;
+                //13 update relations
+                context.AssetDetails.Update(assetDetail);
+            }
+            foreach (var situationDetail in detail.SituationDetails.Where(d => d.Situation.IsDeleted == false))
+            {
+                //14 undelete relations
+                situationDetail.IsDeleted = false;
+                situationDetail.UserId = userId;
+                //15 update relations
+                context.SituationDetails.Update(situationDetail);
+            }
+            //14	save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("Detail with id {DetailId} undeleted", detail.DetailId);
-            return new ServiceResponse($"Detail {detail.DetailId} undeleted", true);
+            _logger.LogInformation("DetailId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Detail with id {id} marked as not deleted", true);
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Error undeleting detail");
+            //15 catch await transaction rollback, log, return response
+            _logger.LogError("Error marking detail with id {Id} as not deleted", id);
             await transaction.RollbackAsync();
-            return new ServiceResponse($"Error undeleting detail");
+            return new ServiceResponse($"Error marking detail with id {id} as not deleted");
         }
     }
-
+    /// <summary>
+    /// Returns service response with true if device by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeleteDevice(int id, string userId)
     {
+        //1 id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid device id");
+            _logger.LogWarning("Invalid device id {Id}", id);
+            return new ServiceResponse($"Invalid device id {id}");
         }
+        //2 await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
-            var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == id);
+            //5 get entity by id including children and relations with parents
+            var device = await context.Devices.Include(d => d.Models).Include(d => d.CommunicateDevices).ThenInclude(d => d.Communicate).Include(d => d.DeviceSituations).ThenInclude(d => d.Situation).FirstOrDefaultAsync(d => d.DeviceId == id);
+            //6 check if entity is null
             if (device == null)
             {
-                _logger.LogWarning("Device not found");
-                return new ServiceResponse("Device not found");
+                _logger.LogWarning("DeviceId {Id} not found", id);
+                return new ServiceResponse($"Device with id {id} not found");
             }
-
-            if (!device.IsDeleted)
+            //7 check if entity is marked as deleted
+            if (device.IsDeleted == false)
             {
-                _logger.LogWarning("Device not marked as deleted");
-                return new ServiceResponse("Device not marked as deleted");
+                _logger.LogWarning("DeviceId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Device with id {id} not marked as deleted");
             }
-
-            device.UserId = userId;
+            //8 check if duplicate name exists
+            var exists = await context.Devices.AnyAsync(d => Equals(d.Name.ToLower().Trim(), device.Name.ToLower().Trim()) && d.DeviceId != id && d.IsDeleted == false);
+            if (exists)
+            {
+                _logger.LogWarning("Device with name {Name} already exists", device.Name);
+                return new ServiceResponse($"Device with name {device.Name} already exists");
+            }
+            //9 undelete entity
             device.IsDeleted = false;
+            device.UserId = userId;
+            //10 update entity
             context.Devices.Update(device);
+            //11 check if related parents are not marked as deleted and exist
+            foreach (var deviceSituation in device.DeviceSituations.Where(d => d.Situation.IsDeleted == false))
+            {
+                //12 undelete relations
+                deviceSituation.IsDeleted = false;
+                deviceSituation.UserId = userId;
+                //13 update relations
+                context.DeviceSituations.Update(deviceSituation);
+            }
+            foreach (var communicateDevice in device.CommunicateDevices.Where(d => d.Communicate.IsDeleted == false))
+            {
+                //14 undelete relations
+                communicateDevice.IsDeleted = false;
+                communicateDevice.UserId = userId;
+                //15 update relations
+                context.CommunicateDevices.Update(communicateDevice);
+            }
+            //14 save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("Device with id {DeviceId} marked as undeleted", id);
-            return new ServiceResponse($"Device {id} marked as undeleted", true);
+            _logger.LogInformation("DeviceId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Device with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking device as undeleted with id {DeviceId}", id);
+            //15 catch await transaction rollback, log, return response
+            _logger.LogError(ex, "Error marking device with id {Id} as not deleted", id);
             await transaction.RollbackAsync();
-            return new ServiceResponse($"Error marking device as undeleted with id {id}");
+            return new ServiceResponse($"Error marking device with id {id} as not deleted");
         }
-    }
 
+
+    }
+    /// <summary>
+    /// Returns service response with true if model by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeleteModel(int id, string userId)
     {
+        //1 id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid model id");
+            _logger.LogWarning("Invalid model id {Id}", id);
+            return new ServiceResponse($"Invalid model id {id}");
         }
+        //2 await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
-            var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == id);
+            //5 get entity by id including children and relations with parents
+            var model = await context.Models.Include(d => d.Assets).Include(d => d.ModelParameters).ThenInclude(d => d.Parameter).Include(m => m.CommunicateModels).ThenInclude(m => m.Communicate).FirstOrDefaultAsync(d => d.ModelId == id);
+            //6 check if entity is null
             if (model == null)
             {
-                _logger.LogWarning("Model not found");
-                return new ServiceResponse("Model not found");
+                _logger.LogWarning("ModelId {Id} not found", id);
+                return new ServiceResponse($"Model with id {id} not found");
             }
-
-            if (!model.IsDeleted)
+            //7 check if entity is marked as deleted
+            if (model.IsDeleted == false)
             {
-                _logger.LogWarning("Model not marked as deleted");
-                return new ServiceResponse("Model not marked as deleted");
+                _logger.LogWarning("ModelId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Model with id {id} not marked as deleted");
             }
-
+            //8 check if duplicate name exists
+            var exists = await context.Devices.Include(m => m.Models).AnyAsync(d => d.Models.Any(d => Equals(d.Name.ToLower().Trim(), model.Name.ToLower().Trim()) && d.ModelId != id && d.IsDeleted == false));
+            if (exists)
+            {
+                _logger.LogWarning("Model with name {Name} already exists", model.Name);
+                return new ServiceResponse($"Model with name {model.Name} already exists");
+            }
+            //9 undelete entity
             model.IsDeleted = false;
             model.UserId = userId;
+            //10 update entity
             context.Models.Update(model);
+            //11 check if related parents are not marked as deleted and exist
+            foreach (var modelParameter in model.ModelParameters.Where(d => d.Parameter.IsDeleted == false))
+            {
+                //12 undelete relations
+                modelParameter.IsDeleted = false;
+                modelParameter.UserId = userId;
+                //13 update relations
+                context.ModelParameters.Update(modelParameter);
+            }
+            foreach (var communicateModel in model.CommunicateModels.Where(d => d.Communicate.IsDeleted == false))
+            {
+                //14 undelete relations
+                communicateModel.IsDeleted = false;
+                communicateModel.UserId = userId;
+                //15 update relations
+                context.CommunicateModels.Update(communicateModel);
+            }
+            //14 save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("Model with id {ModelId} marked as undeleted", model.ModelId);
-            return new ServiceResponse($"Model {model.ModelId} marked as undeleted", true);
+            _logger.LogInformation("ModelId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Model with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking model with id {ModelId} as undeleted", id);
+            //15 catch await transaction rollback, log, return response
+            _logger.LogError(ex, "Error marking model with id {Id} as not deleted", id);
             await transaction.RollbackAsync();
-            return new ServiceResponse($"Error marking model with id {id} as undeleted");
+            return new ServiceResponse($"Error marking model with id {id} as not deleted");
         }
     }
-
+    /// <summary>
+    /// Returns service response with true if parameter by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeleteParameter(int id, string userId)
     {
+        //1 id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid parameter id");
+            _logger.LogWarning("Invalid parameter id {Id}", id);
+            return new ServiceResponse($"Invalid parameter id {id}");
         }
+        //2 await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
-            var parameter = await context.Parameters.FirstOrDefaultAsync(p => p.ParameterId == id);
+            //5 get entity by id including children and relations with parents
+            var parameter = await context.Parameters.Include(d => d.ModelParameters).ThenInclude(d => d.Model).Include(d => d.SituationParameters).ThenInclude(d => d.Situation).FirstOrDefaultAsync(d => d.ParameterId == id);
+            //6 check if entity is null
             if (parameter == null)
             {
-                _logger.LogWarning("Parameter not found");
-                return new ServiceResponse("Parameter not found");
+                _logger.LogWarning("ParameterId {Id} not found", id);
+                return new ServiceResponse($"Parameter with id {id} not found");
             }
-
-            if (!parameter.IsDeleted)
+            //7 check if entity is marked as deleted
+            if (parameter.IsDeleted == false)
             {
-                _logger.LogWarning("Parameter with id {ParameterId} already marked as not deleted",
-                    parameter.ParameterId);
-                return new ServiceResponse($"Parameter with id {parameter.ParameterId} already not deleted");
+                _logger.LogWarning("ParameterId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Parameter with id {id} not marked as deleted");
             }
-
+            //8 check if duplicate name exists
+            var exists = await context.Parameters.AnyAsync(p => Equals(p.Name.ToLower().Trim(), parameter.Name.ToLower().Trim()) && p.ParameterId != id && p.IsDeleted == false);
+            if (exists)
+            {
+                _logger.LogWarning("Parameter with name {Name} already exists", parameter.Name);
+                return new ServiceResponse($"Parameter with name {parameter.Name} already exists");
+            }
+            //9 undelete entity
             parameter.IsDeleted = false;
             parameter.UserId = userId;
+            //10 update entity
+            context.Parameters.Update(parameter);
+            //11 check if related parents are not marked as deleted and exist
+            foreach (var modelParameter in parameter.ModelParameters.Where(d => d.Model.IsDeleted == false))
+            {
+                //12 undelete relations
+                modelParameter.IsDeleted = false;
+                modelParameter.UserId = userId;
+                //13 update relations
+                context.ModelParameters.Update(modelParameter);
+            }
+            foreach (var situationParameter in parameter.SituationParameters.Where(d => d.Situation.IsDeleted == false))
+            {
+                //14 undelete relations
+                situationParameter.IsDeleted = false;
+                situationParameter.UserId = userId;
+                //15 update relations
+                context.SituationParameters.Update(situationParameter);
+            }
+            //14 save changes, await transaction commit, log, return response
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("Parameter with id {ParameterId} marked as not deleted", parameter.ParameterId);
-            return new ServiceResponse($"Parameter {parameter.ParameterId} marked as not deleted");
+            _logger.LogInformation("ParameterId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Parameter with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking parameter with id {ParameterId} as not deleted", id);
+            //15 catch await transaction rollback, log, return response
+            _logger.LogError(ex, "Error marking parameter with id {Id} as not deleted", id);
             await transaction.RollbackAsync();
             return new ServiceResponse($"Error marking parameter with id {id} as not deleted");
         }
-    }
 
+    }
+    /// <summary>
+    /// Returns service response with true if plant by id is marked as deleted
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeletePlant(int id, string userId)
     {
+        //1 id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid plant id");
+            _logger.LogWarning("Invalid plant id {Id}", id);
+            return new ServiceResponse($"Invalid plant id {id}");
         }
+        //2 await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
-            var plant = await context.Plants.FirstOrDefaultAsync(p => p.PlantId == id);
+            //5 get entity by id including children and relations with parents
+            var plant = await context.Plants.Include(p => p.Areas).FirstOrDefaultAsync(d => d.PlantId == id);
+            //6 check if entity is null
             if (plant == null)
             {
-                return new ServiceResponse("Plant not found");
+                _logger.LogWarning("PlantId {Id} not found", id);
+                return new ServiceResponse($"Plant with id {id} not found");
             }
-
+            //7 check if entity is marked as deleted
             if (plant.IsDeleted == false)
             {
-                return new ServiceResponse("Plant is not marked as deleted");
+                _logger.LogWarning("PlantId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Plant with id {id} not marked as deleted");
             }
-
-            var exists = await context.Plants.Where(p =>
-                    Equals(p.Name.ToLower().Trim(), plant.Name.ToLower().Trim()) && p.PlantId != id &&
-                    p.IsDeleted == false)
-                .ToListAsync();
-            if (exists.Any())
+            //8 check if duplicate name exists
+            var exists = await context.Plants.AnyAsync(p => Equals(p.Name.ToLower().Trim(), plant.Name.ToLower().Trim()) && p.PlantId != id && p.IsDeleted == false);
+            if (exists)
             {
+                _logger.LogWarning("Plant with name {Name} already exists", plant.Name);
                 return new ServiceResponse($"Plant with name {plant.Name} already exists");
             }
-
+            //9 undelete entity
             plant.IsDeleted = false;
             plant.UserId = userId;
+            //10 update entity
             context.Plants.Update(plant);
-
+            //11 check if related parents are not marked as deleted and exist
+            //12 undelete relations
+            //13 update relations
+            //14 save changes, await transaction commit, log, return response with true
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            return new ServiceResponse("Plant marked as undeleted", true);
+            _logger.LogInformation("PlantId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Plant with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error un-deleting plant");
+            //15 catch await transaction rollback, log, return response
+            _logger.LogError(ex, "Error marking plant with id {Id} as not deleted", id);
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error un-deleting plant");
+            return new ServiceResponse($"Error marking plant with id {id} as not deleted");
         }
     }
-
+    /// <summary>
+    /// Returns service response with true if question by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> MarkUnDeleteQuestion(int id, string userId)
     {
+        //1 id<=0
         if (id <= 0)
         {
-            return new ServiceResponse("Invalid question id");
+            _logger.LogWarning("Invalid question id {Id}", id);
+            return new ServiceResponse($"Invalid question id {id}");
         }
+        //2 await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
-            var question = await context.Questions.FirstOrDefaultAsync(q => q.QuestionId == id);
+            //5 get entity by id including children and relations with parents
+            var question = await context.Questions.Include(q => q.SituationQuestions).ThenInclude(q => q.Situation).FirstOrDefaultAsync(d => d.QuestionId == id);
+            //6 check if entity is null
             if (question == null)
             {
-                _logger.LogInformation("Question not found");
-                return new ServiceResponse($"Question not found");
+                _logger.LogWarning("QuestionId {Id} not found", id);
+                return new ServiceResponse($"Question with id {id} not found");
             }
-
-            if (question.)
+            //7 check if entity is marked as deleted
+            if (question.IsDeleted == false)
             {
-                _logger.LogInformation("Question not found");
-                return new ServiceResponse($"Question not found");
+                _logger.LogWarning("QuestionId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Question with id {id} not marked as deleted");
             }
-
+            //8 check if duplicate name exists
+            var exists = await context.Questions.AnyAsync(q => Equals(q.Name.ToLower().Trim(), question.Name.ToLower().Trim()) && q.QuestionId != id && q.IsDeleted == false);
+            if (exists)
+            {
+                _logger.LogWarning("Question with name {Name} already exists", question.Name);
+                return new ServiceResponse($"Question with name {question.Name} already exists");
+            }
+            //9 undelete entity
             question.IsDeleted = false;
-            question.;
-            await context.SaveChangesAsync();
-            _logger.LogInformation("Question un-deleted");
-            return new ServiceResponse();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error un-deleting question");
-            return new ServiceResponse($"Error un-deleting question");
-        }
-    }
+            question.UserId = userId;
+            //10 update entity
+            context.Questions.Update(question);
+            //11 check if related parents are not marked as deleted and exist
 
-    public async Task<ServiceResponse> MarkUnDeleteSituation(int id, string userId)
-    {
-        if (id <= 0)
-        {
-            return new ServiceResponse("Invalid situation id");
-        }
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        try
-        {
-            var situation = await context.Situations.Where(s => s.SituationId == id && s.IsDeleted)
-                .FirstOrDefaultAsync();
-            if (situation == null)
+            //12 undelete relations
+            foreach (var situationQuestion in question.SituationQuestions.Where(s => s.Situation.IsDeleted == false))
             {
-                _logger.LogWarning("SituationId {id} not found", id);
-                return new ServiceResponse($"SituationId {id} not found");
+                situationQuestion.IsDeleted = false;
+                situationQuestion.UserId = userId;
+                context.SituationQuestions.Update(situationQuestion);
             }
-
-            if (situation.)
-            {
-                _logger.LogWarning("UserId {userId} does not match situation userId {situationUserId}", userId,
-                    situation.UserId);
-                return new ServiceResponse($"UserId {userId} does not match situation userId {situation.UserId}");
-            }
-
-            situation.IsDeleted = false;
-            situation. = DateTime.UtcNow;
-
-            await context.SaveChangesAsync();
-            _logger.LogInformation("SituationId {id} un-deleted", id);
-            return new ServiceResponse($"SituationId {id} un-deleted");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error un-deleting situation");
-            return new ServiceResponse($"Error un-deleting situation");
-        }
-    }
-
-    public async Task<ServiceResponse> MarkUnDeleteSpace(int id, string userId)
-    {
-        if (id <= 0)
-        {
-            return new ServiceResponse("Invalid space id");
-        }
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        await using var transaction = await context.Database.BeginTransactionAsync();
-        try
-        {
-            var space = await context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == id);
-            if (space == null)
-            {
-                return new ServiceResponse("Space not found");
-            }
-
-            if (!space.IsDeleted)
-            {
-                return new ServiceResponse("Space is not marked as deleted");
-            }
-
-            var exists = await context.Spaces.Where(s =>
-                    s.IsDeleted == false && s.SpaceId != id &&
-                    Equals(s.Name.ToLower().Trim(), space.Name.ToLower().Trim()))
-                .ToListAsync();
-            if (exists.Any())
-            {
-                return new ServiceResponse($"Space with name {space.Name} already exists");
-            }
-
-            space.IsDeleted = false;
-            space.UserId = userId;
-            context.Spaces.Update(space);
+            //14 save changes, await transaction commit, log, return response with true
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            return new ServiceResponse("Space marked as undeleted", true);
+            _logger.LogInformation("QuestionId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Question with id {id} marked as not deleted", true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking space as undeleted");
+            _logger.LogError(ex, "Error marking question with id {Id} as not deleted", id);
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error undeleting space");
+            return new ServiceResponse($"Error marking question with id {id} as not deleted");
         }
     }
-
+    /// <summary>
+    /// Returns service response with true if situation by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<ServiceResponse> MarkUnDeleteSituation(int id, string userId)
+    {
+        //1 id<=0
+        if (id <= 0)
+        {
+            _logger.LogWarning("Invalid situation id {Id}", id);
+            return new ServiceResponse($"Invalid situation id {id}");
+        }
+        //2 await DbContext
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
+        try
+        {
+            //5 get entity by id including children and relations with parents
+            var situation = await context.Situations.Include(s => s.SituationQuestions).ThenInclude(s => s.Question).Include(s => s.SituationDetails).ThenInclude(s => s.Detail).Include(s => s.SituationParameters).ThenInclude(s => s.Parameter).Include(s => s.CategorySituations).ThenInclude(s => s.Category).Include(s => s.DeviceSituations).ThenInclude(s => s.Device).Include(s => s.AssetSituations).ThenInclude(s => s.Asset).FirstOrDefaultAsync(d => d.SituationId == id);
+            //6 check if entity is null
+            if (situation == null)
+            {
+                _logger.LogWarning("SituationId {Id} not found", id);
+                return new ServiceResponse($"Situation with id {id} not found");
+            }
+            //7 check if entity is marked as deleted
+            if (situation.IsDeleted == false)
+            {
+                _logger.LogWarning("SituationId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Situation with id {id} not marked as deleted");
+            }
+            //8 check if duplicate name exists
+            var exists = await context.Situations.AnyAsync(s => Equals(s.Name.ToLower().Trim(), situation.Name.ToLower().Trim()) && s.SituationId != id && s.IsDeleted == false);
+            if (exists)
+            {
+                _logger.LogWarning("Situation with name {Name} already exists", situation.Name);
+                return new ServiceResponse($"Situation with name {situation.Name} already exists");
+            }
+            //9 undelete entity
+            situation.IsDeleted = false;
+            situation.UserId = userId;
+            //10 update entity
+            context.Situations.Update(situation);
+            //11 undelete relations if both parents are not marked as deleted
+            foreach (var situationQuestion in situation.SituationQuestions.Where(s => s.Question.IsDeleted == false))
+            {
+                situationQuestion.IsDeleted = false;
+                situationQuestion.UserId = userId;
+                context.SituationQuestions.Update(situationQuestion);
+            }
+            foreach (var situationDetail in situation.SituationDetails.Where(s => s.Detail.IsDeleted == false))
+            {
+                situationDetail.IsDeleted = false;
+                situationDetail.UserId = userId;
+                context.SituationDetails.Update(situationDetail);
+            }
+            foreach (var situationParameter in situation.SituationParameters.Where(s => s.Parameter.IsDeleted == false))
+            {
+                situationParameter.IsDeleted = false;
+                situationParameter.UserId = userId;
+                context.SituationParameters.Update(situationParameter);
+            }
+            foreach (var categorySituation in situation.CategorySituations.Where(s => s.Category.IsDeleted == false))
+            {
+                categorySituation.IsDeleted = false;
+                categorySituation.UserId = userId;
+                context.CategorySituations.Update(categorySituation);
+            }
+            foreach (var deviceSituation in situation.DeviceSituations.Where(s => s.Device.IsDeleted == false))
+            {
+                deviceSituation.IsDeleted = false;
+                deviceSituation.UserId = userId;
+                context.DeviceSituations.Update(deviceSituation);
+            }
+            foreach (var assetSituation in situation.AssetSituations.Where(s => s.Asset.IsDeleted == false))
+            {
+                assetSituation.IsDeleted = false;
+                assetSituation.UserId = userId;
+                context.AssetSituations.Update(assetSituation);
+            }
+            //12 save changes, await transaction commit, log, return response with true
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            _logger.LogInformation("SituationId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Situation with id {id} marked as not deleted", true);
+        }
+        catch (Exception ex)
+        {
+            //13 catch await transaction rollback, log, return response
+            _logger.LogError(ex, "Error marking situation with id {Id} as not deleted", id);
+            await transaction.RollbackAsync();
+            return new ServiceResponse($"Error marking situation with id {id} as not deleted");
+        }
+    }
+    /// <summary>
+    /// Returns service response with true if space by id is marked as deleted
+    /// Marks all relations as not deleted if it is possible
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<ServiceResponse> MarkUnDeleteSpace(int id, string userId)
+    {
+        //1 id<=0
+        if (id <= 0)
+        {
+            _logger.LogWarning("Invalid space id {Id}", id);
+            return new ServiceResponse($"Invalid space id {id}");
+        }
+        //2 await DbContext
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
+        try
+        {
+            //5 get entity by id including children and relations with parents
+            var space = await context.Spaces.Include(s => s.CommunicateSpaces).ThenInclude(s=>s.Communicate).FirstOrDefaultAsync(d => d.SpaceId == id);
+            //6 check if entity is null
+            if (space == null)
+            {
+                _logger.LogWarning("SpaceId {Id} not found", id);
+                return new ServiceResponse($"Space with id {id} not found");
+            }
+            //7 check if entity is marked as deleted
+            if (space.IsDeleted == false)
+            {
+                _logger.LogWarning("SpaceId {Id} not marked as deleted", id);
+                return new ServiceResponse($"Space with id {id} not marked as deleted");
+            }
+            //8 check if duplicate name exists
+            var exists = await context.Spaces.AnyAsync(s => Equals(s.Name.ToLower().Trim(), space.Name.ToLower().Trim()) && s.SpaceId != id && s.IsDeleted == false && s.AreaId == space.AreaId);
+            if (exists)
+            {
+                _logger.LogWarning("Space with name {Name} already exists", space.Name);
+                return new ServiceResponse($"Space with name {space.Name} already exists");
+            }
+            //9 undelete entity
+            space.IsDeleted = false;
+            space.UserId = userId;
+            //10 update entity
+            context.Spaces.Update(space);
+            //11 undelete relations if both parents are not marked as deleted
+            foreach (var communicateSpace in space.CommunicateSpaces.Where(s => s.Communicate.IsDeleted == false))
+            {
+                communicateSpace.IsDeleted = false;
+                communicateSpace.UserId = userId;
+                context.CommunicateSpaces.Update(communicateSpace);
+            }
+            //12 save changes, await transaction commit, log, return response with true
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            _logger.LogInformation("SpaceId {Id} marked as not deleted", id);
+            return new ServiceResponse($"Space with id {id} marked as not deleted", true);
+        }
+        catch (Exception ex)
+        {
+            //13 catch await transaction rollback, log, return response
+            _logger.LogError(ex, "Error marking space with id {Id} as not deleted", id);
+            await transaction.RollbackAsync();
+            return new ServiceResponse($"Error marking space with id {id} as not deleted");
+        }
+    }
+    /// <summary>
+    /// Returns service response with true if area by id is updated
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <param name="areaUpdateDto"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> UpdateArea(int id, string userId, AreaUpdateDto areaUpdateDto)
     {
+        //1 id<=0
         if (id <= 0)
         {
             return new ServiceResponse("Invalid area id");
         }
+        //2 await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
-            var area = await context.Areas.FirstOrDefaultAsync(a => a.AreaId == id);
+            //5 get entity by id including children and relations with parents
+            var area = await context.Areas.Include(a=>a.CommunicateAreas).FirstOrDefaultAsync(a => a.AreaId == id);
+            //6 check if entity is null
             if (area == null)
             {
                 return new ServiceResponse("Area not found");
             }
-
-            var exists = await context.Areas.FirstOrDefaultAsync(a =>
+            //7 duplicate names check 
+            var duplicate = await context.Areas.AnyAsync(a =>
                 a.AreaId != id && a.PlantId == area.PlantId && a.IsDeleted == false &&
                 Equals(a.Name.ToLower().Trim(), areaUpdateDto.Name.ToLower().Trim()));
-            if (exists != null)
+            if (duplicate)
             {
+                _logger.LogWarning("Area with name {Name} already exists", areaUpdateDto.Name);
                 return new ServiceResponse($"Area with name {areaUpdateDto.Name} already exists");
             }
+            //8 check if entity is marked as deleted
+            if (area.IsDeleted)
+            {
+                _logger.LogWarning("AreaId {Id} is marked as deleted", id);
+                return new ServiceResponse($"Area with id {id} is marked as deleted");
+            }
+            if (!Equals(area.Name.ToLower().Trim(), areaUpdateDto.Name.ToLower().Trim()))
+            {
+                //9 update name
+                area.Name = areaUpdateDto.Name;
+                area.UserId = userId;
+                context.Areas.Update(area);
+            }
+            if (!Equals(area.Description.ToLower().Trim(), areaUpdateDto.Description.ToLower().Trim()))
+            {
+                //10 update description
+                area.Description = areaUpdateDto.Description;
+                area.UserId = userId;
+                context.Areas.Update(area);
+            }
 
-            area.Description = areaUpdateDto.Description;
-            area.Name = areaUpdateDto.Name;
-            area.UserId = userId;
-            context.Areas.Update(area);
 
+
+            
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             return new ServiceResponse("Area updated", true);
@@ -3911,8 +4375,7 @@ public class DbService : IDbService
         }
     }
 
-    public async Task<ServiceResponse> UpdateCommunicate(int id, string userId,
-        CommunicateUpdateDto communicateUpdateDto)
+    public async Task<ServiceResponse> UpdateCommunicate(int id, string userId, CommunicateUpdateDto communicateUpdateDto)
     {
         if (id <= 0)
         {
