@@ -1,0 +1,16 @@
+AssetCategory
+AssetDetail
+AssetSituation
+CategorySituation
+CommunicateArea
+CommunicateAsset
+CommunicateCategory
+CommunicateCoordinate
+CommunicateDevice
+CommunicateModel
+CommunicateSpace
+DeviceSituation
+ModelParameter
+SituationDetail
+SituationParameter
+SituationQuestion

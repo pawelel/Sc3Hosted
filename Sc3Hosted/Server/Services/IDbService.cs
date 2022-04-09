@@ -218,4 +218,37 @@ public interface IDbService
     Task<ServiceResponse> UpdateSituation(int id, string userId, SituationUpdateDto situationUpdateDto);
 
     Task<ServiceResponse> UpdateSpace(int id, string userId, SpaceUpdateDto spaceUpdateDto);
+    Task<ServiceResponse> UpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<ServiceResponse> UpdateAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<ServiceResponse> UpdateAssetSituation(AssetSituationDto assetSituationDto, string userId);
+    Task<ServiceResponse> UpdateCategorySituation(CategorySituationDto categorySituationDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateModel(CommunicateModelDto communicateModelDto, string userId);
+    Task<ServiceResponse> UpdateCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId);
+    Task<ServiceResponse> UpdateDeviceSituation(DeviceSituationDto deviceSituationDto, string userId);
+    Task<ServiceResponse> UpdateModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<ServiceResponse> UpdateSituationDetail(SituationDetailDto situationDetailDto, string userId);
+    Task<ServiceResponse> UpdateSituationParameter(SituationParameterDto situationParameterDto, string userId);
+    Task<ServiceResponse> UpdateSituationQuestion(SituationQuestionDto situationQuestionDto, string userId);
+    Task<ServiceResponse> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<ServiceResponse> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<ServiceResponse> DeleteAssetSituation(AssetSituationDto assetSituationDto, string userId);
+    Task<ServiceResponse> DeleteCategorySituation(CategorySituationDto categorySituationDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateModel(CommunicateModelDto communicateModelDto, string userId);
+    Task<ServiceResponse> DeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId);
+    Task<ServiceResponse> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto, string userId);
+    Task<ServiceResponse> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<ServiceResponse> DeleteSituationDetail(SituationDetailDto situationDetailDto, string userId);
+    Task<ServiceResponse> DeleteSituationParameter(SituationParameterDto situationParameterDto, string userId);
+    Task<ServiceResponse> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto, string userId);
+
 }

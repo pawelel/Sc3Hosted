@@ -173,7 +173,7 @@ public class DbService : IDbService
             }
 
             if (coordinate.Assets.Any(a =>
-                     Equals(a.Name.ToLower().Trim(), assetCreateDto.Name.ToLower().Trim())))
+                    Equals(a.Name.ToLower().Trim(), assetCreateDto.Name.ToLower().Trim())))
             {
                 _logger.LogWarning("Asset with name {AssetName} already exists", assetCreateDto.Name);
                 return new ServiceResponse($"Asset with name {assetCreateDto.Name} already exists");
@@ -298,8 +298,7 @@ public class DbService : IDbService
     /// <param name="coordinateCreateDto"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<ServiceResponse> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto,
-        string userId)
+    public async Task<ServiceResponse> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto, string userId)
     {
         if (spaceId <= 0)
         {
@@ -675,7 +674,7 @@ public class DbService : IDbService
             }
 
             if (area.Spaces.Any(s =>
-                   Equals(s.Name.ToLower().Trim(), spaceCreateDto.Name.ToLower().Trim())))
+                    Equals(s.Name.ToLower().Trim(), spaceCreateDto.Name.ToLower().Trim())))
             {
                 _logger.LogWarning("Space with name {SpaceName} already exists", spaceCreateDto.Name);
                 return new ServiceResponse($"Space with name {spaceCreateDto.Name} already exists");
@@ -1303,7 +1302,7 @@ public class DbService : IDbService
                 return new ServiceResponse<IEnumerable<AreaDto>>("Areas not found");
             }
             return new ServiceResponse<IEnumerable<AreaDto>>(areas,
-            "List of areas with spaces returned");
+                "List of areas with spaces returned");
         }
         catch (Exception ex)
         {
@@ -1466,6 +1465,11 @@ public class DbService : IDbService
         }
     }
 
+    /// <summary>
+    /// Returns service response with category by id with assets if exists
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse<CategoryWithAssetsDto>> GetCategoryByIdWithAssets(int id)
     {
         if (id <= 0)
@@ -1490,6 +1494,7 @@ public class DbService : IDbService
             return new ServiceResponse<CategoryWithAssetsDto>("Error getting category with assets");
         }
     }
+
     /// <summary>
     /// Returns service response with communicate if exists
     /// </summary>
@@ -1699,6 +1704,10 @@ public class DbService : IDbService
         }
     }
 
+    /// <summary>
+    /// Returns service response with detail with assets if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<DetailWithAssetsDto>>> GetDetailsWithAssets()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1784,7 +1793,7 @@ public class DbService : IDbService
             }
 
             return new ServiceResponse<IEnumerable<DeviceDto>>(devices,
-            "Devices returned");
+                "Devices returned");
         }
         catch (Exception ex)
         {
@@ -1891,6 +1900,7 @@ public class DbService : IDbService
             return new ServiceResponse<ParameterDto>($"Error retrieving parameter with id {id}");
         }
     }
+
     /// <summary>
     /// Returns service response with parameters if they exist
     /// </summary>
@@ -1918,6 +1928,10 @@ public class DbService : IDbService
         }
     }
 
+    /// <summary>
+    /// Returns service response with parameters and models if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<ParameterWithModelsDto>>> GetParametersWithModels()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1942,6 +1956,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<ParameterWithModelsDto>>("Error retrieving parameters with models");
         }
     }
+
     /// <summary>
     /// Returns service response with plant if it exist
     /// </summary>
@@ -1972,6 +1987,7 @@ public class DbService : IDbService
             return new ServiceResponse<PlantDto>("Error getting plant by id");
         }
     }
+
     /// <summary>
     /// Returns service response with plants if they exist
     /// </summary>
@@ -1996,6 +2012,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<PlantDto>>("Error getting all plants");
         }
     }
+
     /// <summary>
     /// Returns service response with plants contains areas if they exist
     /// </summary>
@@ -2019,6 +2036,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<PlantDto>>("Error getting plants with areas");
         }
     }
+
     /// <summary>
     /// Returns service response with question by id if it exist
     /// </summary>
@@ -2048,6 +2066,7 @@ public class DbService : IDbService
             return new ServiceResponse<QuestionDto>($"Error getting question");
         }
     }
+
     /// <summary>
     /// Returns service response with questions if they exist
     /// </summary>
@@ -2074,6 +2093,10 @@ public class DbService : IDbService
         }
     }
 
+    /// <summary>
+    /// Returns service response with questions containing situations if they exist
+    /// </summary>
+    /// <returns></returns>
     public async Task<ServiceResponse<IEnumerable<QuestionWithSituationsDto>>> GetQuestionsWithSituations()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -2094,6 +2117,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<QuestionWithSituationsDto>>($"Error getting questions");
         }
     }
+
     /// <summary>
     /// Returns service response with situation by id if it exist
     /// </summary>
@@ -2123,6 +2147,7 @@ public class DbService : IDbService
             return new ServiceResponse<SituationDto>("Error getting situation");
         }
     }
+
     /// <summary>
     /// Returns service response with situations if they exist
     /// </summary>
@@ -2147,6 +2172,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<SituationDto>>("Error getting situations");
         }
     }
+
     /// <summary>
     /// Returns service response with situations containing assets if they exist
     /// </summary>
@@ -2171,6 +2197,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<SituationWithAssetsDto>>("Error getting situations");
         }
     }
+
     /// <summary>
     /// Returns service response with situations containing categories if they exist
     /// </summary>
@@ -2195,6 +2222,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<SituationWithCategoriesDto>>("Error getting situations");
         }
     }
+
     /// <summary>
     /// Returns service response with space by id if it exist
     /// </summary>
@@ -2224,6 +2252,7 @@ public class DbService : IDbService
             return new ServiceResponse<SpaceDto>("Error getting space by id");
         }
     }
+
     /// <summary>
     /// Returns service response with spaces if they exist
     /// </summary>
@@ -2248,6 +2277,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<SpaceDto>>("Error getting all spaces");
         }
     }
+
     /// <summary>
     /// Returns service response with spaces containing coordinates if they exist
     /// </summary>
@@ -2272,6 +2302,7 @@ public class DbService : IDbService
             return new ServiceResponse<IEnumerable<SpaceDto>>("Error getting spaces with coordinates");
         }
     }
+
     /// <summary>
     /// Returns service response with true if area by id is marked as deleted
     /// Requires all included spaces are marked as deleted or deleted.
@@ -2321,6 +2352,7 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting area");
         }
     }
+
     /// <summary>
     /// Returns service response with true if asset by id is marked as deleted
     /// Marks all relations as deleted
@@ -2390,6 +2422,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking asset with id {id} as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if category by id is marked as deleted
     /// </summary>
@@ -2452,6 +2485,7 @@ public class DbService : IDbService
             return new ServiceResponse("Error marking category as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if communicate by id is marked as deleted
     /// Marks all relations as deleted
@@ -2535,6 +2569,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking communicate with id {id} as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if coordinate by id is marked as deleted
     /// Marks all relations as deleted
@@ -2590,6 +2625,7 @@ public class DbService : IDbService
             return new ServiceResponse("Error deleting coordinate");
         }
     }
+
     /// <summary>
     /// Returns service response with true if detail by id is marked as deleted
     /// Marks all relations as deleted
@@ -2629,6 +2665,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting detail");
         }
     }
+
     /// <summary>
     /// Returns service response with true if device by id is marked as deleted
     /// Marks all relations as deleted
@@ -2691,6 +2728,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking device as deleted with id {id}");
         }
     }
+
     /// <summary>
     /// Returns service response with true if model by id is marked as deleted
     /// Marks all relations as deleted
@@ -2727,7 +2765,6 @@ public class DbService : IDbService
                 return new ServiceResponse("Model has assets");
             }
 
-
             model.IsDeleted = true;
             model.UserId = userId;
             context.Models.Update(model);
@@ -2743,6 +2780,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking model with id {id} as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if parameter by id is marked as deleted
     /// </summary>
@@ -2798,6 +2836,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking parameter with id {id} as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if plant by id is marked as deleted
     /// </summary>
@@ -2844,6 +2883,7 @@ public class DbService : IDbService
             return new ServiceResponse("Error marking plant as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if question by id is marked as deleted
     /// Marks all relations as deleted
@@ -2894,6 +2934,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting question");
         }
     }
+
     /// <summary>
     /// Returns service response with true if situation by id is marked as deleted
     /// Marks all relations as deleted
@@ -2974,6 +3015,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error deleting situation");
         }
     }
+
     /// <summary>
     /// Returns service response with true if space by id is marked as deleted
     /// Marks all relations as deleted
@@ -3025,6 +3067,7 @@ public class DbService : IDbService
             return new ServiceResponse("Error marking space as deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if area by id is not marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3107,6 +3150,7 @@ public class DbService : IDbService
             return new ServiceResponse("Error marking area as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if asset by id is not marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3224,10 +3268,8 @@ public class DbService : IDbService
             await transaction.RollbackAsync();
             return new ServiceResponse("Error marking asset as not deleted");
         }
-
-
-
     }
+
     /// <summary>
     /// Returns service response with true if category by id is not marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3311,13 +3353,13 @@ public class DbService : IDbService
         }
         catch (Exception ex)
         {
-
             //18	catch await transaction rollback, log, return response
             _logger.LogError(ex, "Error marking category as not deleted");
             await transaction.RollbackAsync();
             return new ServiceResponse("Error marking category as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if communicate by id is not marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3373,7 +3415,6 @@ public class DbService : IDbService
             //16-1	update relations
             context.CommunicateAreas.UpdateRange(communicate.CommunicateAreas);
 
-
             //15-2	undelete relations
             foreach (var communicateAsset in communicate.CommunicateAssets.Where(c => c.Asset.IsDeleted == false))
             {
@@ -3401,7 +3442,6 @@ public class DbService : IDbService
             //16-4	update relations
             context.CommunicateDevices.UpdateRange(communicate.CommunicateDevices);
 
-
             //15-5	undelete relations
             foreach (var communicateModel in communicate.CommunicateModels.Where(c => c.Model.IsDeleted == false))
             {
@@ -3411,7 +3451,6 @@ public class DbService : IDbService
 
             //16-5	update relations
             context.CommunicateModels.UpdateRange(communicate.CommunicateModels);
-
 
             //15-6	undelete relations
             foreach (var communicateSpace in communicate.CommunicateSpaces.Where(c => c.Space.IsDeleted == false))
@@ -3438,13 +3477,13 @@ public class DbService : IDbService
         }
         catch (Exception ex)
         {
-
             //18	catch await transaction rollback, log, return response
             await transaction.RollbackAsync();
             _logger.LogError(ex, "CommunicateId {Id} not marked as not deleted", id);
             return new ServiceResponse($"Communicate with id {id} not marked as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if coordinate by id is not marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3524,13 +3563,13 @@ public class DbService : IDbService
         }
         catch (Exception ex)
         {
-
             //18	catch await transaction rollback, log, return response
             await transaction.RollbackAsync();
             _logger.LogError(ex, "CoordinateId {Id} not marked as not deleted", id);
             return new ServiceResponse($"Coordinate with id {id} not marked as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if detail by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3610,6 +3649,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking detail with id {id} as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if device by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3688,9 +3728,8 @@ public class DbService : IDbService
             await transaction.RollbackAsync();
             return new ServiceResponse($"Error marking device with id {id} as not deleted");
         }
-
-
     }
+
     /// <summary>
     /// Returns service response with true if model by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3770,6 +3809,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking model with id {id} as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if parameter by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3848,8 +3888,8 @@ public class DbService : IDbService
             await transaction.RollbackAsync();
             return new ServiceResponse($"Error marking parameter with id {id} as not deleted");
         }
-
     }
+
     /// <summary>
     /// Returns service response with true if plant by id is marked as deleted
     /// </summary>
@@ -3914,6 +3954,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking plant with id {id} as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if question by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -3984,6 +4025,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking question with id {id} as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if situation by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -4083,6 +4125,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking situation with id {id} as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if space by id is marked as deleted
     /// Marks all relations as not deleted if it is possible
@@ -4106,7 +4149,7 @@ public class DbService : IDbService
         try
         {
             //5 get entity by id including children and relations with parents
-            var space = await context.Spaces.Include(s => s.CommunicateSpaces).ThenInclude(s=>s.Communicate).FirstOrDefaultAsync(d => d.SpaceId == id);
+            var space = await context.Spaces.Include(s => s.CommunicateSpaces).ThenInclude(s => s.Communicate).FirstOrDefaultAsync(d => d.SpaceId == id);
             //6 check if entity is null
             if (space == null)
             {
@@ -4152,6 +4195,7 @@ public class DbService : IDbService
             return new ServiceResponse($"Error marking space with id {id} as not deleted");
         }
     }
+
     /// <summary>
     /// Returns service response with true if area by id is updated
     /// </summary>
@@ -4174,13 +4218,13 @@ public class DbService : IDbService
         try
         {
             //5 get entity by id including children and relations with parents
-            var area = await context.Areas.Include(a=>a.CommunicateAreas).FirstOrDefaultAsync(a => a.AreaId == id);
+            var area = await context.Areas.Include(a => a.CommunicateAreas).ThenInclude(a => a.Communicate).FirstOrDefaultAsync(a => a.AreaId == id);
             //6 check if entity is null
             if (area == null)
             {
                 return new ServiceResponse("Area not found");
             }
-            //7 duplicate names check 
+            //7 duplicate names check
             var duplicate = await context.Areas.AnyAsync(a =>
                 a.AreaId != id && a.PlantId == area.PlantId && a.IsDeleted == false &&
                 Equals(a.Name.ToLower().Trim(), areaUpdateDto.Name.ToLower().Trim()));
@@ -4209,139 +4253,198 @@ public class DbService : IDbService
                 area.UserId = userId;
                 context.Areas.Update(area);
             }
+            // update communicate areas
+            foreach (var communicateAreaDto in areaUpdateDto.
 
-
-
-            
+            //11 save changes, await transaction commit, log, return response with true
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             return new ServiceResponse("Area updated", true);
         }
+        //12 catch await transaction rollback, log, return response
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating area");
+            _logger.LogError(ex, "Error updating area with id {Id}", id);
             await transaction.RollbackAsync();
             return new ServiceResponse("Error updating area");
         }
     }
-
+    /// <summary>
+    /// Returns service response with true if asset by id is updated
+    /// Updates related entities
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <param name="assetUpdateDto"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> UpdateAsset(int id, string userId, AssetUpdateDto assetUpdateDto)
     {
+        // id<=0
         if (id <= 0)
         {
             return new ServiceResponse("Invalid asset id");
         }
+        // await DbContext
         await using var context = await _contextFactory.CreateDbContextAsync();
+        // await transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        // try-catch
         try
         {
-            var asset = await context.Assets.Include(a => a.AssetDetails).Include(a => a.AssetCategories)
-                .FirstOrDefaultAsync(a => a.AssetId == id);
+            // get entity by id including children and relations with parents: AssetCategories, AssetDetails, CommunicateAssets, AssetSituations
+            var asset = await context.Assets.Include(a => a.AssetCategories).ThenInclude(a => a.Category).Include(a => a.AssetDetails).ThenInclude(a => a.Detail).Include(a => a.CommunicateAssets).ThenInclude(a => a.Communicate).Include(a => a.AssetSituations).ThenInclude(a => a.Situation).FirstOrDefaultAsync(a => a.AssetId == id);
+            // check if entity is null
             if (asset == null)
             {
-                _logger.LogWarning("Asset not found");
                 return new ServiceResponse("Asset not found");
             }
-
-            if (asset.IsDeleted)
+            // duplicate names check
+            var duplicate = await context.Assets.AnyAsync(a =>
+                a.AssetId != id && a.IsDeleted == false &&
+                Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()));
+            if (duplicate)
             {
-                _logger.LogWarning("Asset marked as deleted");
-                return new ServiceResponse("Asset marked as deleted");
-            }
-
-            // check if asset name is unique
-            var exists = await context.Assets.AnyAsync(a =>
-                Equals(a.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()) && a.AssetId != id &&
-                a.IsDeleted == false);
-            if (exists)
-            {
-                _logger.LogWarning("Asset with name {AssetName} already exists", assetUpdateDto.Name);
+                _logger.LogWarning("Asset with name {Name} already exists", assetUpdateDto.Name);
                 return new ServiceResponse($"Asset with name {assetUpdateDto.Name} already exists");
             }
-
-            var coordinate =
-                await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetUpdateDto.CoordinateId);
-            if (coordinate == null || coordinate.IsDeleted)
+            // check if entity is marked as deleted
+            if (asset.IsDeleted)
             {
-                _logger.LogWarning("Cannot update asset to coordinate with id {CoordinateId}",
-                    assetUpdateDto.CoordinateId);
-                return new ServiceResponse($"Cannot update asset to coordinate with id {assetUpdateDto.CoordinateId}");
+                _logger.LogWarning("AssetId {Id} is marked as deleted", id);
+                return new ServiceResponse($"Asset with id {id} is marked as deleted");
             }
-
-            asset.Status = assetUpdateDto.Status;
-            asset.Name = assetUpdateDto.Name;
-            asset.Process = assetUpdateDto.Process;
-            asset.UserId = userId;
-            asset.AssetDetails = asset.AssetDetails
-                .Where(ad => assetUpdateDto.AssetDetails.Any(a => a.AssetDetailId == ad.AssetDetailId)).ToList();
-            asset.AssetCategories = asset.AssetCategories.Where(ac =>
-                assetUpdateDto.AssetCategories.Any(a => a.AssetCategoryId == ac.AssetCategoryId)).ToList();
-            foreach (var assetDetailDto in assetUpdateDto.AssetDetails)
+            // update Name
+            if (!Equals(asset.Name.ToLower().Trim(), assetUpdateDto.Name.ToLower().Trim()))
             {
-                var assetDetailToUpdate =
-                    asset.AssetDetails.FirstOrDefault(ad => ad.AssetDetailId == assetDetailDto.AssetDetailId);
-                if (assetDetailToUpdate == null)
+                asset.Name = assetUpdateDto.Name;
+                asset.UserId = userId;
+                context.Assets.Update(asset);
+            }
+            // update Process
+            if (!Equals(asset.Process.ToLower().Trim(), assetUpdateDto.Process.ToLower().Trim()))
+            {
+                asset.Process = assetUpdateDto.Process;
+                asset.UserId = userId;
+                context.Assets.Update(asset);
+            }
+            // update Status
+            if (!Equals(asset.Status, assetUpdateDto.Status))
+            {
+                asset.Status = assetUpdateDto.Status;
+                asset.UserId = userId;
+                context.Assets.Update(asset);
+            }
+            // update AssetCategories
+            foreach (var assetCategoryDto in assetUpdateDto.AssetCategories)
+            {
+                // check if parent entity is null
+                var category = await context.Categories.FirstOrDefaultAsync(a => a.CategoryId == assetCategoryDto.CategoryId);
+                if (category == null)
                 {
-                    AssetDetail newAssetDetail = new()
-                    {
-                        AssetId = asset.AssetId,
-                        DetailId = assetDetailDto.DetailId,
-                        Value = assetDetailDto.Value,
-                        UserId = userId
-                    };
-                    asset.AssetDetails.Add(newAssetDetail);
+                    _logger.LogWarning("Category with id {Id} not found", assetCategoryDto.CategoryId);
+                    return new ServiceResponse("Category not found");
                 }
-
-                if (assetDetailToUpdate == null || Equals(assetDetailToUpdate.Value = assetDetailDto.Value)) continue;
-                assetDetailToUpdate.Value = assetDetailDto.Value;
-                assetDetailToUpdate.UserId = userId;
+                // get entity by id
+                var assetCategory = await context.AssetCategories.Include(a => a.Category).FirstOrDefaultAsync(a => a.CategoryId == assetCategoryDto.CategoryId && a.AssetId == assetCategoryDto.AssetId);
+                // check if entity is null
+                if (assetCategory == null)
+                {
+                    assetCategory = new AssetCategory
+                    {
+                        AssetId = assetCategoryDto.AssetId,
+                        CategoryId = assetCategoryDto.CategoryId,
+                        UserId = userId,
+                        IsDeleted = false
+                    };
+                    context.AssetCategories.Add(assetCategory);
+                }
+                else
+                {
+                    // check if entity is marked as deleted
+                    if (assetCategory.IsDeleted != assetCategoryDto.IsDeleted)
+                    {
+                        assetCategory.IsDeleted = assetCategoryDto.IsDeleted;
+                        assetCategory.UserId = userId;
+                        context.AssetCategories.Update(assetCategory);
+                    }
+                }
             }
-
-            foreach (var newAssetCategory in from assetCategoryDto in assetUpdateDto.AssetCategories
-                                             let assetCategoryToUpdate =
-                                                 asset.AssetCategories.FirstOrDefault(ac =>
-                                                     ac.AssetCategoryId == assetCategoryDto.AssetCategoryId)
-                                             where assetCategoryToUpdate == null
-                                             select new AssetCategory()
-                                             {
-                                                 AssetId = asset.AssetId,
-                                                 CategoryId = assetCategoryDto.CategoryId,
-                                                 UserId = userId
-                                             })
+            // update AssetDetails
+            foreach (var communicateAssetDto in assetUpdateDto.AssetDetails)
             {
-                asset.AssetCategories.Add(newAssetCategory);
+                // check if parent entity is null
+                var detail = await context.Details.FirstOrDefaultAsync(a => a.DetailId == communicateAssetDto.DetailId);
+                if (detail == null)
+                {
+                    _logger.LogWarning("Detail with id {Id} not found", communicateAssetDto.DetailId);
+                    return new ServiceResponse("Detail not found");
+                }
+                // get entity by id
+                var assetDetail = await context.AssetDetails.FirstOrDefaultAsync(a => a.DetailId == communicateAssetDto.DetailId && a.AssetId == communicateAssetDto.AssetId);
+                // check if entity is null
+                if (assetDetail == null && detail)
+                {
+                    assetDetail = new AssetDetail
+                    {
+                        AssetId = communicateAssetDto.AssetId,
+                        DetailId = communicateAssetDto.DetailId,
+                        UserId = userId,
+                        IsDeleted = false
+                    };
+                    context.AssetDetails.Add(assetDetail);
+                }
+                else
+                {
+
+                    //// check if entity is marked as deleted
+                    //if (assetDetail.IsDeleted)
+                    //{
+                    //    assetDetail.IsDeleted = communicateAssetDto.IsDeleted;
+                    //    assetDetail.UserId = userId;
+                    //    context.AssetDetails.Update(assetDetail);
+                    //}
+                }
             }
-
-            context.Assets.Update(asset);
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("Asset with id {AssetId} updated", id);
-            return new ServiceResponse($"Asset {id} updated", true);
+            // update CommunicateAssets
+            // update AssetSituations
+            // save changes, await transaction commit, log, return ServiceResponse(string, true)
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, "Error updating asset with id {AssetId}", id);
-            await transaction.RollbackAsync();
-            return new ServiceResponse($"Error updating asset with id {id}");
-        }
-    }
+            // catch await transaction rollback, log, return ServiceResponse(string, false)
 
+        }
+
+    }
+    /// <summary>
+    /// Returns service response with true if category by id is updated
+    /// Updates related entities
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="userId"></param>
+    /// <param name="categoryUpdateDto"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> UpdateCategory(int id, string userId, CategoryUpdateDto categoryUpdateDto)
     {
+        //1 check category id
         if (id <= 0)
         {
             return new ServiceResponse("Invalid category id");
         }
+        //2 await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
+        //3 await using transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
+        //4 try-catch
         try
         {
+            Category c;
             var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
             if (category == null)
             {
                 return new ServiceResponse("Category not found");
             }
-
+            // check if category exists and is not marked as deleted
             var exists = await context.Categories.AnyAsync(c =>
                 c.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim() && c.IsDeleted == false &&
                 c.CategoryId != id);
@@ -4349,7 +4452,7 @@ public class DbService : IDbService
             {
                 return new ServiceResponse($"Category with name {categoryUpdateDto.Name} already exists");
             }
-
+            // update name
             if (!Equals(categoryUpdateDto.Name.ToLower().Trim(), category.Name.ToLower().Trim()))
             {
                 category.Name = categoryUpdateDto.Name;
@@ -4822,5 +4925,336 @@ public class DbService : IDbService
             await transaction.RollbackAsync();
             return new ServiceResponse("Error updating space");
         }
+    }
+
+    public async Task<ServiceResponse> UpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Updates or creates a new AssetDetail, returns ServiceResponse(string, true) if successful
+    /// </summary>
+    /// <param name="assetDetailDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<ServiceResponse> UpdateAssetDetail(AssetDetailDto assetDetailDto, string userId)
+    {
+        // id validation
+        if (assetDetailDto.AssetId <= 0)
+        {
+            return new ServiceResponse("Invalid asset id");
+        }
+        if (assetDetailDto.DetailId <= 0)
+        {
+            return new ServiceResponse("Invalid detail id");
+        }
+        if (assetDetailDto.AssetDetailId < 0)
+        {
+            return new ServiceResponse("Invalid AssetDetailId id");
+        }
+
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // await using transaction
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            // get asset
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetDetailDto.AssetId);
+            if (asset == null)
+            {
+                return new ServiceResponse("Asset not found");
+            }
+
+            // get detail
+            var detail = await context.Details.FirstOrDefaultAsync(d => d.DetailId == assetDetailDto.DetailId);
+            if (detail == null)
+            {
+                return new ServiceResponse("Detail not found");
+            }
+
+            // get assetDetail
+            var assetDetail = await context.AssetDetails.FirstOrDefaultAsync(ad => ad.AssetDetailId == assetDetailDto.AssetDetailId);
+            // if assetDetail is null, create new
+            if (assetDetail == null)
+            {
+                // create new assetDetail
+                assetDetail = new AssetDetail
+                {
+                    AssetId = assetDetailDto.AssetId,
+                    DetailId = assetDetailDto.DetailId,
+                    UserId = userId
+                };
+                context.AssetDetails.Add(assetDetail);
+            }
+            else
+            {
+                if (asset.IsDeleted)
+                {
+                    _logger.LogWarning("AssetId {assetId} is marked as deleted", asset.AssetId);
+                    return new ServiceResponse("Asset is marked as deleted");
+                }
+                if (detail.IsDeleted)
+                {
+                    _logger.LogWarning("DetailId {detailId} is marked as deleted", detail.DetailId);
+                    return new ServiceResponse("Detail is marked as deleted");
+                }
+
+                // update assetDetail
+                if (assetDetail.IsDeleted != assetDetailDto.IsDeleted)
+                {
+                    assetDetail.IsDeleted = assetDetailDto.IsDeleted;
+                    assetDetail.UserId = userId;
+                }
+                if (assetDetail.Value != assetDetailDto.Value)
+                {
+                    assetDetail.Value = assetDetailDto.Value;
+                    assetDetail.UserId = userId;
+                }
+                context.AssetDetails.Update(assetDetail);
+            }
+
+            // save changes
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return new ServiceResponse("AssetDetail updated", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating assetDetail");
+            await transaction.RollbackAsync();
+            return new ServiceResponse("Error updating assetDetail");
+        }
+    }
+    /// <summary>
+    /// Updates or creates a new AssetSituation, returns ServiceResponse(string, true) if successful
+    /// </summary>
+    /// <param name="assetSituationDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<ServiceResponse> UpdateAssetSituation(AssetSituationDto assetSituationDto, string userId)
+    {
+        // id validation
+        if (assetSituationDto.AssetId <= 0)
+        {
+            return new ServiceResponse("Invalid asset id");
+        }
+        if (assetSituationDto.SituationId <= 0)
+        {
+            return new ServiceResponse("Invalid situation id");
+        }
+        if (assetSituationDto.AssetSituationId < 0)
+        {
+            return new ServiceResponse("Invalid AssetSituationId id");
+        }
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // await using transaction
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            // get asset
+            var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetSituationDto.AssetId);
+            if (asset == null)
+            {
+                return new ServiceResponse("Asset not found");
+            }
+            if (asset.IsDeleted)
+            {
+                _logger.LogWarning("AssetId {assetId} is marked as deleted", asset.AssetId);
+                return new ServiceResponse("Asset is marked as deleted");
+            }
+            // get situation
+            var situation = await context.Situations.FirstOrDefaultAsync(s => s.SituationId == assetSituationDto.SituationId);
+            if (situation == null)
+            {
+                return new ServiceResponse("Situation not found");
+            }
+            if (situation.IsDeleted)
+            {
+                _logger.LogWarning("SituationId {situationId} is marked as deleted", situation.SituationId);
+                return new ServiceResponse("Situation is marked as deleted");
+            }
+            // get assetSituation
+            var assetSituation = await context.AssetSituations.FirstOrDefaultAsync(asd => asd.AssetSituationId == assetSituationDto.AssetSituationId);
+            // if assetSituation is null, create new
+            if (assetSituation == null)
+            {
+                // create new assetSituation
+                assetSituation = new AssetSituation
+                {
+                    AssetId = assetSituationDto.AssetId,
+                    SituationId = assetSituationDto.SituationId,
+                    UserId = userId
+                };
+                context.AssetSituations.Add(assetSituation);
+            }
+            else
+            {
+                // update assetSituation
+                if (assetSituation.IsDeleted != assetSituationDto.IsDeleted)
+                {
+                    assetSituation.IsDeleted = assetSituationDto.IsDeleted;
+                    assetSituation.UserId = userId;
+                }
+                    context.AssetSituations.Update(assetSituation);
+            }
+            // save changes
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating assetSituation");
+            await transaction.RollbackAsync();
+            return new ServiceResponse("Error updating assetSituation");
+        }
+    }
+
+        public async Task<ServiceResponse> UpdateCategorySituation(CategorySituationDto categorySituationDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateModel(CommunicateModelDto communicateModelDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateDeviceSituation(DeviceSituationDto deviceSituationDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateModelParameter(ModelParameterDto modelParameterDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateSituationDetail(SituationDetailDto situationDetailDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateSituationParameter(SituationParameterDto situationParameterDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> UpdateSituationQuestion(SituationQuestionDto situationQuestionDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteAssetSituation(AssetSituationDto assetSituationDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCategorySituation(CategorySituationDto categorySituationDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateModel(CommunicateModelDto communicateModelDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteSituationDetail(SituationDetailDto situationDetailDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteSituationParameter(SituationParameterDto situationParameterDto, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto, string userId)
+    {
+        throw new NotImplementedException();
     }
 }
