@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace Sc3Hosted.Shared.Dtos;
 public class SituationParameterDto : BaseDto
 {
-    public int SituationParameterId { get; set; }
     public int SituationId { get; set; }
     public int ParameterId { get; set; }
 }

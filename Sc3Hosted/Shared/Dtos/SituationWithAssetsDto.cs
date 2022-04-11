@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class SituationWithAssetsDto
+public class SituationWithAssetsDto : BaseDto
 {
     public int SituationId { get; set; }
     public string Name { get; set; } = string.Empty;

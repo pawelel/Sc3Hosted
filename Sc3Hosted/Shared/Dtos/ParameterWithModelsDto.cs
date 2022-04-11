@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class ParameterWithModelsDto
+public class ParameterWithModelsDto : BaseDto
 {
     public int ParameterId { get; set; }
     public string Name { get; set; } = string.Empty;

@@ -17,4 +17,6 @@ public class AssetUpdateDto
     public virtual List<AssetCategoryDto> AssetCategories { get; set; } = new();
     public virtual List<CommunicateAssetDto> CommunicateAssets { get; set; } = new();
     public virtual List<AssetSituationDto> AssetSituations { get; set; } = new();
+    public int ModelId { get; set; }
+    public string Description { get; set; }= string.Empty;
 }

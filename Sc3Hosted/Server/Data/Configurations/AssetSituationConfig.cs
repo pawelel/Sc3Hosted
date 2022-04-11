@@ -12,10 +12,8 @@ public class AssetSituationConfig : IEntityTypeConfiguration <AssetSituation>
     {
         builder.ToTable("AssetSituations");
 
-        builder.HasKey(x => x.AssetSituationId);
-
-        builder.Property(x => x.AssetSituationId).ValueGeneratedOnAdd();
-
+        builder.HasKey(x => new{x.AssetId, x.SituationId});;
+        
         builder.Property(x => x.AssetId).IsRequired();
 
         builder.Property(x => x.SituationId).IsRequired();

@@ -9,8 +9,7 @@ public class CommunicateAssetConfig : IEntityTypeConfiguration<CommunicateAsset>
     public void Configure(EntityTypeBuilder<CommunicateAsset> builder)
     {
         builder.ToTable("CommunicateAssets", x => x.IsTemporal());
-        builder.HasKey(x => x.CommunicateAssetId);
-        builder.Property(x => x.CommunicateAssetId).ValueGeneratedOnAdd();
+        builder.HasKey(x => new{x.CommunicateId, x.AssetId});
         builder.Property(x => x.AssetId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
     }

@@ -9,8 +9,7 @@ public class CommunicateModelConfig : IEntityTypeConfiguration<CommunicateModel>
     public void Configure(EntityTypeBuilder<CommunicateModel> builder)
     {
         builder.ToTable("CommunicateModels", x => x.IsTemporal());
-        builder.HasKey(x => x.CommunicateModelId);
-        builder.Property(x => x.CommunicateModelId).ValueGeneratedOnAdd();
+        builder.HasKey(x => new{x.CommunicateId, x.ModelId});
         builder.Property(x => x.ModelId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
     }

@@ -10,7 +10,6 @@ public class Communicate  : BaseEntity
     public CommunicationType CommunicationType { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public bool IsArchived { get; set; }
     public virtual List<CommunicateArea> CommunicateAreas { get; set; } = new();
     public virtual List<CommunicateAsset> CommunicateAssets { get; set; }  = new();
     public virtual List<CommunicateCoordinate> CommunicateCoordinates { get; set; }=new(); 

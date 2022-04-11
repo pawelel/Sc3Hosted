@@ -2,7 +2,7 @@
 
 public class CommunicateCategory : BaseEntity
 {
-    public int CommunicateCategoryId { get; set; }
+ 
     public int CommunicateId { get; set; }
     public virtual Communicate Communicate { get; set; } = new();
     public int CategoryId { get; set; }

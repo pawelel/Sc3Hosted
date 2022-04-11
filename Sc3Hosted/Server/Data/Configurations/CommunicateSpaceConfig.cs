@@ -9,8 +9,7 @@ public class CommunicateSpaceConfig : IEntityTypeConfiguration<CommunicateSpace>
     public void Configure(EntityTypeBuilder<CommunicateSpace> builder)
     {
         builder.ToTable("CommunicateSpaces", x => x.IsTemporal());
-        builder.HasKey(x => x.CommunicateSpaceId);
-        builder.Property(x => x.CommunicateSpaceId).ValueGeneratedOnAdd();
+        builder.HasKey(x => new{x.CommunicateId, x.SpaceId});
         builder.Property(x => x.SpaceId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
     }

@@ -15,8 +15,7 @@ public class SituationParameterConfig : IEntityTypeConfiguration<SituationParame
     public void Configure(EntityTypeBuilder<SituationParameter> builder)
     {
         builder.ToTable("SituationParameters", x => x.IsTemporal());
-        builder.HasKey(x => x.SituationParameterId);
-        builder.Property(x => x.SituationParameterId).ValueGeneratedOnAdd();
+        builder.HasKey(x => new{ x.SituationId, x.ParameterId });
         builder.Property(x => x.SituationId).IsRequired();
         builder.Property(x => x.ParameterId).IsRequired();
 

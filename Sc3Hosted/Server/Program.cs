@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Reflection;
 using Sc3Hosted.Server.Entities;
-using Sc3Hosted.Server.Services;
+using Sc3Hosted.Server.Extensions;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var jwtIssuer = builder.Configuration["JwtIssuer"];
@@ -23,9 +22,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>()
 		.AddRoles<IdentityRole>()
 		.AddEntityFrameworkStores<Sc3HostedDbContext>();
 builder.Services.AddSwaggerGen();
-builder.Services.AddTransient<IDbService, DbService>();
-builder.Services.AddScoped<IUserContextService, UserContextService>();
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+builder.Services.ServiceWrapper();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 		.AddJwtBearer(options =>
 		{

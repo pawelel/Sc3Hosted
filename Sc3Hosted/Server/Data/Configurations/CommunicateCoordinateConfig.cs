@@ -9,8 +9,7 @@ public class CommunicateCoordinateConfig : IEntityTypeConfiguration<CommunicateC
     public void Configure(EntityTypeBuilder<CommunicateCoordinate> builder)
     {
         builder.ToTable("CommunicateCoordinates", x => x.IsTemporal());
-        builder.HasKey(x => x.CommunicateCoordinateId);
-        builder.Property(x => x.CommunicateCoordinateId).ValueGeneratedOnAdd();
+        builder.HasKey(x => new{x.CommunicateId, x.CoordinateId});
         builder.Property(x => x.CoordinateId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
     }

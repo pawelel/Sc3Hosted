@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class CategoryWithAssetsDto
+public class CategoryWithAssetsDto : BaseDto
 {
     public int CategoryId { get; set; }
     public string Name { get; set; } = string.Empty;

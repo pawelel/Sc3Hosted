@@ -2,7 +2,7 @@
 
 public class CategorySituation  : BaseEntity
 {
-    public int CategorySituationId { get; set; }
+ 
     
     public int CategoryId { get; set; }
     public virtual Situation Situation { get; set; } = new();

@@ -10,8 +10,7 @@ public class CommunicateCategoryConfig : IEntityTypeConfiguration<CommunicateCat
     public void Configure(EntityTypeBuilder<CommunicateCategory> builder)
     {
         builder.ToTable("CommunicateCategories", x => x.IsTemporal());
-        builder.HasKey(x => x.CommunicateCategoryId);
-        builder.Property(x => x.CommunicateCategoryId).ValueGeneratedOnAdd();
+        builder.HasKey(x => new{x.CommunicateId, x.CategoryId});
         builder.Property(x => x.CommunicateId).IsRequired();
         builder.Property(x => x.CategoryId).IsRequired();
     }
