@@ -60,7 +60,7 @@ public partial class AssetSearch : ComponentBase
         int count = 0;
         _filteredAssets = _filteredAssets.Where(a =>
         {
-            return a.Model!.Name == model;
+            return a.ModelName == model;
         });
         if (!_selectedFilters.Contains(model))
         {
@@ -71,7 +71,7 @@ public partial class AssetSearch : ComponentBase
     private void FilterByArea(string area)
     {
         int count = 0;
-        _filteredAssets = _filteredAssets.Where(a => a.Area!.Name == area);
+        _filteredAssets = _filteredAssets.Where(a => a.AreaName == area);
         if (!_selectedFilters.Contains(area))
         {
             count = _filteredAssets.Count();
@@ -81,7 +81,7 @@ public partial class AssetSearch : ComponentBase
     private void FilterBySpace(string space)
     {
         int count = 0;
-        _filteredAssets = _filteredAssets.Where(a => a.Space!.Name == space);
+        _filteredAssets = _filteredAssets.Where(a => a.SpaceName == space);
         if (!_selectedFilters.Contains(space))
         {
             count = _filteredAssets.Count();
@@ -91,7 +91,7 @@ public partial class AssetSearch : ComponentBase
     private void FilterByCoordinate(string coordinate)
     {
         int count = 0;
-        _filteredAssets = _filteredAssets.Where(a => a.Coordinate!.Name == coordinate);
+        _filteredAssets = _filteredAssets.Where(a => a.CoordinateName == coordinate);
         if (!_selectedFilters.Contains(coordinate))
         {
             count = _filteredAssets.Count();
@@ -101,7 +101,7 @@ public partial class AssetSearch : ComponentBase
     private void FilterByDevice(string device)
     {
         int count = 0;
-        _filteredAssets = _filteredAssets.Where(a => a.Device!.Name == device);
+        _filteredAssets = _filteredAssets.Where(a => a.DeviceName == device);
         if (!_selectedFilters.Contains(device))
         {
             count = _filteredAssets.Count();

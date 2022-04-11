@@ -12,6 +12,7 @@ public class AssetDisplayDto : BaseDto
     public string CoordinateName { get; set; } = string.Empty;
     public int CoordinateId { get; set; }
     public string SpaceName { get; set; } = string.Empty;
+    public SpaceType SpaceType { get; set; }
     public int SpaceId { get; set; }
     public string AreaName { get; set; } = string.Empty;
     public int AreaId { get; set; }

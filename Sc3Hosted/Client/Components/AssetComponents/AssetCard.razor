@@ -38,7 +38,7 @@
 
                         </td>
                         <td>
-                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Device?.Name</MudText>
+                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.DeviceName</MudText>
                         </td>
                     </tr>
                  <tr>
@@ -47,7 +47,7 @@
 
                         </td>
                         <td>
-                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Model?.Name</MudText>
+                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.ModelName</MudText>
                         </td>
                     </tr>
                  <tr>
@@ -63,7 +63,7 @@
                       
                 <MudText Typo="Typo.body1">Parametry: </MudText>
                     
-                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Area?.Name</MudText>
+                            <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.AreaName</MudText>
             <MudPaper Class="pa-2 ma-1 mt-2">
                 <MudText Typo="Typo.h5">Szczegóły</MudText>
                 <MudText Typo="Typo.body2">Old paint found on a stone house door.</MudText>
@@ -89,7 +89,7 @@
                 <MudText Typo="Typo.body1">Obszar: </MudText>
                         </td>
                         <td>
-                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Area?.Name</MudText>
+                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.AreaName</MudText>
                         </td>
                     </tr>
                     <tr>
@@ -97,7 +97,7 @@
                 <MudText Typo="Typo.body1">Typ przestrzeni: </MudText>
                         </td>
                         <td>
-                <MudText Class="px-2" Typo="Typo.body2">@(((AssetModel?.Space?.SpaceType!)==null?SpaceType.Unknown:AssetModel?.Space?.SpaceType!).GetAttribute<DisplayAttribute>().Name)</MudText>
+                <MudText Class="px-2" Typo="Typo.body2">@(((AssetModel?.SpaceType!)==null?SpaceType.Unknown:AssetModel?.SpaceType!).GetAttribute<DisplayAttribute>().Name)</MudText>
                         </td>
                     </tr>
                     <tr>
@@ -105,7 +105,7 @@
                 <MudText Typo="Typo.body1">Koordynat: </MudText>
                         </td>
                         <td>
-                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.Coordinate?.Name</MudText>
+                <MudText Class="px-2" Typo="Typo.body2">@AssetModel?.CoordinateName</MudText>
                         </td>
                     </tr>
                     </tbody>

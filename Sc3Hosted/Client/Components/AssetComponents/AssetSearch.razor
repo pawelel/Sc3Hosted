@@ -1,86 +1,86 @@
 ﻿<MudGrid Spacing=2>
     <MudItem xs="12">
-<MudText Typo="Typo.h6">Assety</MudText>
-</MudItem>
-@if (_filteredAssets is not null&& _assets is not null && _filteredAssets.Count() < _assets.Count())
-{
-    <MudItem xs="12">
-    <MudButton Color="Color.Warning" Size=Size.Small Variant=Variant.Outlined OnClick=ResetAssets>Resetuj assety</MudButton>
-    <MudText>Wybrane filtry:@_selectedFilters</MudText>
+        <MudText Typo="Typo.h6">Assety</MudText>
     </MudItem>
-}
-<MudItem xs=0 sm=6 md=8></MudItem>
-<MudItem xs="12" sm="6" md="4">
-<MudTextField Variant="Variant.Outlined" @bind-Value="_searchString" Placeholder="Szukaj" Immediate=true Adornment="Adornment.Start" AdornmentColor="Color.Warning" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-</MudItem>
-<MudItem xs="12">
-<MudDataGrid Dense=true Hideable="true" Items="@_filteredAssets" RowsPerPage=5 Sortable="true" Filterable="true" QuickFilter="AssetFilter">
-    <Columns>
-        <Column T="AssetDisplayDto" Field=Name Title="Asset">
-            <CellTemplate>
-                <MudButton Variant="Variant.Outlined" StartIcon="@((context.Item.ShowDetails == true)?@Icons.Filled.ArrowDropDown:@Icons.Filled.ArrowRight)" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.Item))">@context.Item.Name</MudButton>
-            </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Field="@nameof(AssetDisplayDto.Device.Name)" Title="Sprzęt" >
-            <CellTemplate>
-                <MudChip OnClick=@(()=>FilterByDevice(context.Item.Device?.Name??""))>@context.Item.Device?.Name</MudChip>
-            </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Filterable=false Sortable=true Field=Status Title="Status" >
-           <CellTemplate>
-               <MudChip OnClick=@(()=>FilterByStatus(context.Item.Status)) Color="@(Utils.SetColor(context.Item.Status))">@(context.Item.Status.GetAttribute<DisplayAttribute>().Name)</MudChip>
-           </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.Model.Name) Title="Model" >
-            <CellTemplate>
-                <MudChip OnClick=@(()=>FilterByModel(context.Item.Model?.Name??""))>@context.Item.Model?.Name</MudChip>
-            </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.Area.Name) Title="Obszar" >
-               <CellTemplate>
-                <MudChip OnClick=@(()=>FilterByArea(context.Item.Area?.Name??""))>@context.Item.Area?.Name</MudChip>
-            </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.Space.Name) Title="Przestrzeń" >
-               <CellTemplate>
-                <MudChip OnClick=@(()=>FilterBySpace(@context.Item.Space!.Name??""))>@context.Item.Space!.Name</MudChip>
-            </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.Coordinate.Name) Title="Koordynat" >
-            <CellTemplate>
-                <MudChip OnClick=@(()=>FilterByCoordinate(context.Item.Coordinate?.Name??""))>@context.Item.Coordinate!.Name</MudChip>
-            </CellTemplate>
-        </Column>
-        <Column T="AssetDisplayDto" Sortable=false Filterable=false Field=@nameof(AssetDisplayDto.Categories) Title="Kategorie">
-            <CellTemplate>
-                @foreach (var cat in @context.Item.Categories!)
+    @if (_filteredAssets is not null && _assets is not null && _filteredAssets.Count() < _assets.Count())
+    {
+        <MudItem xs="12">
+            <MudButton Color="Color.Warning" Size=Size.Small Variant=Variant.Outlined OnClick=ResetAssets>Resetuj assety</MudButton>
+            <MudText>Wybrane filtry:@_selectedFilters</MudText>
+        </MudItem>
+    }
+    <MudItem xs=0 sm=6 md=8></MudItem>
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField Variant="Variant.Outlined" @bind-Value="_searchString" Placeholder="Szukaj" Immediate=true Adornment="Adornment.Start" AdornmentColor="Color.Warning" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </MudItem>
+    <MudItem xs="12">
+        <MudDataGrid Dense=true Hideable="true" Items="@_filteredAssets" RowsPerPage=5 Sortable="true" Filterable="true" QuickFilter="AssetFilter">
+            <Columns>
+                <Column T="AssetDisplayDto" Field=Name Title="Asset">
+                    <CellTemplate>
+                        <MudButton Variant="Variant.Outlined" StartIcon="@((context.Item.ShowDetails == true)?@Icons.Filled.ArrowDropDown:@Icons.Filled.ArrowRight)" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.Item))">@context.Item.Name</MudButton>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Field="@nameof(AssetDisplayDto.DeviceName)" Title="Sprzęt">
+                    <CellTemplate>
+                        <MudChip OnClick=@(() => FilterByDevice(context.Item.DeviceName??""))>@context.Item.DeviceName</MudChip>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Filterable=false Sortable=true Field=Status Title="Status">
+                    <CellTemplate>
+                        <MudChip OnClick=@(() => FilterByStatus(context.Item.Status)) Color="@(Utils.SetColor(context.Item.Status))">@(context.Item.Status.GetAttribute<DisplayAttribute>().Name)</MudChip>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.ModelName) Title="Model">
+                    <CellTemplate>
+                        <MudChip OnClick=@(() => FilterByModel(context.Item.ModelName??""))>@context.Item.ModelName</MudChip>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.AreaName) Title="Obszar">
+                    <CellTemplate>
+                        <MudChip OnClick=@(() => FilterByArea(context.Item.AreaName??""))>@context.Item.AreaName</MudChip>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.SpaceName) Title="Przestrzeń">
+                    <CellTemplate>
+                        <MudChip OnClick=@(() => FilterBySpace(@context.Item.SpaceName??""))>@context.Item.SpaceName</MudChip>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Field=@nameof(AssetDisplayDto.CoordinateName) Title="Koordynat">
+                    <CellTemplate>
+                        <MudChip OnClick=@(() => FilterByCoordinate(context.Item.CoordinateName??""))>@context.Item.CoordinateName</MudChip>
+                    </CellTemplate>
+                </Column>
+                <Column T="AssetDisplayDto" Sortable=false Filterable=false Field=@nameof(AssetDisplayDto.Categories) Title="Kategorie">
+                    <CellTemplate>
+                        @foreach (var cat in @context.Item.Categories!)
+                        {
+                            <MudChip OnClick=@(() => FilterByCategory(cat?.Name??""))>@cat?.Name</MudChip>
+                        }
+                    </CellTemplate>
+                </Column>
+            </Columns>
+            <ChildRowContent>
+                @if (context.ShowDetails)
                 {
-                    <MudChip OnClick=@(()=>FilterByCategory(cat.Name??"")) >@cat.Name</MudChip>
-                }
-            </CellTemplate>
-        </Column>
-    </Columns>
-    <ChildRowContent>
-        @if (context.ShowDetails)
-        {
 
-            if (context is not null)
-            {
-                <tr>
-                    <td colspan="8">
-                        <AssetCard AssetModel=@context/>
-                    </td>
-                </tr>
-            }
-            else
-            {
-                <b>Brak danych</b>
-            }
-        }
-    </ChildRowContent>
-    <PagerContent>
-        <MudDataGridPager T="AssetDisplayDto" RowsPerPageString="Elementów na stronę" PageSizeOptions="Utils.PageSizeOptions"  />
-    </PagerContent>
-</MudDataGrid>
-</MudItem>
+                    if (!string.IsNullOrWhiteSpace(context.Name))
+                    {
+                        <tr>
+                            <td colspan="8">
+                                <AssetCard AssetModel=@context />
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <b>Brak danych</b>
+                    }
+                }
+            </ChildRowContent>
+            <PagerContent>
+                <MudDataGridPager T="AssetDisplayDto" RowsPerPageString="Elementów na stronę" PageSizeOptions="Utils.PageSizeOptions"/>
+            </PagerContent>
+        </MudDataGrid>
+    </MudItem>
 </MudGrid>

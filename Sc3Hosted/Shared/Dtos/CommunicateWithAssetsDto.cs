@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sc3Hosted.Shared.Dtos;
-public class CommunicateWithAssetsDto
+public class CommunicateWithAssetsDto : BaseDto
 {
     public int CommunicateId { get; set; }
     public string Name { get; set; } = string.Empty;
