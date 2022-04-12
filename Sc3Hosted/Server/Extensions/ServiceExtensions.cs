@@ -1,4 +1,5 @@
-﻿using Sc3Hosted.Server.Services;
+﻿using Sc3Hosted.Server.Middleware;
+using Sc3Hosted.Server.Services;
 namespace Sc3Hosted.Server.Extensions;
 public static class ServiceExtensions
 {
@@ -8,7 +9,8 @@ public static class ServiceExtensions
         services.AddTransient<ICommunicateService, CommunicateService>();
         services.AddTransient<ISituationService, SituationService>();
         services.AddTransient<ILocationService, LocationService>();
+        
         services.AddScoped<IUserContextService, UserContextService>();
-
+        services.AddScoped<ErrorHandlingMiddleware>();
     }
 }

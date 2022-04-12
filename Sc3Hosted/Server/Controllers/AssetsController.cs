@@ -25,17 +25,16 @@ public class AssetsController : ControllerBase
         var userId = _userContextService.UserId;
         var result = await _assetService.UpdateAsset(assetId, assetUpdateDto, userId);
 
-        if (result.Success)
+       
             return Ok(result);
-        return BadRequest(result.Message);
+      
     }
     [HttpPut("{assetId:int}/categories/{categoryId:int}")]
     public async Task<IActionResult> UpdateCategory(AssetCategoryDto assetCategoryDto, int assetId, int categoryId)
     {
         var userId = _userContextService.UserId;
         var result = await _assetService.AddOrUpdateAssetCategory(assetCategoryDto, userId);
-        if (result.Success)
+     
             return Ok(result);
-        return BadRequest(result.Message);
     }
 }

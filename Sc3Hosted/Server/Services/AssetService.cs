@@ -2,117 +2,117 @@
 
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Entities;
+using Sc3Hosted.Server.Exceptions;
 using Sc3Hosted.Shared.Dtos;
-using Sc3Hosted.Shared.Helpers;
 
 namespace Sc3Hosted.Server.Services;
 
 public interface IAssetService
 {
-    Task<ServiceResponse> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<bool> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
 
-    Task<ServiceResponse> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<bool> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto, string userId);
 
-    Task<ServiceResponse> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<bool> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto, string userId);
 
-    Task<ServiceResponse> ChangeAssetsModel(int assetId, int modelId, string userId);
+    Task<bool> ChangeAssetsModel(int assetId, int modelId, string userId);
 
-    Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId);
+    Task<int> CreateAsset(AssetCreateDto assetCreateDto, string userId);
 
-    Task<ServiceResponse> CreateCategory(CategoryCreateDto categoryCreateDto, string userId);
+    Task<int> CreateCategory(CategoryCreateDto categoryCreateDto, string userId);
 
-    Task<ServiceResponse> CreateDetail(DetailCreateDto detailCreateDto, string userId);
+    Task<int> CreateDetail(DetailCreateDto detailCreateDto, string userId);
 
-    Task<ServiceResponse> CreateDevice(DeviceCreateDto deviceCreateDto, string userId);
+    Task<int> CreateDevice(DeviceCreateDto deviceCreateDto, string userId);
 
-    Task<ServiceResponse> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId);
+    Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId);
 
-    Task<ServiceResponse> CreateParameter(ParameterCreateDto parameterCreateDto, string userId);
+    Task<int> CreateParameter(ParameterCreateDto parameterCreateDto, string userId);
 
-    Task<ServiceResponse> DeleteAsset(int assetId);
+    Task<bool> DeleteAsset(int assetId);
 
-    Task<ServiceResponse> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<bool> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
 
-    Task<ServiceResponse> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<bool> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
 
-    Task<ServiceResponse> DeleteCategory(int categoryId);
+    Task<bool> DeleteCategory(int categoryId);
 
-    Task<ServiceResponse> DeleteDetail(int detailId);
+    Task<bool> DeleteDetail(int detailId);
 
-    Task<ServiceResponse> DeleteDevice(int deviceId);
+    Task<bool> DeleteDevice(int deviceId);
 
-    Task<ServiceResponse> DeleteModel(int modelId);
+    Task<bool> DeleteModel(int modelId);
 
-    Task<ServiceResponse> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<bool> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
 
-    Task<ServiceResponse> DeleteParameter(int parameterId);
+    Task<bool> DeleteParameter(int parameterId);
 
-    Task<ServiceResponse<AssetDto>> GetAssetById(int assetId);
+    Task<AssetDto> GetAssetById(int assetId);
 
-    Task<ServiceResponse<IEnumerable<AssetDisplayDto>>> GetAssetDisplay();
+    Task<IEnumerable<AssetDisplayDto>> GetAssetDisplay();
 
-    Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets();
-    Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategories();
+    Task<IEnumerable<AssetDto>> GetAssets();
+    Task<IEnumerable<CategoryDto>> GetCategories();
 
-    Task<ServiceResponse<IEnumerable<CategoryWithAssetsDto>>> GetCategoriesWithAssets();
+    Task<IEnumerable<CategoryWithAssetsDto>> GetCategoriesWithAssets();
 
-    Task<ServiceResponse<CategoryDto>> GetCategoryById(int categoryId);
+    Task<CategoryDto> GetCategoryById(int categoryId);
 
-    Task<ServiceResponse<CategoryWithAssetsDto>> GetCategoryByIdWithAssets(int categoryId);
+    Task<CategoryWithAssetsDto>GetCategoryByIdWithAssets(int categoryId);
 
-    Task<ServiceResponse<DetailDto>> GetDetailById(int detailId);
+    Task<DetailDto> GetDetailById(int detailId);
 
-    Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetails();
+    Task<IEnumerable<DetailDto>> GetDetails();
 
-    Task<ServiceResponse<IEnumerable<DetailWithAssetsDto>>> GetDetailsWithAssets();
+    Task<IEnumerable<DetailWithAssetsDto>> GetDetailsWithAssets();
 
-    Task<ServiceResponse<DeviceDto>> GetDeviceById(int deviceId);
+    Task<DeviceDto> GetDeviceById(int deviceId);
 
-    Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevices();
+    Task<IEnumerable<DeviceDto>> GetDevices();
 
-    Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevicesWithModels();
+    Task<IEnumerable<DeviceDto>> GetDevicesWithModels();
 
-    Task<ServiceResponse<ModelDto>> GetModelById(int modelId);
+    Task<ModelDto> GetModelById(int modelId);
 
-    Task<ServiceResponse<IEnumerable<ModelDto>>> GetModels();
+    Task<IEnumerable<ModelDto>> GetModels();
 
-    Task<ServiceResponse<IEnumerable<ModelDto>>> GetModelsWithAssets();
+    Task<IEnumerable<ModelDto>> GetModelsWithAssets();
 
-    Task<ServiceResponse<ParameterDto>> GetParameterById(int parameterId);
+    Task<ParameterDto> GetParameterById(int parameterId);
 
-    Task<ServiceResponse<IEnumerable<ParameterDto>>> GetParameters();
+    Task<IEnumerable<ParameterDto>> GetParameters();
 
-    Task<ServiceResponse<IEnumerable<ParameterWithModelsDto>>> GetParametersWithModels();
+    Task<IEnumerable<ParameterWithModelsDto>> GetParametersWithModels();
 
-    Task<ServiceResponse> MarkDeleteAsset(int assetId, string userId);
+    Task<bool> MarkDeleteAsset(int assetId, string userId);
 
-    Task<ServiceResponse> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<bool> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
 
-    Task<ServiceResponse> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<bool> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
 
-    Task<ServiceResponse> MarkDeleteCategory(int categoryId, string userId);
+    Task<bool> MarkDeleteCategory(int categoryId, string userId);
 
-    Task<ServiceResponse> MarkDeleteDetail(int detailId, string userId);
+    Task<bool> MarkDeleteDetail(int detailId, string userId);
 
-    Task<ServiceResponse> MarkDeleteDevice(int deviceId, string userId);
+    Task<bool> MarkDeleteDevice(int deviceId, string userId);
 
-    Task<ServiceResponse> MarkDeleteModel(int modelId, string userId);
+    Task<bool> MarkDeleteModel(int modelId, string userId);
 
-    Task<ServiceResponse> MarkDeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<bool> MarkDeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
 
-    Task<ServiceResponse> MarkDeleteParameter(int parameterId, string userId);
+    Task<bool> MarkDeleteParameter(int parameterId, string userId);
 
-    Task<ServiceResponse> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto, string userId);
+    Task<bool> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto, string userId);
 
-    Task<ServiceResponse> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto, string userId);
+    Task<bool> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto, string userId);
 
-    Task<ServiceResponse> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto, string userId);
+    Task<bool> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto, string userId);
 
-    Task<ServiceResponse> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto, string userId);
+    Task<bool> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto, string userId);
 
-    Task<ServiceResponse> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto, string userId);
+    Task<bool> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto, string userId);
 
-    Task<ServiceResponse> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto, string userId);
+    Task<bool> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto, string userId);
 }
 
 public class AssetService : IAssetService
@@ -126,7 +126,7 @@ public class AssetService : IAssetService
         _logger = logger;
     }
 
-    public async Task<ServiceResponse> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
+    public async Task<bool> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -139,13 +139,13 @@ public class AssetService : IAssetService
             if (category == null || category.IsDeleted)
             {
                 _logger.LogWarning("Category not found");
-                return new ServiceResponse("Category not found");
+                throw new NotFoundException("Category not found");
             }
             var asset = assetCategoryDto.AssetId < 1 ? null : await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetCategoryDto.AssetId);
             if (asset == null || asset.IsDeleted)
             {
                 _logger.LogWarning("Asset not found");
-                return new ServiceResponse("Asset not found");
+                throw new NotFoundException("Asset not found");
             }
             assetCategory = new AssetCategory
             {
@@ -170,17 +170,17 @@ public class AssetService : IAssetService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("AssetCategory updated");
-            return new ServiceResponse("AssetCategory updated", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating assetCategory");
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating assetCategory");
+            throw new  BadRequestException("Error updating assetCategory");
         }
     }
 
-    public async Task<ServiceResponse> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto, string userId)
+    public async Task<bool> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -193,13 +193,13 @@ public class AssetService : IAssetService
             if (detail == null || detail.IsDeleted)
             {
                 _logger.LogWarning("Detail not found");
-                return new ServiceResponse("Detail not found");
+                throw new NotFoundException("Detail not found");
             }
             var asset = assetDetailDto.AssetId < 1 ? null : await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetDetailDto.AssetId);
             if (asset == null || asset.IsDeleted)
             {
                 _logger.LogWarning("Asset not found");
-                return new ServiceResponse("Asset not found");
+                throw new NotFoundException("Asset not found");
             }
             assetDetail = new AssetDetail
             {
@@ -226,17 +226,17 @@ public class AssetService : IAssetService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("AssetDetail updated");
-            return new ServiceResponse("AssetDetail updated", true);
+            return  true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating assetDetail");
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating assetDetail");
+            throw new BadRequestException("Error updating assetDetail");
         }
     }
 
-    public async Task<ServiceResponse> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto, string userId)
+    public async Task<bool> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -248,13 +248,13 @@ public class AssetService : IAssetService
             if (parameter == null || parameter.IsDeleted)
             {
                 _logger.LogWarning("Parameter not found");
-                return new ServiceResponse("Parameter not found");
+                throw new NotFoundException("Parameter not found");
             }
             var model = modelParameterDto.ModelId < 1 ? null : await context.Models.FirstOrDefaultAsync(a => a.ModelId == modelParameterDto.ModelId);
             if (model == null || model.IsDeleted)
             {
                 _logger.LogWarning("Model not found");
-                return new ServiceResponse("Model not found");
+                throw new  NotFoundException("Model not found");
             }
             modelParameter = new ModelParameter
             {
@@ -282,17 +282,17 @@ public class AssetService : IAssetService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("ModelParameter updated");
-            return new ServiceResponse("ModelParameter updated", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating modelParameter");
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating modelParameter");
+            throw new BadRequestException("Error updating modelParameter");
         }
     }
 
-    public async Task<ServiceResponse> ChangeAssetsModel(int assetId, int modelId, string userId)
+    public async Task<bool> ChangeAssetsModel(int assetId, int modelId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -301,30 +301,30 @@ public class AssetService : IAssetService
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
-            return new ServiceResponse("Asset not found");
+            throw new NotFoundException("Asset not found");
         }
         if (asset.ModelId == modelId)
         {
             _logger.LogWarning("Asset already assigned to model");
-            return new ServiceResponse("Asset already has this model");
+            throw new BadRequestException("Asset already has this model");
         }
         if (asset.IsDeleted)
         {
             _logger.LogWarning("Asset marked as deleted");
-            return new ServiceResponse("Asset marked as deleted");
+            return true;
         }
 
         var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == modelId);
         if (model == null)
         {
             _logger.LogWarning("Model not found");
-            return new ServiceResponse("Model not found");
+            throw new NotFoundException("Model not found");
         }
 
         if (model.IsDeleted)
         {
             _logger.LogWarning("Model marked as deleted");
-            return new ServiceResponse("Model marked as deleted");
+            throw new BadRequestException("Model marked as deleted");
         }
         // delete all asset details
         context.AssetDetails.RemoveRange(asset.AssetDetails);
@@ -346,18 +346,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Asset with id {AssetId} updated", assetId);
-            return new ServiceResponse($"Asset {assetId} updated", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating asset with id {AssetId}", assetId);
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse($"Error updating asset with id {assetId}");
+            throw new BadRequestException($"Error updating asset with id {assetId}");
         }
     }
 
-    public async Task<ServiceResponse> CreateAsset(AssetCreateDto assetCreateDto, string userId)
+    public async Task<int> CreateAsset(AssetCreateDto assetCreateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -367,24 +367,24 @@ public class AssetService : IAssetService
         if (model == null)
         {
             _logger.LogWarning("Model not found");
-            return new ServiceResponse("Model not found");
+            throw new NotFoundException("Model not found");
         }
         if (model.IsDeleted)
         {
             _logger.LogWarning("Model marked as deleted");
-            return new ServiceResponse("Model marked as deleted");
+            throw new BadRequestException("Model marked as deleted");
         }
         // get coordinate
         var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
         if (coordinate == null)
         {
             _logger.LogWarning("Coordinate not found");
-            return new ServiceResponse("Coordinate not found");
+            throw new NotFoundException("Coordinate not found");
         }
         if (coordinate.IsDeleted)
         {
             _logger.LogWarning("Coordinate marked as deleted");
-            return new ServiceResponse("Coordinate marked as deleted");
+            throw new BadRequestException("Coordinate marked as deleted");
         }
 
         // validate asset name
@@ -392,7 +392,7 @@ public class AssetService : IAssetService
         if (duplicate)
         {
             _logger.LogWarning("Asset name already exists");
-            return new ServiceResponse("Asset name already exists");
+            throw new BadRequestException("Asset name already exists");
         }
 
         var asset = new Asset
@@ -417,18 +417,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Asset with id {AssetId} created", asset.AssetId);
-            return new ServiceResponse($"Asset {asset.AssetId} created", true);
+            return asset.AssetId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating asset");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error creating asset");
+            throw new BadRequestException("Error creating asset");
         }
     }
 
-    public async Task<ServiceResponse> CreateCategory(CategoryCreateDto categoryCreateDto, string userId)
+    public async Task<int> CreateCategory(CategoryCreateDto categoryCreateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -438,7 +438,7 @@ public class AssetService : IAssetService
         if (duplicate)
         {
             _logger.LogWarning("Category name already exists");
-            return new ServiceResponse("Category name already exists");
+            throw new BadRequestException("Category name already exists");
         }
 
         var category = new Category
@@ -459,18 +459,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Category with id {CategoryId} created", category.CategoryId);
-            return new ServiceResponse($"Category {category.CategoryId} created", true);
+            return category.CategoryId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating category");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error creating category");
+            throw new BadRequestException("Error creating category");
         }
     }
 
-    public async Task<ServiceResponse> CreateDetail(DetailCreateDto detailCreateDto, string userId)
+    public async Task<int> CreateDetail(DetailCreateDto detailCreateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -480,7 +480,7 @@ public class AssetService : IAssetService
         if (duplicate)
         {
             _logger.LogWarning("Detail name already exists");
-            return new ServiceResponse("Detail name already exists");
+            throw  new BadRequestException("Detail name already exists");
         }
 
         var detail = new Detail
@@ -501,18 +501,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Detail with id {DetailId} created", detail.DetailId);
-            return new ServiceResponse($"Detail {detail.DetailId} created", true);
+            return detail.DetailId ;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating detail");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error creating detail");
+            throw new BadRequestException("Error creating detail");
         }
     }
 
-    public async Task<ServiceResponse> CreateDevice(DeviceCreateDto deviceCreateDto, string userId)
+    public async Task<int> CreateDevice(DeviceCreateDto deviceCreateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -522,7 +522,7 @@ public class AssetService : IAssetService
         if (duplicate)
         {
             _logger.LogWarning("Device name already exists");
-            return new ServiceResponse("Device name already exists");
+            throw new BadRequestException("Device name already exists");
         }
 
         var device = new Device
@@ -543,18 +543,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Device with id {DeviceId} created", device.DeviceId);
-            return new ServiceResponse($"Device {device.DeviceId} created", true);
+            return device.DeviceId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating device");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error creating device");
+            throw new BadRequestException("Error creating device");
         }
     }
 
-    public async Task<ServiceResponse> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId)
+    public async Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -564,20 +564,20 @@ public class AssetService : IAssetService
         if (duplicate)
         {
             _logger.LogWarning("Model name already exists");
-            return new ServiceResponse("Model name already exists");
+            throw new BadRequestException("Model name already exists");
         }
         // get device
         var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == deviceId);
         if (device == null)
         {
             _logger.LogWarning("Device not found");
-            return new ServiceResponse("Device not found");
+            throw new NotFoundException("Device not found");
         }
         // check if device is marked as deleted
         if (device.IsDeleted)
         {
             _logger.LogWarning("Device is marked as deleted");
-            return new ServiceResponse("Device is marked as deleted");
+            throw new BadRequestException("Device is marked as deleted");
         }
 
         var model = new Model
@@ -599,18 +599,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Model with id {ModelId} created", model.ModelId);
-            return new ServiceResponse($"Model {model.ModelId} created", true);
+            return model.ModelId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating model");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error creating model");
+            throw new BadRequestException("Error creating model");
         }
     }
 
-    public async Task<ServiceResponse> CreateParameter(ParameterCreateDto parameterCreateDto, string userId)
+    public async Task<int> CreateParameter(ParameterCreateDto parameterCreateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -620,7 +620,7 @@ public class AssetService : IAssetService
         if (duplicate)
         {
             _logger.LogWarning("Parameter name already exists");
-            return new ServiceResponse("Parameter name already exists");
+            throw new BadRequestException("Parameter name already exists");
         }
         var parameter = new Parameter
         {
@@ -640,18 +640,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Parameter with id {ParameterId} created", parameter.ParameterId);
-            return new ServiceResponse($"Parameter {parameter.ParameterId} created", true);
+            return parameter.ParameterId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating parameter");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error creating parameter");
+            throw new BadRequestException("Error creating parameter");
         }
     }
 
-    public async Task<ServiceResponse> DeleteAsset(int assetId)
+    public async Task<bool> DeleteAsset(int assetId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -661,13 +661,13 @@ public class AssetService : IAssetService
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
-            return new ServiceResponse("Asset not found");
+            throw new NotFoundException("Asset not found");
         }
         // check if asset is marked as deleted
         if (asset.IsDeleted == false)
         {
             _logger.LogWarning("Asset is not marked as deleted");
-            return new ServiceResponse("Asset is not marked as deleted");
+            throw new BadRequestException("Asset is not marked as deleted");
         }
         // delete asset
         context.Assets.Remove(asset);
@@ -680,18 +680,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Asset with id {AssetId} deleted", asset.AssetId);
-            return new ServiceResponse($"Asset {asset.AssetId} deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting asset");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error deleting asset");
+            throw new BadRequestException("Error deleting asset");
         }
     }
 
-    public async Task<ServiceResponse> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
+    public async Task<bool> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -701,7 +701,7 @@ public class AssetService : IAssetService
         if (assetCategory == null)
         {
             _logger.LogWarning("AssetCategory not found");
-            return new ServiceResponse("AssetCategory not found");
+            throw new NotFoundException("AssetCategory not found");
         }
         if (assetCategory.IsDeleted)
         {
@@ -714,20 +714,20 @@ public class AssetService : IAssetService
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 _logger.LogInformation("AssetCategory deleted");
-                return new ServiceResponse("AssetCategory deleted", true);
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting assetCategory");
                 await transaction.RollbackAsync();
-                return new ServiceResponse("Error deleting assetCategory");
+                throw new BadRequestException("Error deleting assetCategory");
             }
         }
         _logger.LogWarning("AssetCategory is not marked as deleted");
-        return new ServiceResponse("AssetCategory is not marked as deleted");
+        throw new BadRequestException("AssetCategory is not marked as deleted");
     }
 
-    public async Task<ServiceResponse> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
+    public async Task<bool> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -737,7 +737,7 @@ public class AssetService : IAssetService
         if (assetDetail == null)
         {
             _logger.LogWarning("AssetDetail not found");
-            return new ServiceResponse("AssetDetail not found");
+            throw new NotFoundException("AssetDetail not found");
         }
         if (assetDetail.IsDeleted)
         {
@@ -750,20 +750,20 @@ public class AssetService : IAssetService
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 _logger.LogInformation("AssetDetail deleted");
-                return new ServiceResponse("AssetDetail deleted", true);
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting assetDetail");
                 await transaction.RollbackAsync();
-                return new ServiceResponse("Error deleting assetDetail");
+                throw new BadRequestException("Error deleting assetDetail");
             }
         }
         _logger.LogWarning("AssetDetail is not marked as deleted");
-        return new ServiceResponse("AssetDetail is not marked as deleted");
+        throw new BadRequestException("AssetDetail is not marked as deleted");
     }
 
-    public async Task<ServiceResponse> DeleteCategory(int categoryId)
+    public async Task<bool> DeleteCategory(int categoryId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -773,13 +773,13 @@ public class AssetService : IAssetService
         if (category == null)
         {
             _logger.LogWarning("Category not found");
-            return new ServiceResponse("Category not found");
+            throw new NotFoundException("Category not found");
         }
         // check if category is marked as deleted
         if (category.IsDeleted == false)
         {
             _logger.LogWarning("Category is not marked as deleted");
-            return new ServiceResponse("Category is not marked as deleted");
+            throw new BadRequestException("Category is not marked as deleted");
         }
         // delete category
         context.Categories.Remove(category);
@@ -792,18 +792,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Category with id {CategoryId} deleted", category.CategoryId);
-            return new ServiceResponse($"Category {category.CategoryId} deleted", true);
+            return  true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting category");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error deleting category");
+            throw new BadRequestException("Error deleting category");
         }
     }
 
-    public async Task<ServiceResponse> DeleteDetail(int detailId)
+    public async Task<bool> DeleteDetail(int detailId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -813,13 +813,13 @@ public class AssetService : IAssetService
         if (detail == null)
         {
             _logger.LogWarning("Detail not found");
-            return new ServiceResponse("Detail not found");
+            throw new NotFoundException("Detail not found");
         }
         // check if detail is marked as deleted
         if (detail.IsDeleted == false)
         {
             _logger.LogWarning("Detail is not marked as deleted");
-            return new ServiceResponse("Detail is not marked as deleted");
+            throw new BadRequestException("Detail is not marked as deleted");
         }
         // delete detail
         context.Details.Remove(detail);
@@ -832,18 +832,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Detail with id {DetailId} deleted", detail.DetailId);
-            return new ServiceResponse($"Detail {detail.DetailId} deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting detail");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error deleting detail");
+            throw new BadRequestException("Error deleting detail");
         }
     }
 
-    public async Task<ServiceResponse> DeleteDevice(int deviceId)
+    public async Task<bool> DeleteDevice(int deviceId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -853,13 +853,13 @@ public class AssetService : IAssetService
         if (device == null)
         {
             _logger.LogWarning("Device not found");
-            return new ServiceResponse("Device not found");
+            throw new NotFoundException("Device not found");
         }
         // check if device is marked as deleted
         if (device.IsDeleted == false)
         {
             _logger.LogWarning("Device is not marked as deleted");
-            return new ServiceResponse("Device is not marked as deleted");
+            throw new BadRequestException("Device is not marked as deleted");
         }
         // delete device
         context.Devices.Remove(device);
@@ -872,18 +872,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Device with id {DeviceId} deleted", device.DeviceId);
-            return new ServiceResponse($"Device {device.DeviceId} deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting device");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error deleting device");
+            throw new BadRequestException("Error deleting device");
         }
     }
 
-    public async Task<ServiceResponse> DeleteModel(int modelId)
+    public async Task<bool> DeleteModel(int modelId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -893,13 +893,13 @@ public class AssetService : IAssetService
         if (model == null)
         {
             _logger.LogWarning("Model not found");
-            return new ServiceResponse("Model not found");
+            throw new NotFoundException("Model not found");
         }
         // check if model is marked as deleted
         if (model.IsDeleted == false)
         {
             _logger.LogWarning("Model is not marked as deleted");
-            return new ServiceResponse("Model is not marked as deleted");
+            throw new BadRequestException("Model is not marked as deleted");
         }
         // delete model
         context.Models.Remove(model);
@@ -912,18 +912,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Model with id {ModelId} deleted", model.ModelId);
-            return new ServiceResponse($"Model {model.ModelId} deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting model");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error deleting model");
+            throw new BadRequestException("Error deleting model");
         }
     }
 
-    public async Task<ServiceResponse> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
+    public async Task<bool> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -933,7 +933,7 @@ public class AssetService : IAssetService
         if (modelParameter == null)
         {
             _logger.LogWarning("ModelParameter not found");
-            return new ServiceResponse("ModelParameter not found");
+            throw new NotFoundException("ModelParameter not found");
         }
         if (modelParameter.IsDeleted)
         {// await using transaction
@@ -945,20 +945,20 @@ public class AssetService : IAssetService
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 _logger.LogInformation("ModelParameter deleted");
-                return new ServiceResponse("ModelParameter deleted", true);
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting modelParameter");
                 await transaction.RollbackAsync();
-                return new ServiceResponse("Error deleting modelParameter");
+                throw new BadRequestException("Error deleting modelParameter");
             }
         }
         _logger.LogWarning("ModelParameter is not marked as deleted");
-        return new ServiceResponse("ModelParameter is not marked as deleted");
+        throw new BadRequestException("ModelParameter is not marked as deleted");
     }
 
-    public async Task<ServiceResponse> DeleteParameter(int parameterId)
+    public async Task<bool> DeleteParameter(int parameterId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -968,13 +968,13 @@ public class AssetService : IAssetService
         if (parameter == null)
         {
             _logger.LogWarning("Parameter not found");
-            return new ServiceResponse("Parameter not found");
+            throw new NotFoundException("Parameter not found");
         }
         // check if parameter is marked as deleted
         if (parameter.IsDeleted == false)
         {
             _logger.LogWarning("Parameter is not marked as deleted");
-            return new ServiceResponse("Parameter is not marked as deleted");
+            throw new BadRequestException("Parameter is not marked as deleted");
         }
         // delete parameter
         context.Parameters.Remove(parameter);
@@ -987,18 +987,18 @@ public class AssetService : IAssetService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Parameter with id {ParameterId} deleted", parameter.ParameterId);
-            return new ServiceResponse($"Parameter {parameter.ParameterId} deleted", true);
+            return  true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting parameter");
             // rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error deleting parameter");
+            throw new BadRequestException("Error deleting parameter");
         }
     }
 
-    public async Task<ServiceResponse<AssetDto>> GetAssetById(int assetId)
+    public async Task<AssetDto> GetAssetById(int assetId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1019,14 +1019,14 @@ public class AssetService : IAssetService
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
-            return new ServiceResponse<AssetDto>("Asset not found");
+            return null!;
         }
         // return asset
         _logger.LogInformation("Asset with id {AssetId} found", asset.AssetId);
-        return new ServiceResponse<AssetDto>(asset, "Asset found");
+        return asset;
     }
 
-    public async Task<ServiceResponse<IEnumerable<AssetDisplayDto>>> GetAssetDisplay()
+    public async Task<IEnumerable<AssetDisplayDto>> GetAssetDisplay()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1082,14 +1082,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No assets found");
-            return new ServiceResponse<IEnumerable<AssetDisplayDto>>("No assets found", true);
+            return null!;
         }
         // return assets
         _logger.LogInformation("Assets found");
-        return new ServiceResponse<IEnumerable<AssetDisplayDto>>(query, "Assets found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<AssetDto>>> GetAssets()
+    public async Task<IEnumerable<AssetDto>> GetAssets()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1112,13 +1112,13 @@ public class AssetService : IAssetService
         if (assets.Count == 0)
         {
             _logger.LogWarning("No assets found");
-            return new ServiceResponse<IEnumerable<AssetDto>>("No assets found", true);
+            return null!;
         }
         // return assets
         _logger.LogInformation("Assets found");
-        return new ServiceResponse<IEnumerable<AssetDto>>(assets, "Assets found");
+        return assets;
     }
-    public async Task<ServiceResponse<IEnumerable<CategoryDto>>> GetCategories()
+    public async Task<IEnumerable<CategoryDto>> GetCategories()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1137,14 +1137,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No categories found");
-            return new ServiceResponse<IEnumerable<CategoryDto>>("No categories found", true);
+            return null!;
         }
         // return categories
         _logger.LogInformation("Categories found");
-        return new ServiceResponse<IEnumerable<CategoryDto>>(query, "Categories found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<CategoryWithAssetsDto>>> GetCategoriesWithAssets()
+    public async Task<IEnumerable<CategoryWithAssetsDto>> GetCategoriesWithAssets()
     {
         // await context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1173,14 +1173,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No categories found");
-            return new ServiceResponse<IEnumerable<CategoryWithAssetsDto>>("No categories found");
+            return null!;
         }
         // return categories
         _logger.LogInformation("Categories found");
-        return new ServiceResponse<IEnumerable<CategoryWithAssetsDto>>(query, "Categories found");
+        return query;
     }
 
-    public async Task<ServiceResponse<CategoryDto>> GetCategoryById(int categoryId)
+    public async Task<CategoryDto> GetCategoryById(int categoryId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1199,14 +1199,14 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No category found");
-            return new ServiceResponse<CategoryDto>("No category found", true);
+            return null!;
         }
         // return category
         _logger.LogInformation("Category found");
-        return new ServiceResponse<CategoryDto>(query, "Category found");
+        return query;
     }
 
-    public async Task<ServiceResponse<CategoryWithAssetsDto>> GetCategoryByIdWithAssets(int categoryId)
+    public async Task<CategoryWithAssetsDto> GetCategoryByIdWithAssets(int categoryId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1235,14 +1235,14 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No category found");
-            return new ServiceResponse<CategoryWithAssetsDto>("No category found", true);
+            return null!;
         }
         // return category
         _logger.LogInformation("Category found");
-        return new ServiceResponse<CategoryWithAssetsDto>(query, "Category found");
+        return query;
     }
 
-    public async Task<ServiceResponse<DetailDto>> GetDetailById(int detailId)
+    public async Task<DetailDto> GetDetailById(int detailId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1261,14 +1261,14 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No detail found");
-            return new ServiceResponse<DetailDto>("No detail found", true);
+            return null!;
         }
         // return detail
         _logger.LogInformation("Detail found");
-        return new ServiceResponse<DetailDto>(query, "Detail found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<DetailDto>>> GetDetails()
+    public async Task<IEnumerable<DetailDto>> GetDetails()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1287,15 +1287,15 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No details found");
-            return new ServiceResponse<IEnumerable<DetailDto>>("No details found");
+            return null!;
         }
 
         // return details
         _logger.LogInformation("Details found");
-        return new ServiceResponse<IEnumerable<DetailDto>>(query, "Details found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<DetailWithAssetsDto>>> GetDetailsWithAssets()
+    public async Task<IEnumerable<DetailWithAssetsDto>> GetDetailsWithAssets()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1324,14 +1324,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No details found");
-            return new ServiceResponse<IEnumerable<DetailWithAssetsDto>>("No details found");
+            return null!;
         }
         // return details
         _logger.LogInformation("Details found");
-        return new ServiceResponse<IEnumerable<DetailWithAssetsDto>>(query, "Details found");
+           return query;
     }
 
-    public async Task<ServiceResponse<DeviceDto>> GetDeviceById(int deviceId)
+    public async Task<DeviceDto> GetDeviceById(int deviceId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1350,14 +1350,14 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No device found");
-            return new ServiceResponse<DeviceDto>("No device found");
+            return null!;
         }
         // return device
         _logger.LogInformation("Device found");
-        return new ServiceResponse<DeviceDto>(query, "Device found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevices()
+    public async Task<IEnumerable<DeviceDto>> GetDevices()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1376,14 +1376,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No devices found");
-            return new ServiceResponse<IEnumerable<DeviceDto>>("No devices found");
+            return null!;
         }
         // return devices
         _logger.LogInformation("Devices found");
-        return new ServiceResponse<IEnumerable<DeviceDto>>(query, "Devices found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<DeviceDto>>> GetDevicesWithModels()
+    public async Task<IEnumerable<DeviceDto>> GetDevicesWithModels()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1410,20 +1410,18 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No devices found");
-            return new ServiceResponse<IEnumerable<DeviceDto>>("No devices found");
+            return null!;
         }
         // return devices
         _logger.LogInformation("Devices found");
-        return new ServiceResponse<IEnumerable<DeviceDto>>(query, "Devices found");
+        return query;
     }
 
-    public async Task<ServiceResponse<ModelDto>> GetModelById(int modelId)
+    public async Task<ModelDto> GetModelById(int modelId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
-        try
-        {
-            // get model
+          // get model
             var query = await context.Models
                 .AsNoTracking()
                 .Select(m => new ModelDto
@@ -1437,20 +1435,15 @@ public class AssetService : IAssetService
             if (query == null)
             {
                 _logger.LogWarning("Model not found");
-                return new ServiceResponse<ModelDto>("Model not found");
+                return null!;
             }
             // return model
             _logger.LogInformation("Model found");
-            return new ServiceResponse<ModelDto>(query, "Model found");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error getting model");
-            return new ServiceResponse<ModelDto>("Error getting model");
-        }
+            return query;
+       
     }
 
-    public async Task<ServiceResponse<IEnumerable<ModelDto>>> GetModels()
+    public async Task<IEnumerable<ModelDto>> GetModels()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1469,14 +1462,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No models found");
-            return new ServiceResponse<IEnumerable<ModelDto>>("No models found");
+            return null!;
         }
         // return models
         _logger.LogInformation("Models found");
-        return new ServiceResponse<IEnumerable<ModelDto>>(query, "Models found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<ModelDto>>> GetModelsWithAssets()
+    public async Task<IEnumerable<ModelDto>> GetModelsWithAssets()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1503,14 +1496,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No models found");
-            return new ServiceResponse<IEnumerable<ModelDto>>("No models found");
+            return null!;
         }
         // return models
         _logger.LogInformation("Models found");
-        return new ServiceResponse<IEnumerable<ModelDto>>(query, "Models found");
+        return query;
     }
 
-    public async Task<ServiceResponse<ParameterDto>> GetParameterById(int parameterId)
+    public async Task<ParameterDto> GetParameterById(int parameterId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1529,14 +1522,14 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("Parameter not found");
-            return new ServiceResponse<ParameterDto>("Parameter not found");
+            return null!;
         }
         // return parameter
         _logger.LogInformation("Parameter found");
-        return new ServiceResponse<ParameterDto>(query, "Parameter found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<ParameterDto>>> GetParameters()
+    public async Task<IEnumerable<ParameterDto>> GetParameters()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1555,14 +1548,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No parameters found");
-            return new ServiceResponse<IEnumerable<ParameterDto>>("No parameters found");
+            return null!;
         }
         // return parameters
         _logger.LogInformation("Parameters found");
-        return new ServiceResponse<IEnumerable<ParameterDto>>(query, "Parameters found");
+        return query;
     }
 
-    public async Task<ServiceResponse<IEnumerable<ParameterWithModelsDto>>> GetParametersWithModels()
+    public async Task<IEnumerable<ParameterWithModelsDto>> GetParametersWithModels()
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1589,14 +1582,14 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No parameters found");
-            return new ServiceResponse<IEnumerable<ParameterWithModelsDto>>("No parameters found");
+            return null!;
         }
         // return parameters
         _logger.LogInformation("Parameters found");
-        return new ServiceResponse<IEnumerable<ParameterWithModelsDto>>(query, "Parameters found");
+        return query;
     }
 
-    public async Task<ServiceResponse> MarkDeleteAsset(int assetId, string userId)
+    public async Task<bool> MarkDeleteAsset(int assetId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1607,13 +1600,13 @@ public class AssetService : IAssetService
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
-            return new ServiceResponse("Asset not found");
+            throw new NotFoundException("Asset not found");
         }
         // check if asset is already deleted
         if (asset.IsDeleted)
         {
             _logger.LogWarning("Asset is already deleted");
-            return new ServiceResponse("Asset is already deleted");
+            throw new BadRequestException("Asset is already deleted");
         }
         // mark asset as deleted
         asset.IsDeleted = true;
@@ -1630,18 +1623,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Asset marked as deleted");
-            return new ServiceResponse("Asset marked as deleted", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking asset as deleted");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking asset as deleted");
+            throw new BadRequestException("Error marking asset as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
+    public async Task<bool> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1651,13 +1644,13 @@ public class AssetService : IAssetService
         if (assetCategory == null)
         {
             _logger.LogWarning("AssetCategory not found");
-            return new ServiceResponse("AssetCategory not found");
+           throw new NotFoundException("AssetCategory not found");
         }
         // check if assetCategory is already deleted
         if (assetCategory.IsDeleted)
         {
             _logger.LogWarning("AssetCategory already deleted");
-            return new ServiceResponse("AssetCategory already deleted");
+            throw new BadRequestException(("AssetCategory already deleted"));
         }
         assetCategory.UserId = userId;
         assetCategory.IsDeleted = true;
@@ -1670,17 +1663,17 @@ public class AssetService : IAssetService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("AssetCategory marked as deleted");
-            return new ServiceResponse("AssetCategory marked as deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking assetCategory as deleted");
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking assetCategory as deleted");
+            throw new BadRequestException("Error marking assetCategory as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
+    public async Task<bool> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1690,13 +1683,13 @@ public class AssetService : IAssetService
         if (assetDetail == null)
         {
             _logger.LogWarning("AssetDetail not found");
-            return new ServiceResponse("AssetDetail not found");
+            throw new NotFoundException("AssetDetail not found");
         }
         // check if assetDetail is already deleted
         if (assetDetail.IsDeleted)
         {
             _logger.LogWarning("AssetDetail already deleted");
-            return new ServiceResponse("AssetDetail already deleted");
+            throw new BadRequestException("AssetDetail already deleted");
         }
         assetDetail.UserId = userId;
         assetDetail.IsDeleted = true;
@@ -1709,17 +1702,17 @@ public class AssetService : IAssetService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("AssetDetail marked as deleted");
-            return new ServiceResponse("AssetDetail marked as deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking assetDetail as deleted");
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking assetDetail as deleted");
+            throw new BadRequestException("Error marking assetDetail as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteCategory(int categoryId, string userId)
+    public async Task<bool> MarkDeleteCategory(int categoryId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1730,13 +1723,13 @@ public class AssetService : IAssetService
         if (category == null)
         {
             _logger.LogWarning("Category not found");
-            return new ServiceResponse("Category not found");
+            throw new NotFoundException("Category not found");
         }
         // check if category is already deleted
         if (category.IsDeleted)
         {
             _logger.LogWarning("Category is already deleted");
-            return new ServiceResponse("Category is already deleted");
+            throw new BadRequestException("Category is already deleted");
         }
         // mark category as deleted
         category.IsDeleted = true;
@@ -1753,18 +1746,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Category marked as deleted");
-            return new ServiceResponse("Category marked as deleted", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking category as deleted");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking category as deleted");
+            throw new BadRequestException("Error marking category as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteDetail(int detailId, string userId)
+    public async Task<bool> MarkDeleteDetail(int detailId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1775,13 +1768,13 @@ public class AssetService : IAssetService
         if (detail == null)
         {
             _logger.LogWarning("Detail not found");
-            return new ServiceResponse("Detail not found");
+            throw new NotFoundException("Detail not found");
         }
         // check if detail is already deleted
         if (detail.IsDeleted)
         {
             _logger.LogWarning("Detail is already deleted");
-            return new ServiceResponse("Detail is already deleted");
+            throw new BadRequestException("Detail is already deleted");
         }
         // mark detail as deleted
         detail.IsDeleted = true;
@@ -1798,18 +1791,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Detail marked as deleted");
-            return new ServiceResponse("Detail marked as deleted", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking detail as deleted");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking detail as deleted");
+            throw new BadRequestException("Error marking detail as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteDevice(int deviceId, string userId)
+    public async Task<bool> MarkDeleteDevice(int deviceId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1820,13 +1813,13 @@ public class AssetService : IAssetService
         if (device == null)
         {
             _logger.LogWarning("Device not found");
-            return new ServiceResponse("Device not found");
+            throw new NotFoundException("Device not found");
         }
         // check if device is already deleted
         if (device.IsDeleted)
         {
             _logger.LogWarning("Device is already deleted");
-            return new ServiceResponse("Device is already deleted");
+            throw new BadRequestException("Device is already deleted");
         }
         // mark device as deleted
         device.IsDeleted = true;
@@ -1843,18 +1836,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Device marked as deleted");
-            return new ServiceResponse("Device marked as deleted", true);
+            return true ;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking device as deleted");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking device as deleted");
+            throw new BadRequestException("Error marking device as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteModel(int modelId, string userId)
+    public async Task<bool> MarkDeleteModel(int modelId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1865,13 +1858,13 @@ public class AssetService : IAssetService
         if (model == null)
         {
             _logger.LogWarning("Model not found");
-            return new ServiceResponse("Model not found");
+            throw new NotFoundException("Model not found");
         }
         // check if model is already deleted
         if (model.IsDeleted)
         {
             _logger.LogWarning("Model is already deleted");
-            return new ServiceResponse("Model is already deleted");
+            throw new BadRequestException("Model is already deleted");
         }
         // mark model as deleted
         model.IsDeleted = true;
@@ -1888,18 +1881,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Model marked as deleted");
-            return new ServiceResponse("Model marked as deleted", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking model as deleted");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking model as deleted");
+            throw new BadRequestException("Error marking model as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
+    public async Task<bool> MarkDeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1908,12 +1901,12 @@ public class AssetService : IAssetService
         if (modelParameter == null)
         {
             _logger.LogWarning("ModelParameter not found");
-            return new ServiceResponse("ModelParameter not found");
+            throw new NotFoundException("ModelParameter not found");
         }
         if (modelParameter.IsDeleted)
         {
             _logger.LogWarning("ModelParameter already deleted");
-            return new ServiceResponse("ModelParameter already deleted");
+            throw new BadRequestException("ModelParameter already deleted");
         }
         modelParameter.UserId = userId;
         modelParameter.IsDeleted = true;
@@ -1926,17 +1919,17 @@ public class AssetService : IAssetService
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("ModelParameter marked as deleted");
-            return new ServiceResponse("ModelParameter marked as deleted", true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking modelParameter as deleted");
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking modelParameter as deleted");
+            throw new BadRequestException("Error marking modelParameter as deleted");
         }
     }
 
-    public async Task<ServiceResponse> MarkDeleteParameter(int parameterId, string userId)
+    public async Task<bool> MarkDeleteParameter(int parameterId, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1947,13 +1940,13 @@ public class AssetService : IAssetService
         if (parameter == null)
         {
             _logger.LogWarning("Parameter not found");
-            return new ServiceResponse("Parameter not found");
+            throw new NotFoundException("Parameter not found");
         }
         // check if parameter is already deleted
         if (parameter.IsDeleted)
         {
             _logger.LogWarning("Parameter is already deleted");
-            return new ServiceResponse("Parameter is already deleted");
+            throw new BadRequestException("Parameter is already deleted");
         }
         // mark parameter as deleted
         parameter.IsDeleted = true;
@@ -1970,18 +1963,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Parameter marked as deleted");
-            return new ServiceResponse("Parameter marked as deleted", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking parameter as deleted");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error marking parameter as deleted");
+            throw new BadRequestException("Error marking parameter as deleted");
         }
     }
 
-    public async Task<ServiceResponse> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto, string userId)
+    public async Task<bool> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1992,7 +1985,7 @@ public class AssetService : IAssetService
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
-            return new ServiceResponse("Asset not found");
+            throw new NotFoundException("Asset not found");
         }
         var modelFromDto = asset.ModelId == assetUpdateDto.ModelId ? null : await context.Models.FirstOrDefaultAsync(m => m.ModelId == assetUpdateDto.ModelId);
 
@@ -2022,7 +2015,7 @@ public class AssetService : IAssetService
         if (duplicate || asset.Name.ToLower().Trim() == assetUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Asset name is already taken");
-            return new ServiceResponse("Asset name is already taken");
+            throw new BadRequestException("Asset name is already taken");
         }
         asset.Name = assetUpdateDto.Name;
 
@@ -2042,18 +2035,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Asset updated");
-            return new ServiceResponse("Asset updated", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating asset");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating asset");
+            throw new BadRequestException("Error updating asset");
         }
     }
 
-    public async Task<ServiceResponse> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto, string userId)
+    public async Task<bool> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -2063,14 +2056,14 @@ public class AssetService : IAssetService
         if (category == null)
         {
             _logger.LogWarning("Category not found");
-            return new ServiceResponse("Category not found");
+            throw new NotFoundException("Category not found");
         }
         // check if category name from dto is already taken
         var duplicate = await context.Categories.AnyAsync(a => a.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim());
         if (duplicate || category.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Category name is already taken");
-            return new ServiceResponse("Category name is already taken");
+            throw new BadRequestException("Category name is already taken");
         }
         category.Name = categoryUpdateDto.Name;
         // assign userId to update
@@ -2089,18 +2082,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Category updated");
-            return new ServiceResponse("Category updated", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating category");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating category");
+            throw new BadRequestException("Error updating category");
         }
     }
 
-    public async Task<ServiceResponse> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto, string userId)
+    public async Task<bool> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -2110,14 +2103,14 @@ public class AssetService : IAssetService
         if (detail == null)
         {
             _logger.LogWarning("Detail not found");
-            return new ServiceResponse("Detail not found");
+            throw new NotFoundException("Detail not found");
         }
         // check if detail name from dto is already taken
         var duplicate = await context.Details.AnyAsync(a => a.Name.ToLower().Trim() == detailUpdateDto.Name.ToLower().Trim());
         if (duplicate || detail.Name.ToLower().Trim() == detailUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Detail name is already taken");
-            return new ServiceResponse("Detail name is already taken");
+            throw new BadRequestException("Detail name is already taken");
         }
         detail.Name = detailUpdateDto.Name;
         // assign userId to update
@@ -2136,18 +2129,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Detail updated");
-            return new ServiceResponse("Detail updated", true);
+            return  true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating detail");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating detail");
+            throw new BadRequestException("Error updating detail");
         }
     }
 
-    public async Task<ServiceResponse> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto, string userId)
+    public async Task<bool> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -2157,14 +2150,14 @@ public class AssetService : IAssetService
         if (device == null)
         {
             _logger.LogWarning("Device not found");
-            return new ServiceResponse("Device not found");
+            throw new NotFoundException("Device not found");
         }
         // check if device name from dto is already taken
         var duplicate = await context.Devices.AnyAsync(a => a.Name.ToLower().Trim() == deviceUpdateDto.Name.ToLower().Trim());
         if (duplicate || device.Name.ToLower().Trim() == deviceUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Device name is already taken");
-            return new ServiceResponse("Device name is already taken");
+            throw new BadRequestException("Device name is already taken");
         }
         device.Name = deviceUpdateDto.Name;
         // assign userId to update
@@ -2183,18 +2176,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Device updated");
-            return new ServiceResponse("Device updated", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating device");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating device");
+            throw new BadRequestException("Error updating device");
         }
     }
 
-    public async Task<ServiceResponse> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto, string userId)
+    public async Task<bool> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -2204,14 +2197,14 @@ public class AssetService : IAssetService
         if (model == null)
         {
             _logger.LogWarning("Model not found");
-            return new ServiceResponse("Model not found");
+            throw new NotFoundException("Model not found");
         }
         // check if model name from dto is already taken
         var duplicate = await context.Models.AnyAsync(a => a.Name.ToLower().Trim() == modelUpdateDto.Name.ToLower().Trim());
         if (duplicate || model.Name.ToLower().Trim() == modelUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Model name is already taken");
-            return new ServiceResponse("Model name is already taken");
+            throw new BadRequestException("Model name is already taken");
         }
         model.Name = modelUpdateDto.Name;
         // assign userId to update
@@ -2230,18 +2223,18 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Model updated");
-            return new ServiceResponse("Model updated", true);
+            return  true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating model");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating model");
+            throw new BadRequestException("Error updating model");
         }
     }
 
-    public async Task<ServiceResponse> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto, string userId)
+    public async Task<bool> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto, string userId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -2251,14 +2244,14 @@ public class AssetService : IAssetService
         if (parameter == null)
         {
             _logger.LogWarning("Parameter not found");
-            return new ServiceResponse("Parameter not found");
+            throw new NotFoundException("Parameter not found");
         }
         // check if parameter name from dto is already taken
         var duplicate = await context.Parameters.AnyAsync(a => a.Name.ToLower().Trim() == parameterUpdateDto.Name.ToLower().Trim());
         if (duplicate || parameter.Name.ToLower().Trim() == parameterUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Parameter name is already taken");
-            return new ServiceResponse("Parameter name is already taken");
+            throw new BadRequestException("Parameter name is already taken");
         }
         parameter.Name = parameterUpdateDto.Name;
         // assign userId to update
@@ -2277,14 +2270,14 @@ public class AssetService : IAssetService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Parameter updated");
-            return new ServiceResponse("Parameter updated", true);
+            return true;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating parameter");
             // await rollback transaction
             await transaction.RollbackAsync();
-            return new ServiceResponse("Error updating parameter");
+            throw new BadRequestException("Error updating parameter");
         }
     }
 }

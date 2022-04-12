@@ -21,9 +21,9 @@ public class AreasController : ControllerBase
     public async Task<IActionResult> Get()
     {
         var result = await _locationService.GetAreas();
-        if (result.Success)
-            return Ok(result.Data);
-        return BadRequest(result.Message);
+    
+            return Ok(result);
+       
     }
 
     // GET api/<AreasController>/5
