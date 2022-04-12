@@ -10,5 +10,7 @@ public class DeviceSituationConfig : IEntityTypeConfiguration<DeviceSituation>
         builder.HasKey(x => new { x.DeviceId, x.SituationId });
         builder.Property(x => x.SituationId).IsRequired();
         builder.Property(x => x.DeviceId).IsRequired();
+        builder.HasOne(x => x.Device).WithMany(x => x.DeviceSituations).HasForeignKey(x => x.DeviceId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Situation).WithMany(x => x.DeviceSituations).HasForeignKey(x => x.SituationId).OnDelete(DeleteBehavior.ClientCascade);
     }
 }

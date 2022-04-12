@@ -10,5 +10,7 @@ public class CommunicateCategoryConfig : IEntityTypeConfiguration<CommunicateCat
         builder.HasKey(x => new { x.CommunicateId, x.CategoryId });
         builder.Property(x => x.CommunicateId).IsRequired();
         builder.Property(x => x.CategoryId).IsRequired();
+        builder.HasOne(x => x.Communicate).WithMany(x => x.CommunicateCategories).HasForeignKey(x => x.CommunicateId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Category).WithMany(x => x.CommunicateCategories).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.ClientCascade);
     }
 }

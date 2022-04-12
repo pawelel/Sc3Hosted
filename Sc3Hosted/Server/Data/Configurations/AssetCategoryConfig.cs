@@ -8,6 +8,8 @@ public class AssetCategoryConfig : IEntityTypeConfiguration<AssetCategory>
     {
         builder.ToTable("AssetCategories", x => x.IsTemporal());
         builder.HasKey(x => new { x.AssetId, x.CategoryId });
+        builder.HasOne(x => x.Asset).WithMany(x => x.AssetCategories).HasForeignKey(x => x.AssetId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Category).WithMany(x => x.AssetCategories).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.ClientCascade);
         builder.Property(x => x.AssetId).IsRequired();
         builder.Property(x => x.CategoryId).IsRequired();
     }

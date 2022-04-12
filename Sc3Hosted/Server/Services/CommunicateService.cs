@@ -7,37 +7,37 @@ using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Server.Services;
 public interface ICommunicateService
 {
-    Task<bool> AddOrUpdateCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId);
+    Task<bool> AddOrUpdateCommunicateArea(CommunicateAreaDto communicateAreaDto);
 
-    Task<bool> AddOrUpdateCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId);
+    Task<bool> AddOrUpdateCommunicateAsset(CommunicateAssetDto communicateAssetDto);
 
-    Task<bool> AddOrUpdateCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId);
+    Task<bool> AddOrUpdateCommunicateCategory(CommunicateCategoryDto communicateCategoryDto);
 
-    Task<bool> AddOrUpdateCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId);
+    Task<bool> AddOrUpdateCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto);
 
-    Task<bool> AddOrUpdateCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId);
+    Task<bool> AddOrUpdateCommunicateDevice(CommunicateDeviceDto communicateDeviceDto);
 
-    Task<bool> AddOrUpdateCommunicateModel(CommunicateModelDto communicateModelDto, string userId);
+    Task<bool> AddOrUpdateCommunicateModel(CommunicateModelDto communicateModelDto);
 
-    Task<bool> AddOrUpdateCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId);
+    Task<bool> AddOrUpdateCommunicateSpace(CommunicateSpaceDto communicateSpaceDto);
 
-    Task<int> CreateCommunicate(CommunicateCreateDto communicateCreateDto, string userId);
+    Task<int> CreateCommunicate(CommunicateCreateDto communicateCreateDto);
 
     Task<bool> DeleteCommunicate(int communicateId);
 
-    Task<bool> DeleteCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId);
+    Task<bool> DeleteCommunicateArea(CommunicateAreaDto communicateAreaDto);
 
-    Task<bool> DeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId);
+    Task<bool> DeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto);
 
-    Task<bool> DeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId);
+    Task<bool> DeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto);
 
-    Task<bool> DeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId);
+    Task<bool> DeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto);
 
-    Task<bool> DeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId);
+    Task<bool> DeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto);
 
-    Task<bool> DeleteCommunicateModel(CommunicateModelDto communicateModelDto, string userId);
+    Task<bool> DeleteCommunicateModel(CommunicateModelDto communicateModelDto);
 
-    Task<bool> DeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId);
+    Task<bool> DeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto);
 
     Task<CommunicateDto> GetCommunicateById(int communicateId);
 
@@ -45,38 +45,39 @@ public interface ICommunicateService
 
     Task<IEnumerable<CommunicateWithAssetsDto>> GetCommunicatesWithAssets();
 
-    Task<bool> MarkDeleteCommunicate(int communicateId, string userId);
+    Task<bool> MarkDeleteCommunicate(int communicateId);
 
-    Task<bool> MarkDeleteCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId);
+    Task<bool> MarkDeleteCommunicateArea(CommunicateAreaDto communicateAreaDto);
 
-    Task<bool> MarkDeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId);
+    Task<bool> MarkDeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto);
 
-    Task<bool> MarkDeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId);
+    Task<bool> MarkDeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto);
 
-    Task<bool> MarkDeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId);
+    Task<bool> MarkDeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto);
 
-    Task<bool> MarkDeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId);
+    Task<bool> MarkDeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto);
 
-    Task<bool> MarkDeleteCommunicateModel(CommunicateModelDto communicateModelDto, string userId);
+    Task<bool> MarkDeleteCommunicateModel(CommunicateModelDto communicateModelDto);
 
-    Task<bool> MarkDeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId);
+    Task<bool> MarkDeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto);
 
-    Task<bool> UpdateCommunicate(int communicateId, string userId, CommunicateUpdateDto communicateUpdateDto);
+    Task<bool> UpdateCommunicate(int communicateId, CommunicateUpdateDto communicateUpdateDto);
 }
 
 public class CommunicateService : ICommunicateService
-{
+{ private readonly IUserContextService _userContextService;
     private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
     private readonly ILogger<CommunicateService> _logger;
 
-    public CommunicateService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<CommunicateService> logger)
+    public CommunicateService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<CommunicateService> logger, IUserContextService userContextService)
     {
         _contextFactory = contextFactory;
         _logger = logger;
+        _userContextService = userContextService;
     }
 
-    public async Task<bool> AddOrUpdateCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateArea(CommunicateAreaDto communicateAreaDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -129,8 +130,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> AddOrUpdateCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateAsset(CommunicateAssetDto communicateAssetDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -183,8 +184,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> AddOrUpdateCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateCategory(CommunicateCategoryDto communicateCategoryDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -237,8 +238,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> AddOrUpdateCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -291,8 +292,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> AddOrUpdateCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateDevice(CommunicateDeviceDto communicateDeviceDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -345,8 +346,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> AddOrUpdateCommunicateModel(CommunicateModelDto communicateModelDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateModel(CommunicateModelDto communicateModelDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -399,8 +400,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> AddOrUpdateCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCommunicateSpace(CommunicateSpaceDto communicateSpaceDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -453,8 +454,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<int> CreateCommunicate(CommunicateCreateDto communicateCreateDto, string userId)
-    {
+    public async Task<int> CreateCommunicate(CommunicateCreateDto communicateCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -535,7 +536,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId)
+    public async Task<bool> DeleteCommunicateArea(CommunicateAreaDto communicateAreaDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -575,7 +576,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId)
+    public async Task<bool> DeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -615,7 +616,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId)
+    public async Task<bool> DeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -655,7 +656,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId)
+    public async Task<bool> DeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -695,7 +696,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId)
+    public async Task<bool> DeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -735,7 +736,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateModel(CommunicateModelDto communicateModelDto, string userId)
+    public async Task<bool> DeleteCommunicateModel(CommunicateModelDto communicateModelDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -775,7 +776,7 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> DeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId)
+    public async Task<bool> DeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -932,8 +933,8 @@ public class CommunicateService : ICommunicateService
         return situation;
     }
 
-    public async Task<bool> MarkDeleteCommunicate(int communicateId, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicate(int communicateId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -983,8 +984,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateArea(CommunicateAreaDto communicateAreaDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateArea(CommunicateAreaDto communicateAreaDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1021,8 +1022,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateAsset(CommunicateAssetDto communicateAssetDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1059,8 +1060,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateCategory(CommunicateCategoryDto communicateCategoryDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1097,8 +1098,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateCoordinate(CommunicateCoordinateDto communicateCoordinateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1135,8 +1136,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateDevice(CommunicateDeviceDto communicateDeviceDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1173,8 +1174,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateModel(CommunicateModelDto communicateModelDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateModel(CommunicateModelDto communicateModelDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1211,8 +1212,8 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> MarkDeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCommunicateSpace(CommunicateSpaceDto communicateSpaceDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction
@@ -1249,9 +1250,9 @@ public class CommunicateService : ICommunicateService
         }
     }
 
-    public async Task<bool> UpdateCommunicate(int communicateId, string userId,
-        CommunicateUpdateDto communicateUpdateDto)
+    public async Task<bool> UpdateCommunicate(int communicateId,CommunicateUpdateDto communicateUpdateDto)
     {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // await using transaction

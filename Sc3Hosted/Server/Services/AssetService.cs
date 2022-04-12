@@ -7,31 +7,31 @@ using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Server.Services;
 public interface IAssetService
 {
-    Task<bool> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<bool> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto);
 
-    Task<bool> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<bool> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto);
 
-    Task<bool> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<bool> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto);
 
-    Task<bool> ChangeAssetsModel(int assetId, int modelId, string userId);
+    Task<bool> ChangeAssetsModel(int assetId, int modelId);
 
-    Task<int> CreateAsset(AssetCreateDto assetCreateDto, string userId);
+    Task<int> CreateAsset(AssetCreateDto assetCreateDto);
 
-    Task<int> CreateCategory(CategoryCreateDto categoryCreateDto, string userId);
+    Task<int> CreateCategory(CategoryCreateDto categoryCreateDto);
 
-    Task<int> CreateDetail(DetailCreateDto detailCreateDto, string userId);
+    Task<int> CreateDetail(DetailCreateDto detailCreateDto);
 
-    Task<int> CreateDevice(DeviceCreateDto deviceCreateDto, string userId);
+    Task<int> CreateDevice(DeviceCreateDto deviceCreateDto);
 
-    Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId);
+    Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto);
 
-    Task<int> CreateParameter(ParameterCreateDto parameterCreateDto, string userId);
+    Task<int> CreateParameter(ParameterCreateDto parameterCreateDto);
 
     Task<bool> DeleteAsset(int assetId);
 
-    Task<bool> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<bool> DeleteAssetCategory(AssetCategoryDto assetCategoryDto);
 
-    Task<bool> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<bool> DeleteAssetDetail(AssetDetailDto assetDetailDto);
 
     Task<bool> DeleteCategory(int categoryId);
 
@@ -41,7 +41,7 @@ public interface IAssetService
 
     Task<bool> DeleteModel(int modelId);
 
-    Task<bool> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<bool> DeleteModelParameter(ModelParameterDto modelParameterDto);
 
     Task<bool> DeleteParameter(int parameterId);
 
@@ -82,50 +82,51 @@ public interface IAssetService
 
     Task<IEnumerable<ParameterWithModelsDto>> GetParametersWithModels();
 
-    Task<bool> MarkDeleteAsset(int assetId, string userId);
+    Task<bool> MarkDeleteAsset(int assetId);
 
-    Task<bool> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId);
+    Task<bool> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto);
 
-    Task<bool> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto, string userId);
+    Task<bool> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto);
 
-    Task<bool> MarkDeleteCategory(int categoryId, string userId);
+    Task<bool> MarkDeleteCategory(int categoryId);
 
-    Task<bool> MarkDeleteDetail(int detailId, string userId);
+    Task<bool> MarkDeleteDetail(int detailId);
 
-    Task<bool> MarkDeleteDevice(int deviceId, string userId);
+    Task<bool> MarkDeleteDevice(int deviceId);
 
-    Task<bool> MarkDeleteModel(int modelId, string userId);
+    Task<bool> MarkDeleteModel(int modelId);
 
-    Task<bool> MarkDeleteModelParameter(ModelParameterDto modelParameterDto, string userId);
+    Task<bool> MarkDeleteModelParameter(ModelParameterDto modelParameterDto);
 
-    Task<bool> MarkDeleteParameter(int parameterId, string userId);
+    Task<bool> MarkDeleteParameter(int parameterId);
 
-    Task<bool> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto, string userId);
+    Task<bool> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto);
 
-    Task<bool> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto, string userId);
+    Task<bool> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto);
 
-    Task<bool> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto, string userId);
+    Task<bool> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto);
 
-    Task<bool> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto, string userId);
+    Task<bool> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto);
 
-    Task<bool> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto, string userId);
+    Task<bool> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto);
 
-    Task<bool> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto, string userId);
+    Task<bool> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto);
 }
 
 public class AssetService : IAssetService
-{
+{private readonly IUserContextService _userContextService;
     private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
     private readonly ILogger<AssetService> _logger;
 
-    public AssetService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<AssetService> logger)
+    public AssetService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<AssetService> logger, IUserContextService userContextService)
     {
         _contextFactory = contextFactory;
         _logger = logger;
+        _userContextService = userContextService;
     }
 
-    public async Task<bool> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateAssetCategory(AssetCategoryDto assetCategoryDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -178,8 +179,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateAssetDetail(AssetDetailDto assetDetailDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -234,8 +235,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateModelParameter(ModelParameterDto modelParameterDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         var modelParameter = await context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
@@ -290,8 +291,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> ChangeAssetsModel(int assetId, int modelId, string userId)
-    {
+    public async Task<bool> ChangeAssetsModel(int assetId, int modelId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -355,8 +356,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<int> CreateAsset(AssetCreateDto assetCreateDto, string userId)
-    {
+    public async Task<int> CreateAsset(AssetCreateDto assetCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -426,8 +427,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<int> CreateCategory(CategoryCreateDto categoryCreateDto, string userId)
-    {
+    public async Task<int> CreateCategory(CategoryCreateDto categoryCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -468,8 +469,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<int> CreateDetail(DetailCreateDto detailCreateDto, string userId)
-    {
+    public async Task<int> CreateDetail(DetailCreateDto detailCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -510,8 +511,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<int> CreateDevice(DeviceCreateDto deviceCreateDto, string userId)
-    {
+    public async Task<int> CreateDevice(DeviceCreateDto deviceCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -552,8 +553,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto, string userId)
-    {
+    public async Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -608,8 +609,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<int> CreateParameter(ParameterCreateDto parameterCreateDto, string userId)
-    {
+    public async Task<int> CreateParameter(ParameterCreateDto parameterCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -689,7 +690,7 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> DeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
+    public async Task<bool> DeleteAssetCategory(AssetCategoryDto assetCategoryDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -725,7 +726,7 @@ public class AssetService : IAssetService
         throw new BadRequestException("AssetCategory is not marked as deleted");
     }
 
-    public async Task<bool> DeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
+    public async Task<bool> DeleteAssetDetail(AssetDetailDto assetDetailDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -921,7 +922,7 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> DeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
+    public async Task<bool> DeleteModelParameter(ModelParameterDto modelParameterDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1587,8 +1588,8 @@ public class AssetService : IAssetService
         return query;
     }
 
-    public async Task<bool> MarkDeleteAsset(int assetId, string userId)
-    {
+    public async Task<bool> MarkDeleteAsset(int assetId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1632,8 +1633,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto, string userId)
-    {
+    public async Task<bool> MarkDeleteAssetCategory(AssetCategoryDto assetCategoryDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1671,8 +1672,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto, string userId)
-    {
+    public async Task<bool> MarkDeleteAssetDetail(AssetDetailDto assetDetailDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1710,8 +1711,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteCategory(int categoryId, string userId)
-    {
+    public async Task<bool> MarkDeleteCategory(int categoryId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1755,8 +1756,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteDetail(int detailId, string userId)
-    {
+    public async Task<bool> MarkDeleteDetail(int detailId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1800,8 +1801,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteDevice(int deviceId, string userId)
-    {
+    public async Task<bool> MarkDeleteDevice(int deviceId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1845,8 +1846,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteModel(int modelId, string userId)
-    {
+    public async Task<bool> MarkDeleteModel(int modelId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1890,8 +1891,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteModelParameter(ModelParameterDto modelParameterDto, string userId)
-    {
+    public async Task<bool> MarkDeleteModelParameter(ModelParameterDto modelParameterDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1927,8 +1928,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> MarkDeleteParameter(int parameterId, string userId)
-    {
+    public async Task<bool> MarkDeleteParameter(int parameterId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1972,8 +1973,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2044,8 +2045,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2091,8 +2092,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2138,8 +2139,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2185,8 +2186,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateModel(int modelId, ModelUpdateDto modelUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2232,8 +2233,8 @@ public class AssetService : IAssetService
         }
     }
 
-    public async Task<bool> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 

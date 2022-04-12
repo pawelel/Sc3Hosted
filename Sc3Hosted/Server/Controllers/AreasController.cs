@@ -10,10 +10,8 @@ namespace Sc3Hosted.Server.Controllers;
 public class AreasController : ControllerBase
 {
     private readonly ILocationService _locationService;
-    private readonly IUserContextService _userContextService;
-    public AreasController(IUserContextService userContextService, ILocationService locationService)
+    public AreasController( ILocationService locationService)
     {
-        _userContextService = userContextService;
         _locationService = locationService;
 
     }
@@ -37,8 +35,7 @@ public class AreasController : ControllerBase
     [HttpPost]
     public void Post([FromRoute]int plantId, [FromBody] AreaCreateDto area)
     {
-        var userId = _userContextService.UserId;
-        _locationService.CreateArea(plantId, area, userId);
+        _locationService.CreateArea(plantId, area);
     }
     
 

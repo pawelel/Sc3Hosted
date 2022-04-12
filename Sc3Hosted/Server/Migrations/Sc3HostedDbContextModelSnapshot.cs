@@ -51,22 +51,22 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "fbc0c666-0f63-49dc-9abe-abf478be2c6d",
-                            ConcurrencyStamp = "13f84914-ced1-44a2-817d-157996c9c1ca",
+                            Id = "12f404b0-bb8e-4188-9104-541e0f337113",
+                            ConcurrencyStamp = "1304f647-c425-472f-bab1-bf2c1eb5b1f9",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "437bc857-b421-4893-8108-de9bdf783bb0",
-                            ConcurrencyStamp = "259b219f-cbc9-4110-ac0c-05095e2eac8c",
+                            Id = "1deb2437-0d60-4604-9be5-1959c7320f92",
+                            ConcurrencyStamp = "f3782dcf-e5de-473a-a932-dce9ecaaea43",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "4a5667e9-9f2c-46d5-895b-7e958795425c",
-                            ConcurrencyStamp = "3fbb09a3-28d7-4a1c-bd20-6038c8bf3fe3",
+                            Id = "316f61e4-8165-46a2-9731-2add2a85489e",
+                            ConcurrencyStamp = "cd17fb18-b279-4468-9a9a-871c6d52bc87",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         });
@@ -1676,7 +1676,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Plant", "Plant")
                         .WithMany("Areas")
                         .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Plant");
@@ -1687,7 +1687,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Coordinate", "Coordinate")
                         .WithMany("Assets")
                         .HasForeignKey("CoordinateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Model", "Model")
@@ -1706,7 +1706,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("AssetCategories")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Category", "Category")
@@ -1725,7 +1725,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("AssetDetails")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Detail", "Detail")
@@ -1744,13 +1744,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("AssetSituations")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("AssetSituations")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Asset");
@@ -1826,7 +1826,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateCategories")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1839,7 +1839,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateCoordinates")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Coordinate", "Coordinate")
@@ -1858,7 +1858,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateDevices")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Device", "Device")
@@ -1877,7 +1877,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateModels")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Model", "Model")
@@ -1896,7 +1896,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateSpaces")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Space", "Space")
@@ -1945,7 +1945,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Device", "Device")
                         .WithMany("Models")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Device");
@@ -1956,7 +1956,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Model", "Model")
                         .WithMany("ModelParameters")
                         .HasForeignKey("ModelId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Parameter", "Parameter")
@@ -1981,7 +1981,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("SituationDetails")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Detail");
@@ -2000,7 +2000,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("SituationParameters")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Parameter");
@@ -2013,13 +2013,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Question", "Question")
                         .WithMany("SituationQuestions")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("SituationQuestions")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Question");
@@ -2032,7 +2032,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Area", "Area")
                         .WithMany("Spaces")
                         .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Area");

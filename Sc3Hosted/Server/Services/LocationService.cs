@@ -7,13 +7,13 @@ using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Server.Services;
 public interface ILocationService
 {
-    Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto, string userId);
+    Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto);
 
-    Task<int> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto, string userId);
+    Task<int> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto);
 
-    Task<int> CreatePlant(PlantCreateDto plantCreateDto, string userId);
+    Task<int> CreatePlant(PlantCreateDto plantCreateDto);
 
-    Task<int> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto, string userId);
+    Task<int> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto);
 
     Task<bool> DeleteArea(int areaId);
 
@@ -47,36 +47,38 @@ public interface ILocationService
 
     Task<IEnumerable<SpaceDto>> GetSpacesWithCoordinates();
 
-    Task<bool> MarkDeleteArea(int areaId, string userId);
+    Task<bool> MarkDeleteArea(int areaId);
 
-    Task<bool> MarkDeleteCoordinate(int coordinateId, string userId);
+    Task<bool> MarkDeleteCoordinate(int coordinateId);
 
-    Task<bool> MarkDeletePlant(int plantId, string userId);
+    Task<bool> MarkDeletePlant(int plantId);
 
-    Task<bool> MarkDeleteSpace(int spaceId, string userId);
+    Task<bool> MarkDeleteSpace(int spaceId);
 
-    Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto, string userId);
+    Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto);
 
-    Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto, string userId);
+    Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto);
 
-    Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto, string userId);
+    Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto);
 
-    Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto, string userId);
+    Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto);
 }
 
 public class LocationService : ILocationService
 {
     private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
     private readonly ILogger<LocationService> _logger;
-
-    public LocationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<LocationService> logger)
+    private readonly IUserContextService _userContextService;
+    public LocationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<LocationService> logger, IUserContextService userContextService)
     {
         _contextFactory = contextFactory;
         _logger = logger;
+        _userContextService = userContextService;
     }
 
-    public async Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto, string userId)
+    public async Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto)
     {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -119,8 +121,9 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<int> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto, string userId)
+    public async Task<int> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto)
     {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -163,8 +166,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<int> CreatePlant(PlantCreateDto plantCreateDto, string userId)
-    {
+    public async Task<int> CreatePlant(PlantCreateDto plantCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -206,8 +209,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<int> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto, string userId)
-    {
+    public async Task<int> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -758,8 +761,8 @@ public class LocationService : ILocationService
         return spaces;
     }
 
-    public async Task<bool> MarkDeleteArea(int areaId, string userId)
-    {
+    public async Task<bool> MarkDeleteArea(int areaId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -810,8 +813,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> MarkDeleteCoordinate(int coordinateId, string userId)
-    {
+    public async Task<bool> MarkDeleteCoordinate(int coordinateId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -860,8 +863,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> MarkDeletePlant(int plantId, string userId)
-    {
+    public async Task<bool> MarkDeletePlant(int plantId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -910,8 +913,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> MarkDeleteSpace(int spaceId, string userId)
-    {
+    public async Task<bool> MarkDeleteSpace(int spaceId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -960,8 +963,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1007,8 +1010,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1054,8 +1057,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto, string userId)
-    {
+    public async Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1102,8 +1105,8 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto, string userId)
-    {
+    public async Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 

@@ -7,37 +7,37 @@ using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Server.Services;
 public interface ISituationService
 {
-    Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto, string userId);
+    Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto);
 
-    Task<bool> AddOrUpdateCategorySituation(CategorySituationDto categorySituationDto, string userId);
+    Task<bool> AddOrUpdateCategorySituation(CategorySituationDto categorySituationDto);
 
-    Task<bool> AddOrUpdateDeviceSituation(DeviceSituationDto deviceSituationDto, string userId);
+    Task<bool> AddOrUpdateDeviceSituation(DeviceSituationDto deviceSituationDto);
 
-    Task<bool> AddOrUpdateSituationDetail(SituationDetailDto situationDetailDto, string userId);
+    Task<bool> AddOrUpdateSituationDetail(SituationDetailDto situationDetailDto);
 
-    Task<bool> AddOrUpdateSituationParameter(SituationParameterDto situationParameterDto, string userId);
+    Task<bool> AddOrUpdateSituationParameter(SituationParameterDto situationParameterDto);
 
-    Task<bool> AddOrUpdateSituationQuestion(SituationQuestionDto situationQuestionDto, string userId);
+    Task<bool> AddOrUpdateSituationQuestion(SituationQuestionDto situationQuestionDto);
 
-    Task<int> CreateQuestion(QuestionCreateDto questionCreateDto, string userId);
+    Task<int> CreateQuestion(QuestionCreateDto questionCreateDto);
 
-    Task<int> CreateSituation(SituationCreateDto situationCreateDto, string userId);
+    Task<int> CreateSituation(SituationCreateDto situationCreateDto);
 
-    Task<bool> DeleteAssetSituation(AssetSituationDto assetSituationDto, string userId);
+    Task<bool> DeleteAssetSituation(AssetSituationDto assetSituationDto);
 
-    Task<bool> DeleteCategorySituation(CategorySituationDto categorySituationDto, string userId);
+    Task<bool> DeleteCategorySituation(CategorySituationDto categorySituationDto);
 
-    Task<bool> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto, string userId);
+    Task<bool> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto);
 
     Task<bool> DeleteQuestion(int situationId);
 
     Task<bool> DeleteSituation(int situationId);
 
-    Task<bool> DeleteSituationDetail(SituationDetailDto situationDetailDto, string userId);
+    Task<bool> DeleteSituationDetail(SituationDetailDto situationDetailDto);
 
-    Task<bool> DeleteSituationParameter(SituationParameterDto situationParameterDto, string userId);
+    Task<bool> DeleteSituationParameter(SituationParameterDto situationParameterDto);
 
-    Task<bool> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto, string userId);
+    Task<bool> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto);
 
     Task<QuestionDto> GetQuestionById(int questionId);
 
@@ -55,40 +55,42 @@ public interface ISituationService
 
     Task<IEnumerable<SituationWithAssetsAndDetailsDto>> GetSituationWithAssetsAndDetails();
 
-    Task<bool> MarkDeleteAssetSituation(AssetSituationDto assetSituationDto, string userId);
+    Task<bool> MarkDeleteAssetSituation(AssetSituationDto assetSituationDto);
 
-    Task<bool> MarkDeleteCategorySituation(CategorySituationDto categorySituationDto, string userId);
+    Task<bool> MarkDeleteCategorySituation(CategorySituationDto categorySituationDto);
 
-    Task<bool> MarkDeleteDeviceSituation(DeviceSituationDto deviceSituationDto, string userId);
+    Task<bool> MarkDeleteDeviceSituation(DeviceSituationDto deviceSituationDto);
 
-    Task<bool> MarkDeleteQuestion(int questionId, string userId);
+    Task<bool> MarkDeleteQuestion(int questionId);
 
-    Task<bool> MarkDeleteSituation(int situationId, string userId);
+    Task<bool> MarkDeleteSituation(int situationId);
 
-    Task<bool> MarkDeleteSituationDetail(SituationDetailDto situationDetailDto, string userId);
+    Task<bool> MarkDeleteSituationDetail(SituationDetailDto situationDetailDto);
 
-    Task<bool> MarkDeleteSituationParameter(SituationParameterDto situationParameterDto, string userId);
+    Task<bool> MarkDeleteSituationParameter(SituationParameterDto situationParameterDto);
 
-    Task<bool> MarkDeleteSituationQuestion(SituationQuestionDto situationQuestionDto, string userId);
+    Task<bool> MarkDeleteSituationQuestion(SituationQuestionDto situationQuestionDto);
 
-    Task<bool> UpdateQuestion(int questionId, string userId, QuestionUpdateDto questionUpdateDto);
+    Task<bool> UpdateQuestion(int questionId,  QuestionUpdateDto questionUpdateDto);
 
-    Task<bool> UpdateSituation(int questionId, string userId, SituationUpdateDto situationUpdateDto);
+    Task<bool> UpdateSituation(int questionId,  SituationUpdateDto situationUpdateDto);
 }
 
 public class SituationService : ISituationService
 {
+    private readonly IUserContextService _userContextService;
     private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
     private readonly ILogger<SituationService> _logger;
 
-    public SituationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<SituationService> logger)
+    public SituationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<SituationService> logger, IUserContextService userContextService)
     {
         _contextFactory = contextFactory;
         _logger = logger;
+        _userContextService = userContextService;
     }
 
-    public async Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -141,8 +143,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> AddOrUpdateCategorySituation(CategorySituationDto categorySituationDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateCategorySituation(CategorySituationDto categorySituationDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -195,8 +197,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> AddOrUpdateDeviceSituation(DeviceSituationDto deviceSituationDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateDeviceSituation(DeviceSituationDto deviceSituationDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -249,8 +251,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> AddOrUpdateSituationDetail(SituationDetailDto situationDetailDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateSituationDetail(SituationDetailDto situationDetailDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -303,8 +305,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> AddOrUpdateSituationParameter(SituationParameterDto situationParameterDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateSituationParameter(SituationParameterDto situationParameterDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -357,8 +359,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> AddOrUpdateSituationQuestion(SituationQuestionDto situationQuestionDto, string userId)
-    {
+    public async Task<bool> AddOrUpdateSituationQuestion(SituationQuestionDto situationQuestionDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -411,8 +413,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<int> CreateQuestion(QuestionCreateDto questionCreateDto, string userId)
-    {
+    public async Task<int> CreateQuestion(QuestionCreateDto questionCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -452,8 +454,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<int> CreateSituation(SituationCreateDto situationCreateDto, string userId)
-    {
+    public async Task<int> CreateSituation(SituationCreateDto situationCreateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -494,7 +496,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteAssetSituation(AssetSituationDto assetSituationDto, string userId)
+    public async Task<bool> DeleteAssetSituation(AssetSituationDto assetSituationDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -534,7 +536,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteCategorySituation(CategorySituationDto categorySituationDto, string userId)
+    public async Task<bool> DeleteCategorySituation(CategorySituationDto categorySituationDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -574,7 +576,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto, string userId)
+    public async Task<bool> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -694,7 +696,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituationDetail(SituationDetailDto situationDetailDto, string userId)
+    public async Task<bool> DeleteSituationDetail(SituationDetailDto situationDetailDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -734,7 +736,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituationParameter(SituationParameterDto situationParameterDto, string userId)
+    public async Task<bool> DeleteSituationParameter(SituationParameterDto situationParameterDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -774,7 +776,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto, string userId)
+    public async Task<bool> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -1062,8 +1064,8 @@ public class SituationService : ISituationService
         return situations;
     }
 
-    public async Task<bool> MarkDeleteAssetSituation(AssetSituationDto assetSituationDto, string userId)
-    {
+    public async Task<bool> MarkDeleteAssetSituation(AssetSituationDto assetSituationDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1100,8 +1102,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteCategorySituation(CategorySituationDto categorySituationDto, string userId)
-    {
+    public async Task<bool> MarkDeleteCategorySituation(CategorySituationDto categorySituationDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1138,8 +1140,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteDeviceSituation(DeviceSituationDto deviceSituationDto, string userId)
-    {
+    public async Task<bool> MarkDeleteDeviceSituation(DeviceSituationDto deviceSituationDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1176,8 +1178,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteQuestion(int questionId, string userId)
-    {
+    public async Task<bool> MarkDeleteQuestion(int questionId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1228,8 +1230,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteSituation(int situationId, string userId)
-    {
+    public async Task<bool> MarkDeleteSituation(int situationId)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1292,6 +1294,7 @@ public class SituationService : ISituationService
         }
         // mark delete situation
         situation.IsDeleted = true;
+        situation.UserId = userId;
         context.Situations.Update(situation);
         // await using transaction
         await using var transaction = await context.Database.BeginTransactionAsync();
@@ -1314,8 +1317,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteSituationDetail(SituationDetailDto situationDetailDto, string userId)
-    {
+    public async Task<bool> MarkDeleteSituationDetail(SituationDetailDto situationDetailDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1353,8 +1356,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteSituationParameter(SituationParameterDto situationParameterDto, string userId)
-    {
+    public async Task<bool> MarkDeleteSituationParameter(SituationParameterDto situationParameterDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1391,8 +1394,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteSituationQuestion(SituationQuestionDto situationQuestionDto, string userId)
-    {
+    public async Task<bool> MarkDeleteSituationQuestion(SituationQuestionDto situationQuestionDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1429,8 +1432,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> UpdateQuestion(int questionId, string userId, QuestionUpdateDto questionUpdateDto)
-    {
+    public async Task<bool> UpdateQuestion(int questionId,  QuestionUpdateDto questionUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1476,8 +1479,8 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> UpdateSituation(int situationId, string userId, SituationUpdateDto situationUpdateDto)
-    {
+    public async Task<bool> UpdateSituation(int situationId, SituationUpdateDto situationUpdateDto)
+    {var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 

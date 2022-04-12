@@ -10,5 +10,7 @@ public class CommunicateDeviceConfig : IEntityTypeConfiguration<CommunicateDevic
         builder.HasKey(x => new { x.CommunicateId, x.DeviceId });
         builder.Property(x => x.DeviceId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
+        builder.HasOne(x => x.Communicate).WithMany(x => x.CommunicateDevices).HasForeignKey(x => x.CommunicateId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Device).WithMany(x => x.CommunicateDevices).HasForeignKey(x => x.DeviceId).OnDelete(DeleteBehavior.ClientCascade);
     }
 }

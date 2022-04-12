@@ -10,5 +10,7 @@ public class CategorySituationConfig : IEntityTypeConfiguration<CategorySituatio
         builder.HasKey(x => new { x.CategoryId, x.SituationId });
         builder.Property(x => x.SituationId).IsRequired();
         builder.Property(x => x.CategoryId).IsRequired();
+        builder.HasOne(x => x.Category).WithMany(x => x.CategorySituations).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Situation).WithMany(x => x.CategorySituations).HasForeignKey(x => x.SituationId).OnDelete(DeleteBehavior.ClientCascade);
     }
 }

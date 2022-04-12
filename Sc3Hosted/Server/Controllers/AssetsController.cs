@@ -23,7 +23,7 @@ public class AssetsController : ControllerBase
     public async Task<IActionResult> Update(int assetId, AssetUpdateDto assetUpdateDto)
     {
         var userId = _userContextService.UserId;
-        var result = await _assetService.UpdateAsset(assetId, assetUpdateDto, userId);
+        var result = await _assetService.UpdateAsset(assetId, assetUpdateDto);
 
 
         return Ok(result);
@@ -33,7 +33,7 @@ public class AssetsController : ControllerBase
     public async Task<IActionResult> UpdateCategory(AssetCategoryDto assetCategoryDto, int assetId, int categoryId)
     {
         var userId = _userContextService.UserId;
-        var result = await _assetService.AddOrUpdateAssetCategory(assetCategoryDto, userId);
+        var result = await _assetService.AddOrUpdateAssetCategory(assetCategoryDto);
 
         return Ok(result);
     }
