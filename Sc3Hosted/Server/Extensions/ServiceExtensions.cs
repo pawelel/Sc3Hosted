@@ -1,6 +1,5 @@
 ﻿using Sc3Hosted.Server.Services;
 namespace Sc3Hosted.Server.Extensions;
-
 public static class ServiceExtensions
 {
     public static void ServiceWrapper(this IServiceCollection services)

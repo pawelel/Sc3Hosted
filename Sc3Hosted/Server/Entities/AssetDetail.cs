@@ -1,5 +1,4 @@
 ﻿namespace Sc3Hosted.Server.Entities;
-
 public class AssetDetail : BaseEntity
 {
 
@@ -7,5 +6,5 @@ public class AssetDetail : BaseEntity
     public int DetailId { get; set; }
     public virtual Asset Asset { get; set; } = new();
     public virtual Detail Detail { get; set; } = new();
-    public string Value { get; set; }=string.Empty;
+    public string Value { get; set; } = string.Empty;
 }

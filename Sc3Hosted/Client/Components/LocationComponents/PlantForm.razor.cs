@@ -1,24 +1,26 @@
 ﻿using Microsoft.AspNetCore.Components;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MudBlazor;
-using Sc3Hosted.Shared.Dtos;
 using Sc3Hosted.Client.Services;
-
+using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Client.Components.LocationComponents;
 public partial class PlantForm : ComponentBase
 {
+    private readonly PlantCreateDto _plantCreateDto = new();
+    private MudForm _form = new();
+    private bool _isOpen;
     [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
-    [Inject] IPlantService PlantService { get; set; } = default!;
+    [Inject]
+    private IPlantService PlantService { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
-    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
-    private MudForm _form=new();
-    bool _isOpen;
-    private void Cancel() => MudDialog.Cancel();
-    private PlantCreateDto _plantCreateDto = new();
+    private void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
     protected override async Task OnInitializedAsync()
     {
 
@@ -38,11 +40,10 @@ public partial class PlantForm : ComponentBase
         _isOpen = !_isOpen;
     }
 
-    async Task HandleSave()
+    private async Task HandleSave()
     {
         await _form.Validate();
         if (_form.IsValid)
-        {
             try
             {
                 await PlantService.CreatePlant(_plantCreateDto);
@@ -53,7 +54,6 @@ public partial class PlantForm : ComponentBase
             {
                 Snackbar.Add(ex.Message, Severity.Error);
             }
-        }
 
     }
 }

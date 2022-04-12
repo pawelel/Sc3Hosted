@@ -1,22 +1,21 @@
-﻿using Blazored.LocalStorage;
-using Sc3Hosted.Client.Helpers;
-using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using Sc3Hosted.Client.Helpers;
 using Sc3Hosted.Shared.Dtos;
-
 namespace Sc3Hosted.Client.Services;
-
 public interface IAuthService
 {
     Task<LoginResultDto> Login(LoginDto loginModel);
     Task<RegisterResultDto> Register(RegisterDto registerModel);
     Task Logout();
 }
+
 public class AuthService : IAuthService
 {
-    private readonly HttpClient _httpClient;
     private readonly AuthenticationStateProvider _authenticationStateProvider;
+    private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorage;
 
     public AuthService(HttpClient httpClient,

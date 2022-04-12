@@ -1,6 +1,4 @@
-﻿
-namespace Sc3Hosted.Server.Entities;
-
+﻿namespace Sc3Hosted.Server.Entities;
 public class Area : BaseEntity
 {
     public int AreaId { get; set; }

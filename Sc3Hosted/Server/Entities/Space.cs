@@ -1,7 +1,5 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
-
 namespace Sc3Hosted.Server.Entities;
-
 public class Space : BaseEntity
 {
     public int SpaceId { get; set; }

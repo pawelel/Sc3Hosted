@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 using Sc3Hosted.Server.Entities;
-
 namespace Sc3Hosted.Server.Data.Configurations;
-
 public class CoordinateConfig : IEntityTypeConfiguration<Coordinate>
 {
     public void Configure(EntityTypeBuilder<Coordinate> builder)
@@ -14,7 +11,7 @@ public class CoordinateConfig : IEntityTypeConfiguration<Coordinate>
         builder.Property(x => x.CoordinateId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(500);
-        builder.Property(x=>x.SpaceId).IsRequired();
+        builder.Property(x => x.SpaceId).IsRequired();
         builder.HasMany(x => x.CommunicateCoordinates).WithOne(x => x.Coordinate).HasForeignKey(x => x.CoordinateId);
         builder.HasMany(x => x.Assets).WithOne(x => x.Coordinate).HasForeignKey(x => x.CoordinateId);
     }

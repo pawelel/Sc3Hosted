@@ -1,20 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Sc3Hosted.Server.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
 using Sc3Hosted.Server.Services;
 using Sc3Hosted.Shared.Dtos;
-using Sc3Hosted.Shared.Helpers;
 namespace Sc3Hosted.Server.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class AssetsController : ControllerBase
 {
-    private readonly IUserContextService _userContextService;
     private readonly IAssetService _assetService;
+    private readonly IUserContextService _userContextService;
 
     public AssetsController(IUserContextService userContextService, IAssetService assetService)
     {
@@ -31,11 +24,9 @@ public class AssetsController : ControllerBase
     {
         var userId = _userContextService.UserId;
         var result = await _assetService.UpdateAsset(assetId, assetUpdateDto, userId);
-        
+
         if (result.Success)
-        {
             return Ok(result);
-        }
         return BadRequest(result.Message);
     }
     [HttpPut("{assetId:int}/categories/{categoryId:int}")]
@@ -44,10 +35,7 @@ public class AssetsController : ControllerBase
         var userId = _userContextService.UserId;
         var result = await _assetService.AddOrUpdateAssetCategory(assetCategoryDto, userId);
         if (result.Success)
-        {
             return Ok(result);
-        }
         return BadRequest(result.Message);
     }
-    
 }

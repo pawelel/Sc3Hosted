@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 namespace Sc3Hosted.Shared.Enumerations;
 public enum Scope
 {

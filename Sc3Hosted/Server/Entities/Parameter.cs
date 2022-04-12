@@ -1,5 +1,4 @@
-﻿
-namespace Sc3Hosted.Server.Entities;
+﻿namespace Sc3Hosted.Server.Entities;
 public class Parameter : BaseEntity
 {
     public int ParameterId { get; set; }

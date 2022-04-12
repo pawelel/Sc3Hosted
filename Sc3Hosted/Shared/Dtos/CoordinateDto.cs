@@ -1,5 +1,4 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-
 public class CoordinateDto : BaseDto
 {
     public int CoordinateId { get; set; }

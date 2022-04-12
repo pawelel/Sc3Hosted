@@ -1,29 +1,27 @@
 ﻿using Microsoft.AspNetCore.Components;
-
 using Sc3Hosted.Client.Services;
 using Sc3Hosted.Shared.Dtos;
 using Sc3Hosted.Shared.Enumerations;
-
 namespace Sc3Hosted.Client.Components.AssetComponents;
 public partial class AssetSearch : ComponentBase
 {
-    [Inject] IAssetsService AssetsService { get; set; } = null!;
-
-    string _searchString = string.Empty;
-    string _selectedFilters = string.Empty;
-    IEnumerable<AssetDisplayDto> _filteredAssets=new List<AssetDisplayDto>();
     private IEnumerable<AssetDisplayDto> _assets = new List<AssetDisplayDto>();
+    private IEnumerable<AssetDisplayDto> _filteredAssets = new List<AssetDisplayDto>();
+
+    private string _searchString = string.Empty;
+    private string _selectedFilters = string.Empty;
+    [Inject]
+    private IAssetsService AssetsService { get; set; } = null!;
+
+    private Func<AssetDisplayDto, bool> AssetFilter => x => {
+        return _searchString != null && typeof(AssetDisplayDto).GetProperties().Any(p => p.GetValue(x)?.ToString()?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true);
+    };
     protected override async Task OnInitializedAsync()
     {
         _assets = await AssetsService.GetAssetsAsync();
         _filteredAssets = _assets;
 
     }
-
-    private Func<AssetDisplayDto, bool> AssetFilter => x =>
-    {
-        return _searchString != null && typeof(AssetDisplayDto).GetProperties().Any(p => p.GetValue(x)?.ToString()?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true);
-    };
     private static void ShowBtnPress(AssetDisplayDto aDisplayDto)
     {
         aDisplayDto.ShowDetails = !aDisplayDto.ShowDetails;
@@ -37,7 +35,7 @@ public partial class AssetSearch : ComponentBase
 
     private void FilterByCategory(string category)
     {
-        int count = 0;
+        var count = 0;
         _filteredAssets = _filteredAssets.Where(a => a.Categories!.Any(c => c.Name == category));
         if (!_selectedFilters.Contains(category))
         {
@@ -47,7 +45,7 @@ public partial class AssetSearch : ComponentBase
     }
     private void FilterByStatus(Status status)
     {
-        int count = 0;
+        var count = 0;
         _filteredAssets = _filteredAssets.Where(a => a.Status == status);
         if (!_selectedFilters.Contains(status.ToString()))
         {
@@ -57,9 +55,8 @@ public partial class AssetSearch : ComponentBase
     }
     private void FilterByModel(string model)
     {
-        int count = 0;
-        _filteredAssets = _filteredAssets.Where(a =>
-        {
+        var count = 0;
+        _filteredAssets = _filteredAssets.Where(a => {
             return a.ModelName == model;
         });
         if (!_selectedFilters.Contains(model))
@@ -70,7 +67,7 @@ public partial class AssetSearch : ComponentBase
     }
     private void FilterByArea(string area)
     {
-        int count = 0;
+        var count = 0;
         _filteredAssets = _filteredAssets.Where(a => a.AreaName == area);
         if (!_selectedFilters.Contains(area))
         {
@@ -80,7 +77,7 @@ public partial class AssetSearch : ComponentBase
     }
     private void FilterBySpace(string space)
     {
-        int count = 0;
+        var count = 0;
         _filteredAssets = _filteredAssets.Where(a => a.SpaceName == space);
         if (!_selectedFilters.Contains(space))
         {
@@ -90,7 +87,7 @@ public partial class AssetSearch : ComponentBase
     }
     private void FilterByCoordinate(string coordinate)
     {
-        int count = 0;
+        var count = 0;
         _filteredAssets = _filteredAssets.Where(a => a.CoordinateName == coordinate);
         if (!_selectedFilters.Contains(coordinate))
         {
@@ -100,7 +97,7 @@ public partial class AssetSearch : ComponentBase
     }
     private void FilterByDevice(string device)
     {
-        int count = 0;
+        var count = 0;
         _filteredAssets = _filteredAssets.Where(a => a.DeviceName == device);
         if (!_selectedFilters.Contains(device))
         {

@@ -15,3 +15,5 @@
 //        return _searchString != null && typeof(LocationDto).GetProperties().Any(p => p.GetValue(x)?.ToString()?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true);
 //    };
 //}
+
+

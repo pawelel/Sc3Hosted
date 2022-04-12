@@ -1,6 +1,5 @@
 ﻿namespace Sc3Hosted.Server.Entities;
-
-public class DeviceSituation :BaseEntity
+public class DeviceSituation : BaseEntity
 {
     public virtual Situation Situation { get; set; } = new();
     public int SituationId { get; set; }

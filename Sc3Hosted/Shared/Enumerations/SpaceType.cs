@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 namespace Sc3Hosted.Shared.Enumerations;
 public enum SpaceType
 {
-    [Display(Name="Nieznana")]
+    [Display(Name = "Nieznana")]
     Unknown,
-    [Display(Name="Linia")]
+    [Display(Name = "Linia")]
     Line,
-    [Display(Name="Pomieszczenie")]
+    [Display(Name = "Pomieszczenie")]
     Room,
-    [Display(Name="Magazyn")]
+    [Display(Name = "Magazyn")]
     Storage
 }

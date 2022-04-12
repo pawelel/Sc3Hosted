@@ -1,7 +1,6 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-
 /// <summary>
-/// Trouble shooting question not from DB
+///     Trouble shooting question not from DB
 /// </summary>
 public class QuestionDto : BaseDto
 {

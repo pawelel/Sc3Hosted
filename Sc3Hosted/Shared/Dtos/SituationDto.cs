@@ -9,6 +9,6 @@ public class SituationDto : BaseDto
     public virtual List<SituationParameterDto> SituationParameters { get; set; } = new();
     public virtual List<CategorySituationDto> CategorySituations { get; set; } = new();
     public virtual List<DeviceSituationDto> DeviceSituations { get; set; } = new();
-    public  List<AssetSituationDto> AssetSituations { get; set; } = new();
+    public List<AssetSituationDto> AssetSituations { get; set; } = new();
     public virtual List<CommunicateCategoryDto> CommunicateCategories { get; set; } = new();
 }

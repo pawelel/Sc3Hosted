@@ -1,22 +1,20 @@
 ﻿using System.Security.Claims;
-
 namespace Sc3Hosted.Server.Services;
-
 public interface IUserContextService
 {
-        ClaimsPrincipal User { get; }
-string UserId { get; }
+    ClaimsPrincipal User { get; }
+    string UserId { get; }
 }
 
-public class UserContextService :IUserContextService
+public class UserContextService : IUserContextService
 {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserContextService(IHttpContextAccessor httpContextAccessor)
-        {
-                _httpContextAccessor = httpContextAccessor;
-        }
+    public UserContextService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User??new ClaimsPrincipal();
-        public string UserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value??string.Empty;
+    public ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User??new ClaimsPrincipal();
+    public string UserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value??string.Empty;
 }

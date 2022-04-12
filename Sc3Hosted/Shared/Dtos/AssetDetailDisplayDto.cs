@@ -5,5 +5,5 @@ public class AssetDetailDisplayDto : BaseDto
     public string Description { get; set; } = string.Empty;
     public int AssetId { get; set; }
     public int DetailId { get; set; }
-    public string Value { get; set; }= string.Empty;
+    public string Value { get; set; } = string.Empty;
 }

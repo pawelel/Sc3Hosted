@@ -1,5 +1,4 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
-
 namespace Sc3Hosted.Shared.Dtos;
 public class AssetDisplayDto : BaseDto
 {

@@ -1,5 +1,4 @@
 ﻿namespace Sc3Hosted.Server.Entities;
-
 public class Question : BaseEntity
 {
     public int QuestionId { get; set; }

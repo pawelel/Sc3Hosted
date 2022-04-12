@@ -1,9 +1,6 @@
-﻿using Sc3Hosted.Shared.Dtos;
-
-using System.Net.Http.Json;
-
+﻿using System.Net.Http.Json;
+using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Client.Services;
-
 public interface IPlantService
 {
     Task<List<PlantDto>> GetPlants();
@@ -11,7 +8,6 @@ public interface IPlantService
     Task<PlantCreateDto> CreatePlant(PlantCreateDto plant);
     Task<PlantUpdateDto> UpdatePlant(PlantUpdateDto plant);
     Task<bool> DeletePlant(int id);
-    
 }
 
 public class PlantService : IPlantService

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-
 namespace Sc3Hosted.Server.Entities;
-
 public class ApplicationUser : IdentityUser
 {
     public string FirstName { get; set; } = string.Empty;

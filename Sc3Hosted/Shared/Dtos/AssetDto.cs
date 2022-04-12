@@ -1,7 +1,5 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
-
 namespace Sc3Hosted.Shared.Dtos;
-
 public class AssetDto : BaseDto
 {
     public int AssetId { get; set; }
@@ -14,5 +12,5 @@ public class AssetDto : BaseDto
     public virtual List<AssetDetailDto> AssetDetails { get; set; } = new();
     public virtual List<AssetCategoryDto> AssetCategories { get; set; } = new();
     public virtual List<CommunicateAssetDto> CommunicateAssets { get; set; } = new();
-    public  List<AssetSituationDto> AssetSituations { get; set; } = new();
+    public List<AssetSituationDto> AssetSituations { get; set; } = new();
 }

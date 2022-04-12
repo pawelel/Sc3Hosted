@@ -1,11 +1,4 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Sc3Hosted.Shared.Dtos;
 public class AssetUpdateDto
 {
@@ -18,5 +11,5 @@ public class AssetUpdateDto
     public virtual List<CommunicateAssetDto> CommunicateAssets { get; set; } = new();
     public virtual List<AssetSituationDto> AssetSituations { get; set; } = new();
     public int ModelId { get; set; }
-    public string Description { get; set; }= string.Empty;
+    public string Description { get; set; } = string.Empty;
 }

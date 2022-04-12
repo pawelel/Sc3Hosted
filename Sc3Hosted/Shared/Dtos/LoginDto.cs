@@ -1,15 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
-namespace Sc3Hosted.Shared.Dtos
+namespace Sc3Hosted.Shared.Dtos;
+public class LoginDto
 {
-	public class LoginDto
-	{
-		[Required]
-		public string Email { get; set; } = string.Empty;
+    [Required]
+    public string Email { get; set; } = string.Empty;
 
-		[Required]
-        public string Password { get; set; } = string.Empty;
+    [Required]
+    public string Password { get; set; } = string.Empty;
 
-        public bool RememberMe { get; set; }
-	}
+    public bool RememberMe { get; set; }
 }

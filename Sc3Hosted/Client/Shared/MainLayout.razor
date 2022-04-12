@@ -1,15 +1,15 @@
 ﻿@inherits LayoutComponentBase
 <MudLayout>
     <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(e => DrawerToggle())"/>
+        <MudSpacer/>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
-        <MudLink Color=Color.Inherit Typo="Typo.h6" Href="" Underline="Underline.None">SC3 Asset Manager</MudLink>
-            
+            <MudLink Color="Color.Inherit" Typo="Typo.h6" Href="" Underline="Underline.None">SC3 Asset Manager</MudLink>
+
         </MudDrawerHeader>
-        <NavMenu />
+        <NavMenu/>
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">

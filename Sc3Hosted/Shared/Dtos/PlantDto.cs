@@ -1,5 +1,4 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-
 public class PlantDto : BaseDto
 {
     public int PlantId { get; set; }

@@ -1,60 +1,13 @@
-﻿
-
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
 using Sc3Hosted.Server.Data.Configurations;
 using Sc3Hosted.Server.Entities;
-
 namespace Sc3Hosted.Server.Data;
-
 public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
 {
     public Sc3HostedDbContext(DbContextOptions options) : base(options)
     {
-    }
-
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-
-        builder.Entity<IdentityRole>()
-               .HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-        builder.Entity<IdentityRole>()
-               .HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-        builder.Entity<IdentityRole>()
-               .HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-
-        new AreaConfig().Configure(builder.Entity<Area>());
-        new CommunicateAreaConfig().Configure(builder.Entity<CommunicateArea>());
-        new CommunicateAssetConfig().Configure(builder.Entity<CommunicateAsset>());
-        new CommunicateConfig().Configure(builder.Entity<Communicate>());
-        new CommunicateCoordinateConfig().Configure(builder.Entity<CommunicateCoordinate>());
-        new CommunicateDeviceConfig().Configure(builder.Entity<CommunicateDevice>());
-        new CommunicateModelConfig().Configure(builder.Entity<CommunicateModel>());
-        new CommunicateSpaceConfig().Configure(builder.Entity<CommunicateSpace>());
-        new CommunicateCategoryConfig().Configure(builder.Entity<CommunicateCategory>());
-        new AreaConfig().Configure(builder.Entity<Area>());
-        new CoordinateConfig().Configure(builder.Entity<Coordinate>());
-        new SpaceConfig().Configure(builder.Entity<Space>());
-        new DeviceSituationConfig().Configure(builder.Entity<DeviceSituation>());
-        new CategorySituationConfig().Configure(builder.Entity<CategorySituation>());
-        new SituationConfig().Configure(builder.Entity<Situation>());
-        new QuestionConfig().Configure(builder.Entity<Question>());
-        new SituationQuestionConfig().Configure(builder.Entity<SituationQuestion>());
-        new SituationDetailConfig().Configure(builder.Entity<SituationDetail>());
-        new SituationParameterConfig().Configure(builder.Entity<SituationParameter>());
-        new AssetConfig().Configure(builder.Entity<Asset>());
-        new AssetCategoryConfig().Configure(builder.Entity<AssetCategory>());
-        new AssetDetailConfig().Configure(builder.Entity<AssetDetail>());
-        new CategoryConfig().Configure(builder.Entity<Category>());
-        new DeviceConfig().Configure(builder.Entity<Device>());
-        new DetailConfig().Configure(builder.Entity<Detail>());
-        new ModelConfig().Configure(builder.Entity<Model>());
-        new ModelParameterConfig().Configure(builder.Entity<ModelParameter>());
-        new ParameterConfig().Configure(builder.Entity<Parameter>());
-        new AssetSituationConfig().Configure(builder.Entity<AssetSituation>());
     }
     //stuff
     public DbSet<Asset> Assets => Set<Asset>();
@@ -92,4 +45,45 @@ public class Sc3HostedDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SituationParameter> SituationParameters => Set<SituationParameter>();
     public DbSet<AssetSituation> AssetSituations => Set<AssetSituation>();
 
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<IdentityRole>()
+            .HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+        builder.Entity<IdentityRole>()
+            .HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+        builder.Entity<IdentityRole>()
+            .HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+
+        new AreaConfig().Configure(builder.Entity<Area>());
+        new CommunicateAreaConfig().Configure(builder.Entity<CommunicateArea>());
+        new CommunicateAssetConfig().Configure(builder.Entity<CommunicateAsset>());
+        new CommunicateConfig().Configure(builder.Entity<Communicate>());
+        new CommunicateCoordinateConfig().Configure(builder.Entity<CommunicateCoordinate>());
+        new CommunicateDeviceConfig().Configure(builder.Entity<CommunicateDevice>());
+        new CommunicateModelConfig().Configure(builder.Entity<CommunicateModel>());
+        new CommunicateSpaceConfig().Configure(builder.Entity<CommunicateSpace>());
+        new CommunicateCategoryConfig().Configure(builder.Entity<CommunicateCategory>());
+        new AreaConfig().Configure(builder.Entity<Area>());
+        new CoordinateConfig().Configure(builder.Entity<Coordinate>());
+        new SpaceConfig().Configure(builder.Entity<Space>());
+        new DeviceSituationConfig().Configure(builder.Entity<DeviceSituation>());
+        new CategorySituationConfig().Configure(builder.Entity<CategorySituation>());
+        new SituationConfig().Configure(builder.Entity<Situation>());
+        new QuestionConfig().Configure(builder.Entity<Question>());
+        new SituationQuestionConfig().Configure(builder.Entity<SituationQuestion>());
+        new SituationDetailConfig().Configure(builder.Entity<SituationDetail>());
+        new SituationParameterConfig().Configure(builder.Entity<SituationParameter>());
+        new AssetConfig().Configure(builder.Entity<Asset>());
+        new AssetCategoryConfig().Configure(builder.Entity<AssetCategory>());
+        new AssetDetailConfig().Configure(builder.Entity<AssetDetail>());
+        new CategoryConfig().Configure(builder.Entity<Category>());
+        new DeviceConfig().Configure(builder.Entity<Device>());
+        new DetailConfig().Configure(builder.Entity<Detail>());
+        new ModelConfig().Configure(builder.Entity<Model>());
+        new ModelParameterConfig().Configure(builder.Entity<ModelParameter>());
+        new ParameterConfig().Configure(builder.Entity<Parameter>());
+        new AssetSituationConfig().Configure(builder.Entity<AssetSituation>());
+    }
 }

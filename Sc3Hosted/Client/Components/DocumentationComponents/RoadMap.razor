@@ -1,79 +1,97 @@
 ﻿<MudPaper Width="600px">
     <MudGrid>
         <MudItem xs="12" md="12">
-            <MudList Clickable=true Dense=false>
-             <MudListItem IconColor=Color.Primary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                    <ChildContent><MudText Color="Color.Primary" Typo="Typo.h6">Dokumentacja</MudText></ChildContent>
+            <MudList Clickable="true" Dense="false">
+                <MudListItem IconColor="Color.Primary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                    <ChildContent>
+                        <MudText Color="Color.Primary" Typo="Typo.h6">Dokumentacja</MudText>
+                    </ChildContent>
                     <NestedList>
-                        <MudListItem Text="Instrukcja obsługi wtyczki" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Instrukcja obsługi strony" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Dodanie edytora wysiwyg" Icon=@Icons.Filled.CheckBoxOutlineBlank />
+                        <MudListItem Text="Instrukcja obsługi wtyczki" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Instrukcja obsługi strony" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Dodanie edytora wysiwyg" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
                     </NestedList>
                 </MudListItem>
-                 <MudListItem IconColor=Color.Primary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                    <ChildContent><MudText Color="Color.Primary" Typo="Typo.h6">Api</MudText></ChildContent>
+                <MudListItem IconColor="Color.Primary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                    <ChildContent>
+                        <MudText Color="Color.Primary" Typo="Typo.h6">Api</MudText>
+                    </ChildContent>
                     <NestedList>
-                        <MudListItem Text="Mapowanie encji" Icon=@Icons.Filled.CheckBox />
-                        <MudListItem Text="Stworzenie usług" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Stworzenie kontrolerów" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Dodanie soft delete (IsArchived)" Icon=@Icons.Filled.CheckBoxOutlineBlank />
+                        <MudListItem Text="Mapowanie encji" Icon="@Icons.Filled.CheckBox"/>
+                        <MudListItem Text="Stworzenie usług" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Stworzenie kontrolerów" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Dodanie soft delete (IsArchived)" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
                     </NestedList>
                 </MudListItem>
-                <MudListItem  IconColor=Color.Primary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                         <ChildContent><MudText Color="Color.Primary" Typo="Typo.h6">Tabele</MudText></ChildContent>
+                <MudListItem IconColor="Color.Primary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                    <ChildContent>
+                        <MudText Color="Color.Primary" Typo="Typo.h6">Tabele</MudText>
+                    </ChildContent>
                     <NestedList>
-                        <MudListItem IconColor=Color.Tertiary Icon=@Icons.Filled.CheckBoxOutlineBlank>
-                            <ChildContent><MudText Color="Color.Tertiary" Typo="Typo.body1">Tabela assetów</MudText></ChildContent>
+                        <MudListItem IconColor="Color.Tertiary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                            <ChildContent>
+                                <MudText Color="Color.Tertiary" Typo="Typo.body1">Tabela assetów</MudText>
+                            </ChildContent>
                             <NestedList>
-                                <MudListItem Text="Filtrowanie po kategorii" Icon=@Icons.Filled.CheckCircle />
-                                <MudListItem Text="Kliknięcie nazwy assetu wyświetla szczegóły" Icon=@Icons.Filled.CheckCircle/>
-                                <MudListItem Text="Karta wyświetlająca szczegóły assetu" Icon=@Icons.Filled.CheckCircleOutline />
+                                <MudListItem Text="Filtrowanie po kategorii" Icon="@Icons.Filled.CheckCircle"/>
+                                <MudListItem Text="Kliknięcie nazwy assetu wyświetla szczegóły" Icon="@Icons.Filled.CheckCircle"/>
+                                <MudListItem Text="Karta wyświetlająca szczegóły assetu" Icon="@Icons.Filled.CheckCircleOutline"/>
                             </NestedList>
                         </MudListItem>
-                        <MudListItem IconColor=Color.Error Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                             <ChildContent><MudText Color="Color.Error" Typo="Typo.body1">Tabela Zdarzeń</MudText></ChildContent>
+                        <MudListItem IconColor="Color.Error" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                            <ChildContent>
+                                <MudText Color="Color.Error" Typo="Typo.body1">Tabela Zdarzeń</MudText>
+                            </ChildContent>
                         </MudListItem>
-                        
-                        <MudListItem IconColor=Color.Tertiary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                               <ChildContent><MudText Color="Color.Tertiary" Typo="Typo.body1">Tabela lokalizacji</MudText></ChildContent>
+
+                        <MudListItem IconColor="Color.Tertiary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                            <ChildContent>
+                                <MudText Color="Color.Tertiary" Typo="Typo.body1">Tabela lokalizacji</MudText>
+                            </ChildContent>
                             <NestedList>
-                                <MudListItem Text="Listowanie kategorii" Icon=@Icons.Filled.CheckCircleOutline />
-                                <MudListItem Text="Kliknięcie nazwy kategorii rozwija sprzęty" Icon=@Icons.Filled.CheckCircleOutline />
+                                <MudListItem Text="Listowanie kategorii" Icon="@Icons.Filled.CheckCircleOutline"/>
+                                <MudListItem Text="Kliknięcie nazwy kategorii rozwija sprzęty" Icon="@Icons.Filled.CheckCircleOutline"/>
                             </NestedList>
                         </MudListItem>
-                        <MudListItem Text="Tabela komunikatów" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Tabela terminów" Icon=@Icons.Filled.CheckBoxOutlineBlank />
+                        <MudListItem Text="Tabela komunikatów" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Tabela terminów" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
                     </NestedList>
                 </MudListItem>
-                <MudListItem IconColor=Color.Primary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                         <ChildContent><MudText Color="Color.Primary" Typo="Typo.h6">Komunikaty</MudText></ChildContent>
+                <MudListItem IconColor="Color.Primary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                    <ChildContent>
+                        <MudText Color="Color.Primary" Typo="Typo.h6">Komunikaty</MudText>
+                    </ChildContent>
                     <NestedList>
-                        <MudListItem Text="Wyświetlanie komunikatu o wygasającym certyfikacie" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Wyświetlanie komunikatu o pożyczonym sprzęcie" Icon=@Icons.Filled.CheckBoxOutlineBlank />
+                        <MudListItem Text="Wyświetlanie komunikatu o wygasającym certyfikacie" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Wyświetlanie komunikatu o pożyczonym sprzęcie" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
                     </NestedList>
                 </MudListItem>
-                <MudListItem  IconColor=Color.Primary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                         <ChildContent><MudText Color="Color.Primary" Typo="Typo.h6">Konfiguratory</MudText></ChildContent>
+                <MudListItem IconColor="Color.Primary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                    <ChildContent>
+                        <MudText Color="Color.Primary" Typo="Typo.h6">Konfiguratory</MudText>
+                    </ChildContent>
                     <NestedList>
-                        <MudListItem Text="Konfigurator Assetu" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Sprzętu" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Obszaru" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Przestrzeni" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Koordynatu" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Komunikatu" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Modelu" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Konfigurator Zdarzenia" Icon=@Icons.Filled.CheckBoxOutlineBlank />
+                        <MudListItem Text="Konfigurator Assetu" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Sprzętu" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Obszaru" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Przestrzeni" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Koordynatu" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Komunikatu" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Modelu" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Konfigurator Zdarzenia" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
                     </NestedList>
                 </MudListItem>
-                <MudListItem IconColor=Color.Primary Icon=@Icons.Filled.CheckBoxOutlineBlank >
-                    <ChildContent><MudText Color="Color.Primary" Typo="Typo.h6">Wtyczka Chromium</MudText></ChildContent>
+                <MudListItem IconColor="Color.Primary" Icon="@Icons.Filled.CheckBoxOutlineBlank">
+                    <ChildContent>
+                        <MudText Color="Color.Primary" Typo="Typo.h6">Wtyczka Chromium</MudText>
+                    </ChildContent>
                     <NestedList>
-                        <MudListItem Text="Wypełnianie tickeów SC3" Icon=@Icons.Filled.CheckBox />
-                        <MudListItem Text="Rejestracja wtyczki w Google Play i Microsoft Store" Icon=@Icons.Filled.CheckBox />
-                        <MudListItem Text="Aktualizacja pól" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Połączenie z API" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Dodanie tabeli komunikatów" Icon=@Icons.Filled.CheckBoxOutlineBlank />
-                        <MudListItem Text="Dodanie tabeli kategorii" Icon=@Icons.Filled.CheckBoxOutlineBlank />
+                        <MudListItem Text="Wypełnianie tickeów SC3" Icon="@Icons.Filled.CheckBox"/>
+                        <MudListItem Text="Rejestracja wtyczki w Google Play i Microsoft Store" Icon="@Icons.Filled.CheckBox"/>
+                        <MudListItem Text="Aktualizacja pól" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Połączenie z API" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Dodanie tabeli komunikatów" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
+                        <MudListItem Text="Dodanie tabeli kategorii" Icon="@Icons.Filled.CheckBoxOutlineBlank"/>
                     </NestedList>
                 </MudListItem>
             </MudList>

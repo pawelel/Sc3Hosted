@@ -6,10 +6,10 @@ public static class MapDto
 {
     public static AssetCategoryDisplayDto AssetCategoryToCategoryDisplayDto(this AssetCategory ac)
     {
-        return new AssetCategoryDisplayDto()
+        return new AssetCategoryDisplayDto
         {
             Name = ac.Category.Name,
-       
+
             AssetId = ac.AssetId,
             CategoryId = ac.CategoryId,
             Description = ac.Category.Description,
@@ -18,7 +18,7 @@ public static class MapDto
     }
     public static ModelParameterDisplayDto ModelParameterToModelParameterDisplayDto(this ModelParameter mp)
     {
-        return new ModelParameterDisplayDto()
+        return new ModelParameterDisplayDto
         {
             Name = mp.Parameter.Name,
             Value = mp.Value,
@@ -31,13 +31,13 @@ public static class MapDto
     }
     public static AssetDetailDisplayDto AssetDetailToAssetDisplayDetailDto(this AssetDetail ad)
     {
-        return new AssetDetailDisplayDto()
+        return new AssetDetailDisplayDto
         {
             Name = ad.Detail.Name,
             Value = ad.Value,
             DetailId = ad.DetailId,
             AssetId = ad.AssetId,
-     
+
             Description = ad.Detail.Description,
             IsDeleted = ad.IsDeleted
         };

@@ -1,5 +1,4 @@
 ﻿using Sc3Hosted.Shared.Enumerations;
-
 namespace Sc3Hosted.Shared.Dtos;
 public class CommunicateDto : BaseDto
 {
@@ -10,7 +9,7 @@ public class CommunicateDto : BaseDto
     public CommunicationType CommunicationType { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    
+
     public virtual List<CommunicateAreaDto> CommunicateAreas { get; set; } = new();
     public virtual List<CommunicateAssetDto> CommunicateAssets { get; set; } = new();
     public virtual List<CommunicateCoordinateDto> CommunicateCoordinates { get; set; } = new();

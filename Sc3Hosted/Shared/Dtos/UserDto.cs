@@ -1,8 +1,6 @@
-﻿namespace Sc3Hosted.Shared.Dtos
+﻿namespace Sc3Hosted.Shared.Dtos;
+public class UserDto
 {
-	public class UserDto
-	{
-		public string Email { get; set; } = string.Empty;
-		public bool IsAuthenticated { get; set; }
-	}
+    public string Email { get; set; } = string.Empty;
+    public bool IsAuthenticated { get; set; }
 }

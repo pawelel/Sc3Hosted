@@ -1,6 +1,4 @@
-﻿
-namespace Sc3Hosted.Server.Entities;
-
+﻿namespace Sc3Hosted.Server.Entities;
 public class SituationQuestion : BaseEntity
 {
     public int SituationId { get; set; }

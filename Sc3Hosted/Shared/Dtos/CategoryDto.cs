@@ -1,7 +1,4 @@
-
-
 namespace Sc3Hosted.Shared.Dtos;
-
 public class CategoryDto : BaseDto
 {
     public int CategoryId { get; set; }

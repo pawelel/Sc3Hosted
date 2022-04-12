@@ -1,5 +1,4 @@
 ﻿namespace Sc3Hosted.Shared.Dtos;
-
 public class AreaDto : BaseDto
 {
     public int AreaId { get; set; }

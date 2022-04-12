@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sc3Hosted.Server.Entities;
+﻿namespace Sc3Hosted.Server.Entities;
 public class SituationParameter : BaseEntity
 {
     public int SituationId { get; set; }

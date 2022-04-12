@@ -1,5 +1,4 @@
 namespace Sc3Hosted.Server.Entities;
-
 public class Category : BaseEntity
 {
     public int CategoryId { get; set; }

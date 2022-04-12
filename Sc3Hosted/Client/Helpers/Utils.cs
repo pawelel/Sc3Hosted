@@ -1,17 +1,14 @@
 ﻿using MudBlazor;
-
 using Sc3Hosted.Shared.Enumerations;
-
 namespace Sc3Hosted.Client.Helpers;
-
 public static class Utils
 {
-    public static readonly int[] PageSizeOptions = new[] { 5, 10, 25, 50, 100 };
+    public static readonly int[] PageSizeOptions = { 5, 10, 25, 50, 100 };
 
 
     public static Color SetColor(Status status)
     {
-        Color color = Color.Default;
+        var color = Color.Default;
         switch (status)
         {
             case Status.Retired:
@@ -35,11 +32,11 @@ public static class Utils
 
     public static string WarnMissingValue(string? style)
     {
-        return string.IsNullOrEmpty(style) || style.Contains("Unknown") ? "background-color:#ff9800ff; color" : string.Empty;
+        return string.IsNullOrEmpty(style) || style.Contains("Unknown")?"background-color:#ff9800ff; color":string.Empty;
     }
 
     public static string MissingTextCheck(string? value)
     {
-        return string.IsNullOrEmpty(value) ? "Brak danych" : value;
+        return string.IsNullOrEmpty(value)?"Brak danych":value;
     }
 }

@@ -1,5 +1,4 @@
 ﻿namespace Sc3Hosted.Server.Entities;
-
 public class SituationDetail : BaseEntity
 {
     public int SituationId { get; set; }
