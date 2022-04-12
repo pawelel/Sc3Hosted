@@ -1018,7 +1018,7 @@ public class AssetService : IAssetService
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
-            return null!;
+            throw new NotFoundException("Asset not found");
         }
         // return asset
         _logger.LogInformation("Asset with id {AssetId} found", asset.AssetId);
@@ -1081,7 +1081,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No assets found");
-            return null!;
+            throw new NotFoundException("No assets found");
         }
         // return assets
         _logger.LogInformation("Assets found");
@@ -1111,7 +1111,7 @@ public class AssetService : IAssetService
         if (assets.Count == 0)
         {
             _logger.LogWarning("No assets found");
-            return null!;
+            throw new NotFoundException("No assets found");
         }
         // return assets
         _logger.LogInformation("Assets found");
@@ -1136,7 +1136,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No categories found");
-            return null!;
+            throw new NotFoundException("No categories found");
         }
         // return categories
         _logger.LogInformation("Categories found");
@@ -1172,7 +1172,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No categories found");
-            return null!;
+            throw new NotFoundException("No categories found");
         }
         // return categories
         _logger.LogInformation("Categories found");
@@ -1198,7 +1198,7 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No category found");
-            return null!;
+            throw new NotFoundException("No category found");
         }
         // return category
         _logger.LogInformation("Category found");
@@ -1234,7 +1234,7 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No category found");
-            return null!;
+            throw new NotFoundException("No category found");
         }
         // return category
         _logger.LogInformation("Category found");
@@ -1260,7 +1260,7 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No detail found");
-            return null!;
+            throw new NotFoundException("No detail found");
         }
         // return detail
         _logger.LogInformation("Detail found");
@@ -1286,7 +1286,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No details found");
-            return null!;
+            throw new NotFoundException("No details found");
         }
 
         // return details
@@ -1323,7 +1323,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No details found");
-            return null!;
+            throw new NotFoundException("No details found");
         }
         // return details
         _logger.LogInformation("Details found");
@@ -1349,7 +1349,7 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("No device found");
-            return null!;
+            throw new NotFoundException("No device found");
         }
         // return device
         _logger.LogInformation("Device found");
@@ -1375,7 +1375,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No devices found");
-            return null!;
+            throw new NotFoundException("No devices found");
         }
         // return devices
         _logger.LogInformation("Devices found");
@@ -1409,7 +1409,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No devices found");
-            return null!;
+            throw new NotFoundException("No devices found");
         }
         // return devices
         _logger.LogInformation("Devices found");
@@ -1434,7 +1434,7 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("Model not found");
-            return null!;
+            throw new NotFoundException("Model not found");
         }
         // return model
         _logger.LogInformation("Model found");
@@ -1461,7 +1461,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No models found");
-            return null!;
+            throw new NotFoundException("No models found");
         }
         // return models
         _logger.LogInformation("Models found");
@@ -1495,7 +1495,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No models found");
-            return null!;
+            throw new NotFoundException("No models found");
         }
         // return models
         _logger.LogInformation("Models found");
@@ -1521,7 +1521,7 @@ public class AssetService : IAssetService
         if (query == null)
         {
             _logger.LogWarning("Parameter not found");
-            return null!;
+            throw new NotFoundException("Parameter not found");
         }
         // return parameter
         _logger.LogInformation("Parameter found");
@@ -1547,7 +1547,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No parameters found");
-            return null!;
+            throw new NotFoundException("No parameters found");
         }
         // return parameters
         _logger.LogInformation("Parameters found");
@@ -1581,7 +1581,7 @@ public class AssetService : IAssetService
         if (query.Count == 0)
         {
             _logger.LogWarning("No parameters found");
-            return null!;
+            throw new NotFoundException("No parameters found");
         }
         // return parameters
         _logger.LogInformation("Parameters found");

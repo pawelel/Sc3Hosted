@@ -836,7 +836,7 @@ public class CommunicateService : ICommunicateService
         if (communicate == null)
         {
             _logger.LogWarning("Communicate not found");
-            return null!;
+            throw new NotFoundException("Communicate not found");
         }
         // return communicate
         _logger.LogInformation("Communicate with id {CommunicateId} returned", communicateId);
@@ -863,7 +863,7 @@ public class CommunicateService : ICommunicateService
         if (communicates.Count == 0)
         {
             _logger.LogWarning("Communicates not found");
-            return null!;
+            throw new NotFoundException("Communicates not found");
         }
 
         // return communicates
@@ -899,7 +899,7 @@ public class CommunicateService : ICommunicateService
         if (communicates.Count == 0)
         {
             _logger.LogWarning("Communicates not found");
-            return null!;
+            throw new NotFoundException("Communicates not found");
         }
         // return communicates
         _logger.LogInformation("Communicates returned");
@@ -926,7 +926,7 @@ public class CommunicateService : ICommunicateService
         if (situation == null)
         {
             _logger.LogWarning("Situation not found");
-            return null!;
+            throw new NotFoundException("Situation not found");
         }
         // return situation
         _logger.LogInformation("Situation with id {SituationId} returned", situationId);

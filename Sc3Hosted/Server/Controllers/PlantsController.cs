@@ -1,17 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
+using Sc3Hosted.Server.Services;
 namespace Sc3Hosted.Server.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
 public class PlantsController : ControllerBase
 {
+    private readonly ILocationService _locationService;
     // GET: api/<PlantsController>
-    [HttpGet]
-    public IEnumerable<string> Get()
+    public PlantsController(ILocationService locationService)
     {
-        return new[] { "value1", "value2" };
+        _locationService = locationService;
+    }
+    [HttpGet]
+    public async Task<ActionResult> GetPlants()
+    {
+        return Ok(await _locationService.GetPlants());
     }
 
     // GET api/<PlantsController>/5

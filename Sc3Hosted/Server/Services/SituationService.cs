@@ -835,7 +835,7 @@ public class SituationService : ISituationService
         if (question == null)
         {
             _logger.LogWarning("Question not found");
-            return null!;
+            throw new NotFoundException("Question not found");
         }
         // return question
         _logger.LogInformation("Question with id {QuestionId} returned", questionId);
@@ -861,7 +861,7 @@ public class SituationService : ISituationService
         if (questions.Count == 0)
         {
             _logger.LogWarning("Questions not found");
-            return null!;
+            throw new NotFoundException("Questions not found");
         }
         // return questions
         _logger.LogInformation("Questions returned");
@@ -888,7 +888,7 @@ public class SituationService : ISituationService
         if (situation == null)
         {
             _logger.LogWarning("Situation not found");
-            return null!;
+            throw new NotFoundException("Situation not found");
         }
         // return situation
         _logger.LogInformation("Situation with id {SituationId} returned", situationId);
@@ -915,7 +915,7 @@ public class SituationService : ISituationService
         if (situations.Count == 0)
         {
             _logger.LogWarning("Situations not found");
-            return null!;
+            throw new NotFoundException("Situations not found");
         }
         // return situations
         _logger.LogInformation("Situations returned");
@@ -949,7 +949,7 @@ public class SituationService : ISituationService
         if (situations.Count == 0)
         {
             _logger.LogWarning("Situations not found");
-            return null!;
+            throw new NotFoundException("Situations not found");
         }
         // return situations
         _logger.LogInformation("Situations returned");
@@ -983,7 +983,7 @@ public class SituationService : ISituationService
         if (situations.Count == 0)
         {
             _logger.LogWarning("Situations not found");
-            return null!;
+            throw new NotFoundException("Situations not found");
         }
         // return situations
         _logger.LogInformation("Situations returned");
@@ -1015,7 +1015,7 @@ public class SituationService : ISituationService
         if (situations.Count == 0)
         {
             _logger.LogWarning("Situations not found");
-            return null!;
+            throw new NotFoundException("Situations not found");
         }
         // return situations
         _logger.LogInformation("Situations returned");
@@ -1057,7 +1057,7 @@ public class SituationService : ISituationService
         if (situations.Count == 0)
         {
             _logger.LogWarning("Situations with asset details not found");
-            return null!;
+            throw new NotFoundException("Situations with asset details not found");
         }
         // return situations
         _logger.LogInformation("Situations with asset details returned");
@@ -1074,12 +1074,12 @@ public class SituationService : ISituationService
         if (assetSituation == null)
         {
             _logger.LogWarning("AssetSituation not found");
-            return false;
+            throw new NotFoundException("AssetSituation not found");
         }
         if (assetSituation.IsDeleted)
         {
             _logger.LogWarning("AssetSituation already marked as deleted");
-            return false;
+            throw new BadRequestException("AssetSituation already marked as deleted");
         }
         assetSituation.UserId = userId;
         assetSituation.IsDeleted = true;
@@ -1112,7 +1112,7 @@ public class SituationService : ISituationService
         if (categorySituation == null)
         {
             _logger.LogWarning("CategorySituation not found");
-            return false;
+            throw new NotFoundException("CategorySituation not found");
         }
         if (categorySituation.IsDeleted)
         {

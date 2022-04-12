@@ -7,32 +7,26 @@ namespace Sc3Hosted.Server.Controllers;
 public class AssetsController : ControllerBase
 {
     private readonly IAssetService _assetService;
-    private readonly IUserContextService _userContextService;
-
-    public AssetsController(IUserContextService userContextService, IAssetService assetService)
+    public AssetsController(IAssetService assetService)
     {
-        _userContextService = userContextService;
         _assetService = assetService;
     }
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] AssetCreateDto assetCreateDto)
     {
-        throw new NotImplementedException();
+       var newAssetId = await _assetService.CreateAsset(assetCreateDto);
+        return Created($"/api/assets/{newAssetId}", null);
     }
     [HttpPut("{assetId:int}")]
     public async Task<IActionResult> Update(int assetId, AssetUpdateDto assetUpdateDto)
     {
-        var userId = _userContextService.UserId;
         var result = await _assetService.UpdateAsset(assetId, assetUpdateDto);
-
-
         return Ok(result);
 
     }
     [HttpPut("{assetId:int}/categories/{categoryId:int}")]
     public async Task<IActionResult> UpdateCategory(AssetCategoryDto assetCategoryDto, int assetId, int categoryId)
     {
-        var userId = _userContextService.UserId;
         var result = await _assetService.AddOrUpdateAssetCategory(assetCategoryDto);
 
         return Ok(result);

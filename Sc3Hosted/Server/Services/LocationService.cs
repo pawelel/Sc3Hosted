@@ -454,7 +454,7 @@ public class LocationService : ILocationService
         if (areas.Count == 0)
         {
             _logger.LogWarning("No areas found");
-            return null!;
+            throw new NotFoundException("No areas found");
         }
 
         // return areas
@@ -489,7 +489,7 @@ public class LocationService : ILocationService
         if (areas.Count == 0)
         {
             _logger.LogWarning("No areas found");
-            return null!;
+            throw new NotFoundException("No areas found");
         }
         // return areas
         _logger.LogInformation("Areas returned");
@@ -523,7 +523,7 @@ public class LocationService : ILocationService
         if (coordinate == null)
         {
             _logger.LogWarning("Coordinate not found");
-            return null!;
+            throw new NotFoundException("Coordinate not found");
         }
         // return coordinate
         _logger.LogInformation("Coordinate with id {CoordinateId} returned", coordinate.CoordinateId);
@@ -549,7 +549,7 @@ public class LocationService : ILocationService
         if (coordinates.Count == 0)
         {
             _logger.LogWarning("No coordinates found");
-            return null!;
+            throw new NotFoundException("No coordinates found");
         }
         // return coordinates
         _logger.LogInformation("Coordinates returned");
@@ -583,7 +583,7 @@ public class LocationService : ILocationService
         if (coordinates.Count == 0)
         {
             _logger.LogWarning("No coordinates found");
-            return null!;
+            throw new NotFoundException("No coordinates found");
         }
         // return coordinates
         _logger.LogInformation("Coordinates returned");
@@ -609,7 +609,7 @@ public class LocationService : ILocationService
         if (plant == null)
         {
             _logger.LogWarning("Plant not found");
-            return null!;
+            throw new NotFoundException("Plant not found");
         }
         // return plant
         _logger.LogInformation("Plant with id {PlantId} returned", plant.PlantId);
@@ -635,7 +635,7 @@ public class LocationService : ILocationService
         if (plants.Count == 0)
         {
             _logger.LogWarning("No plants found");
-            return null!;
+            throw new NotFoundException("No plants found");
         }
         // return plants
         _logger.LogInformation("Plants returned");
@@ -669,7 +669,7 @@ public class LocationService : ILocationService
         if (plants.Count == 0)
         {
             _logger.LogWarning("No plants found");
-            return null!;
+            throw new NotFoundException("No plants found");
         }
         // return plants
         _logger.LogInformation("Plants returned");
@@ -695,7 +695,7 @@ public class LocationService : ILocationService
         if (space == null)
         {
             _logger.LogWarning("Space not found");
-            return null!;
+            throw new NotFoundException("Space not found");
         }
         // return space
         _logger.LogInformation("Space with id {SpaceId} returned", space.SpaceId);
@@ -721,7 +721,7 @@ public class LocationService : ILocationService
         if (spaces.Count == 0)
         {
             _logger.LogWarning("No spaces found");
-            return null!;
+            throw new NotFoundException("No spaces found");
         }
         // return spaces
         _logger.LogInformation("Spaces returned");
@@ -754,7 +754,7 @@ public class LocationService : ILocationService
         if (spaces.Count == 0)
         {
             _logger.LogWarning("No spaces found");
-            return null!;
+            throw new NotFoundException("No spaces found");
         }
         // return spaces
         _logger.LogInformation("Spaces returned");
