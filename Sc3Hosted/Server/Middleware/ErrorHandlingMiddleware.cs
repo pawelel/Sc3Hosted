@@ -1,42 +1,40 @@
 ﻿using Sc3Hosted.Server.Exceptions;
-namespace Sc3Hosted.Server.Middleware
+namespace Sc3Hosted.Server.Middleware;
+public class ErrorHandlingMiddleware : IMiddleware
 {
-    public class ErrorHandlingMiddleware : IMiddleware
+    private readonly ILogger<ErrorHandlingMiddleware> _logger;
+
+    public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger)
     {
-        private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
-        public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger)
+        _logger = logger;
+    }
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    {
+        try
         {
-            _logger = logger;
+            await next.Invoke(context);
         }
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        catch (ForbidException forbidException)
         {
-            try
-            {
-                await next.Invoke(context);
-            }
-            catch (ForbidException forbidException)
-            {
-                context.Response.StatusCode = 403;
-                await context.Response.WriteAsync(forbidException.Message);
-            }
-            catch (BadRequestException badRequestException)
-            {
-                context.Response.StatusCode = 400;
-                await context.Response.WriteAsync(badRequestException.Message);
-            }
-            catch (NotFoundException notFoundException)
-            {
-                context.Response.StatusCode = 404;
-                await context.Response.WriteAsync(notFoundException.Message);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error: {Message}", e.Message);
+            context.Response.StatusCode = 403;
+            await context.Response.WriteAsync(forbidException.Message);
+        }
+        catch (BadRequestException badRequestException)
+        {
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsync(badRequestException.Message);
+        }
+        catch (NotFoundException notFoundException)
+        {
+            context.Response.StatusCode = 404;
+            await context.Response.WriteAsync(notFoundException.Message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error: {Message}", e.Message);
 
-                context.Response.StatusCode = 500;
-                await context.Response.WriteAsync("Something went wrong");
-            }
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsync("Something went wrong");
         }
     }
 }

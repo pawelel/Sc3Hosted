@@ -9,14 +9,7 @@ public class AssetSituationConfig : IEntityTypeConfiguration<AssetSituation>
         builder.ToTable("AssetSituations");
 
         builder.HasKey(x => new { x.AssetId, x.SituationId });
-        ;
-
         builder.Property(x => x.AssetId).IsRequired();
-
         builder.Property(x => x.SituationId).IsRequired();
-
-        builder.HasOne(x => x.Asset).WithMany(x => x.AssetSituations).HasForeignKey(x => x.AssetId);
-
-        builder.HasOne(x => x.Situation).WithMany(x => x.AssetSituations).HasForeignKey(x => x.SituationId);
     }
 }

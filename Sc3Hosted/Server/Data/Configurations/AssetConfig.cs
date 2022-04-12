@@ -13,5 +13,9 @@ public class AssetConfig : IEntityTypeConfiguration<Asset>
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.CoordinateId).IsRequired();
         builder.Property(x => x.ModelId).IsRequired();
+        builder.HasMany(x=>x.AssetCategories).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.AssetDetails).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.AssetSituations).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.CommunicateAssets).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
     }
 }

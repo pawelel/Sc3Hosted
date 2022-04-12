@@ -9,7 +9,7 @@ public static class ServiceExtensions
         services.AddTransient<ICommunicateService, CommunicateService>();
         services.AddTransient<ISituationService, SituationService>();
         services.AddTransient<ILocationService, LocationService>();
-        
+
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddScoped<ErrorHandlingMiddleware>();
     }

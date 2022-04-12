@@ -10,5 +10,6 @@ public class QuestionConfig : IEntityTypeConfiguration<Question>
         builder.HasKey(x => x.QuestionId);
         builder.Property(x => x.QuestionId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        builder.HasMany(x=>x.SituationQuestions).WithOne(x=>x.Question).HasForeignKey(x=>x.QuestionId).OnDelete(DeleteBehavior.NoAction);
     }
 }

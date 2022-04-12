@@ -11,7 +11,7 @@ public class SpaceConfig : IEntityTypeConfiguration<Space>
         builder.Property(x => x.SpaceId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(200);
-        builder.HasMany(x => x.Coordinates).WithOne(x => x.Space).HasForeignKey(x => x.SpaceId);
-        builder.HasMany(x => x.CommunicateSpaces).WithOne(x => x.Space).HasForeignKey(x => x.SpaceId);
+        builder.HasMany(x => x.Coordinates).WithOne(x => x.Space).HasForeignKey(x => x.SpaceId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x => x.CommunicateSpaces).WithOne(x => x.Space).HasForeignKey(x => x.SpaceId).OnDelete(DeleteBehavior.NoAction);
     }
 }

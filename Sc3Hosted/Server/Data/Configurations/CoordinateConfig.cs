@@ -12,7 +12,7 @@ public class CoordinateConfig : IEntityTypeConfiguration<Coordinate>
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(500);
         builder.Property(x => x.SpaceId).IsRequired();
-        builder.HasMany(x => x.CommunicateCoordinates).WithOne(x => x.Coordinate).HasForeignKey(x => x.CoordinateId);
-        builder.HasMany(x => x.Assets).WithOne(x => x.Coordinate).HasForeignKey(x => x.CoordinateId);
+        builder.HasMany(x=>x.CommunicateCoordinates).WithOne(x=>x.Coordinate).HasForeignKey(x=>x.CoordinateId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.Assets).WithOne(x=>x.Coordinate).HasForeignKey(x=>x.CoordinateId).OnDelete(DeleteBehavior.NoAction);
     }
 }

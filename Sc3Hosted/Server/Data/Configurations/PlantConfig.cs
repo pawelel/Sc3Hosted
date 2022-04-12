@@ -12,7 +12,6 @@ public class PlantConfig : IEntityTypeConfiguration<Plant>
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(200);
 
-        builder.HasMany(x => x.Areas).WithOne(x => x.Plant).HasForeignKey(x => x.PlantId);
-
+        builder.HasMany(x => x.Areas).WithOne(x => x.Plant).HasForeignKey(x => x.PlantId).OnDelete(DeleteBehavior.SetNull);
     }
 }

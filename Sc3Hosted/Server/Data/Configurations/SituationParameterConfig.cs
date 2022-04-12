@@ -10,6 +10,5 @@ public class SituationParameterConfig : IEntityTypeConfiguration<SituationParame
         builder.HasKey(x => new { x.SituationId, x.ParameterId });
         builder.Property(x => x.SituationId).IsRequired();
         builder.Property(x => x.ParameterId).IsRequired();
-
     }
 }

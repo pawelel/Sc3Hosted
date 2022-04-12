@@ -12,7 +12,8 @@ public class ModelConfig : IEntityTypeConfiguration<Model>
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(200);
         builder.Property(x => x.DeviceId).IsRequired();
-        builder.HasMany(x => x.ModelParameters).WithOne(x => x.Model).HasForeignKey(x => x.ModelId);
-        builder.HasMany(x => x.Assets).WithOne(x => x.Model).HasForeignKey(x => x.ModelId);
+        builder.HasMany(x => x.ModelParameters).WithOne(x => x.Model).HasForeignKey(x => x.ModelId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x => x.Assets).WithOne(x => x.Model).HasForeignKey(x => x.ModelId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.CommunicateModels).WithOne(x=>x.Model).HasForeignKey(x=>x.ModelId).OnDelete(DeleteBehavior.NoAction);
     }
 }

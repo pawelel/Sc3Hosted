@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Exceptions;
 using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Services;
-
 public interface ILocationService
 {
     Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto, string userId);
@@ -110,7 +108,7 @@ public class LocationService : ILocationService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Area with id {AreaId} created", area.AreaId);
-            return  area.AreaId ;
+            return area.AreaId;
         }
         catch (Exception ex)
         {
@@ -154,7 +152,7 @@ public class LocationService : ILocationService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Coordinate with id {CoordinateId} created", coordinate.CoordinateId);
-            return  coordinate.CoordinateId ;
+            return coordinate.CoordinateId;
         }
         catch (Exception ex)
         {
@@ -197,7 +195,7 @@ public class LocationService : ILocationService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Plant with id {PlantId} created", plant.PlantId);
-            return  plant.PlantId ;
+            return plant.PlantId;
         }
         catch (Exception ex)
         {
@@ -241,7 +239,7 @@ public class LocationService : ILocationService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Space with id {SpaceId} created", space.SpaceId);
-            return  space.SpaceId ;
+            return space.SpaceId;
         }
         catch (Exception ex)
         {
@@ -772,13 +770,13 @@ public class LocationService : ILocationService
         if (area == null)
         {
             _logger.LogWarning("Area not found");
-            
+
             throw new NotFoundException("Area not found");
         }
         if (area.IsDeleted)
         {
             _logger.LogWarning("Area already deleted");
-            throw new BadRequestException(("Area already deleted"));
+            throw new BadRequestException("Area already deleted");
         }
         // check if area has active spaces
         if (area.Spaces.Any(s => s.IsDeleted == false))

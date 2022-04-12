@@ -10,6 +10,5 @@ public class SituationQuestionConfig : IEntityTypeConfiguration<SituationQuestio
         builder.HasKey(x => new { x.SituationId, x.QuestionId });
         builder.Property(x => x.SituationId).IsRequired();
         builder.Property(x => x.QuestionId).IsRequired();
-
     }
 }

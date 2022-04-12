@@ -11,7 +11,9 @@ public class DeviceConfig : IEntityTypeConfiguration<Device>
         builder.Property(x => x.DeviceId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(500);
-        builder.HasMany(x => x.Models).WithOne(x => x.Device).HasForeignKey(x => x.DeviceId);
-        builder.HasMany(x => x.CommunicateDevices).WithOne(x => x.Device).HasForeignKey(x => x.DeviceId);
+        builder.HasMany(x=>x.Models).WithOne(x=>x.Device).HasForeignKey(x=>x.DeviceId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.CommunicateDevices).WithOne(x=>x.Device).HasForeignKey(x=>x.DeviceId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.DeviceSituations).WithOne(x=>x.Device).HasForeignKey(x=>x.DeviceId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.Models).WithOne(x=>x.Device).HasForeignKey(x=>x.DeviceId).OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sc3Hosted.Server.Services;
+using Sc3Hosted.Shared.Dtos;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,26 +19,28 @@ public class AreasController : ControllerBase
     }
     // GET: api/<AreasController>
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<ActionResult> Get()
     {
         var result = await _locationService.GetAreas();
-    
-            return Ok(result);
-       
+
+        return Ok(result);
     }
 
     // GET api/<AreasController>/5
-    [HttpGet("{id}")]
-    public string Get(int id)
+    [HttpGet("{areaId:int}")]
+    public async Task<ActionResult>  Get(int areaId)
     {
-        return "value";
+        return Ok(await _locationService.GetAreaById(areaId));
     }
 
     // POST api/<AreasController>
     [HttpPost]
-    public void Post([FromBody] string value)
+    public void Post([FromRoute]int plantId, [FromBody] AreaCreateDto area)
     {
+        var userId = _userContextService.UserId;
+        _locationService.CreateArea(plantId, area, userId);
     }
+    
 
     // PUT api/<AreasController>/5
     [HttpPut("{id}")]

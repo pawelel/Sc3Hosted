@@ -11,7 +11,7 @@ public class DetailConfig : IEntityTypeConfiguration<Detail>
         builder.Property(x => x.DetailId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(500);
-        builder.HasMany(x => x.SituationDetails).WithOne(x => x.Detail).HasForeignKey(x => x.DetailId);
-        builder.HasMany(x => x.AssetDetails).WithOne(x => x.Detail).HasForeignKey(x => x.DetailId);
+        builder.HasMany(x=>x.AssetDetails).WithOne(x=>x.Detail).HasForeignKey(x=>x.DetailId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(x=>x.SituationDetails).WithOne(x=>x.Detail).HasForeignKey(x=>x.DetailId).OnDelete(DeleteBehavior.NoAction);
     }
 }

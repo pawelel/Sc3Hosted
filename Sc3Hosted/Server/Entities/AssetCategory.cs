@@ -1,7 +1,6 @@
 ﻿namespace Sc3Hosted.Server.Entities;
 public class AssetCategory : BaseEntity
 {
-    public int AssetCategoryId { get; set; }
     public int AssetId { get; set; }
     public virtual Asset Asset { get; set; } = new();
     public int CategoryId { get; set; }

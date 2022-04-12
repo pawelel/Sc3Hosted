@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Exceptions;
 using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Services;
-
 public interface ISituationService
 {
     Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto, string userId);
@@ -98,13 +96,13 @@ public class SituationService : ISituationService
         var assetSituation = await context.AssetSituations.FindAsync(assetSituationDto.AssetId, assetSituationDto.SituationId);
         if (assetSituation == null)
         {
-            var asset = assetSituationDto.AssetId < 1 ? null : await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetSituationDto.AssetId);
+            var asset = assetSituationDto.AssetId < 1?null:await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetSituationDto.AssetId);
             if (asset == null || asset.IsDeleted)
             {
                 _logger.LogWarning("Asset not found");
                 throw new NotFoundException("Asset not found");
             }
-            var situation = assetSituationDto.SituationId < 1 ? null : await context.Situations.FirstOrDefaultAsync(a => a.SituationId == assetSituationDto.SituationId);
+            var situation = assetSituationDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == assetSituationDto.SituationId);
             if (situation == null || situation.IsDeleted)
             {
                 _logger.LogWarning("Situation not found");
@@ -152,13 +150,13 @@ public class SituationService : ISituationService
         var categorySituation = await context.CategorySituations.FindAsync(categorySituationDto.CategoryId, categorySituationDto.SituationId);
         if (categorySituation == null)
         {
-            var category = categorySituationDto.CategoryId < 1 ? null : await context.Categories.FirstOrDefaultAsync(a => a.CategoryId == categorySituationDto.CategoryId);
+            var category = categorySituationDto.CategoryId < 1?null:await context.Categories.FirstOrDefaultAsync(a => a.CategoryId == categorySituationDto.CategoryId);
             if (category == null || category.IsDeleted)
             {
                 _logger.LogWarning("Category not found");
                 throw new NotFoundException("Category not found");
             }
-            var situation = categorySituationDto.SituationId < 1 ? null : await context.Situations.FirstOrDefaultAsync(a => a.SituationId == categorySituationDto.SituationId);
+            var situation = categorySituationDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == categorySituationDto.SituationId);
             if (situation == null || situation.IsDeleted)
             {
                 _logger.LogWarning("Situation not found");
@@ -206,13 +204,13 @@ public class SituationService : ISituationService
         var deviceSituation = await context.DeviceSituations.FindAsync(deviceSituationDto.DeviceId, deviceSituationDto.SituationId);
         if (deviceSituation == null)
         {
-            var device = deviceSituationDto.DeviceId < 1 ? null : await context.Devices.FirstOrDefaultAsync(a => a.DeviceId == deviceSituationDto.DeviceId);
+            var device = deviceSituationDto.DeviceId < 1?null:await context.Devices.FirstOrDefaultAsync(a => a.DeviceId == deviceSituationDto.DeviceId);
             if (device == null || device.IsDeleted)
             {
                 _logger.LogWarning("Device not found");
                 throw new NotFoundException("Device not found");
             }
-            var situation = deviceSituationDto.SituationId < 1 ? null : await context.Situations.FirstOrDefaultAsync(a => a.SituationId == deviceSituationDto.SituationId);
+            var situation = deviceSituationDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == deviceSituationDto.SituationId);
             if (situation == null || situation.IsDeleted)
             {
                 _logger.LogWarning("Situation not found");
@@ -260,13 +258,13 @@ public class SituationService : ISituationService
         var situationDetail = await context.SituationDetails.FindAsync(situationDetailDto.SituationId, situationDetailDto.DetailId);
         if (situationDetail == null)
         {
-            var situation = situationDetailDto.SituationId < 1 ? null : await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationDetailDto.SituationId);
+            var situation = situationDetailDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationDetailDto.SituationId);
             if (situation == null || situation.IsDeleted)
             {
                 _logger.LogWarning("Situation not found");
                 throw new NotFoundException("Situation not found");
             }
-            var device = situationDetailDto.DetailId < 1 ? null : await context.Devices.FirstOrDefaultAsync(a => a.DeviceId == situationDetailDto.DetailId);
+            var device = situationDetailDto.DetailId < 1?null:await context.Devices.FirstOrDefaultAsync(a => a.DeviceId == situationDetailDto.DetailId);
             if (device == null || device.IsDeleted)
             {
                 _logger.LogWarning("Device not found");
@@ -314,13 +312,13 @@ public class SituationService : ISituationService
         var situationParameter = await context.SituationParameters.FindAsync(situationParameterDto.SituationId, situationParameterDto.ParameterId);
         if (situationParameter == null)
         {
-            var situation = situationParameterDto.SituationId < 1 ? null : await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationParameterDto.SituationId);
+            var situation = situationParameterDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationParameterDto.SituationId);
             if (situation == null || situation.IsDeleted)
             {
                 _logger.LogWarning("Situation not found");
                 throw new NotFoundException("Situation not found");
             }
-            var parameter = situationParameterDto.ParameterId < 1 ? null : await context.Parameters.FirstOrDefaultAsync(a => a.ParameterId == situationParameterDto.ParameterId);
+            var parameter = situationParameterDto.ParameterId < 1?null:await context.Parameters.FirstOrDefaultAsync(a => a.ParameterId == situationParameterDto.ParameterId);
             if (parameter == null || parameter.IsDeleted)
             {
                 _logger.LogWarning("Parameter not found");
@@ -368,13 +366,13 @@ public class SituationService : ISituationService
         var situationQuestion = await context.SituationQuestions.FindAsync(situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
         if (situationQuestion == null)
         {
-            var situation = situationQuestionDto.SituationId < 1 ? null : await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationQuestionDto.SituationId);
+            var situation = situationQuestionDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationQuestionDto.SituationId);
             if (situation == null || situation.IsDeleted)
             {
                 _logger.LogWarning("Situation not found");
                 throw new NotFoundException("Situation not found");
             }
-            var question = situationQuestionDto.QuestionId < 1 ? null : await context.Questions.FirstOrDefaultAsync(a => a.QuestionId == situationQuestionDto.QuestionId);
+            var question = situationQuestionDto.QuestionId < 1?null:await context.Questions.FirstOrDefaultAsync(a => a.QuestionId == situationQuestionDto.QuestionId);
             if (question == null || question.IsDeleted)
             {
                 _logger.LogWarning("Question not found");
@@ -835,7 +833,7 @@ public class SituationService : ISituationService
         if (question == null)
         {
             _logger.LogWarning("Question not found");
-            return  null!;
+            return null!;
         }
         // return question
         _logger.LogInformation("Question with id {QuestionId} returned", questionId);
@@ -1304,14 +1302,14 @@ public class SituationService : ISituationService
             // await commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Situation with id {SituationId} is marked as deleted", situationId);
-         return   true;
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while marking as deleted situation with id {SituationId}", situationId);
             // await rollback transaction
             await transaction.RollbackAsync();
-          
+
             throw new BadRequestException($"Error while marking as deleted situation with id {situationId}");
         }
     }

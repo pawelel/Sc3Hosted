@@ -1,7 +1,5 @@
-﻿namespace Sc3Hosted.Server.Exceptions
+﻿namespace Sc3Hosted.Server.Exceptions;
+public class ForbidException : Exception
 {
-    public class ForbidException : Exception
-    {
-        
-    }
+
 }
