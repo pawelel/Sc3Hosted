@@ -2,7 +2,8 @@
 using Sc3Hosted.Server.Services;
 using Sc3Hosted.Shared.Dtos;
 namespace Sc3Hosted.Server.Controllers;
-[Route("api/[controller]")]
+
+[Route("api/[controller]/[action]")]
 [ApiController]
 public class AssetsController : ControllerBase
 {
@@ -20,15 +21,32 @@ public class AssetsController : ControllerBase
     [HttpPut("{assetId:int}")]
     public async Task<IActionResult> Update(int assetId, AssetUpdateDto assetUpdateDto)
     {
-        var result = await _assetService.UpdateAsset(assetId, assetUpdateDto);
-        return Ok(result);
-
+         await _assetService.UpdateAsset(assetId, assetUpdateDto);
+        return NoContent();
     }
-    [HttpPut("{assetId:int}/categories/{categoryId:int}")]
-    public async Task<IActionResult> UpdateCategory(AssetCategoryDto assetCategoryDto, int assetId, int categoryId)
+    
+    [HttpDelete("{assetId:int}")]
+    public async Task<IActionResult> Delete(int assetId)
     {
-        var result = await _assetService.AddOrUpdateAssetCategory(assetCategoryDto);
-
-        return Ok(result);
+        await _assetService.DeleteAsset(assetId);
+      return NoContent();
+    }
+    [HttpGet("{assetId:int}")]
+    public async Task<IActionResult> GetAssetById(int assetId)
+    {
+        var asset = await _assetService.GetAssetById(assetId);
+        return Ok(asset);
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetAssets()
+    {
+        var assets = await _assetService.GetAssets();
+        return Ok(assets);
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetAssetDisplays()
+    {
+        var assets = await _assetService.GetAssetDisplays();
+        return Ok(assets);
     }
 }

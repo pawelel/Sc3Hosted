@@ -1,16 +1,31 @@
-AssetCategory
-AssetDetail
-AssetSituation
-CategorySituation
-CommunicateArea
-CommunicateAsset
-CommunicateCategory
-CommunicateCoordinate
-CommunicateDevice
-CommunicateModel
-CommunicateSpace
-DeviceSituation
-ModelParameter
-SituationDetail
-SituationParameter
-SituationQuestion
+AssetCategory         api/assets/asset-categories/{assetId}/{categoryId}
+AssetDetail           api/assets/asset-details/{assetId}/{detailId}
+AssetSituation        api/assets/asset-situations/{assetId}/{situationId}
+CategorySituation     api/categories/category-situations/{categoryId}/{situationId}
+CommunicateArea       api/communicates/communicate-areas/{communicateId}/{areaId}
+CommunicateAsset      api/communicates/communicate-assets/{communicateId}/{assetId}
+CommunicateCategory   api/communicates/communicate-categories/{communicateId}/{categoryId}
+CommunicateCoordinate api/communicates/communicate-coordinates/{communicateId}/{coordinateId}
+CommunicateDevice     api/communicates/communicate-devices/{communicateId}/{deviceId}
+CommunicateModel      api/communicates/communicate-models/{communicateId}/{modelId}
+CommunicateSpace      api/communicates/communicate-spaces/{communicateId}/{spaceId}
+DeviceSituation       api/devices/device-situations/{deviceId}/{situationId}
+ModelParameter        api/models/model-parameters/{modelId}/{parameterId}
+SituationDetail       api/situations/situation-details/{situationId}/{detailId}
+SituationParameter    api/situations/situation-parameters/{situationId}/{parameterId}
+SituationQuestion     api/situations/situation-questions/{situationId}/{questionId}
+asset                 api/assets/{assetId}
+category              api/categories/{categoryId}
+communicate           api/communicates/{communicateId}
+device                api/devices/{deviceId}
+model                 api/models/{modelId}
+situation             api/situations/{situationId}
+plant                 api/plants/{plantId}
+area                  api/areas/{areaId}
+space                 api/spaces/{spaceId}
+coordinate            api/coordinates/{coordinateId}
+question              api/questions/{questionId}  
+detail                api/details/{detailId}    
+parameter             api/parameters/{parameterId}
+situation             api/situations/{situationId}
+

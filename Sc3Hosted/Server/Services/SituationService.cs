@@ -1,43 +1,45 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Exceptions;
 using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Services;
+
 public interface ISituationService
 {
-    Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto);
+    Task<(int, int)> CreateAssetSituation(int assetId, int situationId);
 
-    Task<bool> AddOrUpdateCategorySituation(CategorySituationDto categorySituationDto);
+    Task<(int, int)> CreateCategorySituation(int categoryId, int situationId);
 
-    Task<bool> AddOrUpdateDeviceSituation(DeviceSituationDto deviceSituationDto);
-
-    Task<bool> AddOrUpdateSituationDetail(SituationDetailDto situationDetailDto);
-
-    Task<bool> AddOrUpdateSituationParameter(SituationParameterDto situationParameterDto);
-
-    Task<bool> AddOrUpdateSituationQuestion(SituationQuestionDto situationQuestionDto);
+    Task<(int, int)> CreateDeviceSituation(int deviceId, int situationId);
 
     Task<int> CreateQuestion(QuestionCreateDto questionCreateDto);
 
     Task<int> CreateSituation(SituationCreateDto situationCreateDto);
 
-    Task<bool> DeleteAssetSituation(AssetSituationDto assetSituationDto);
+    Task<(int, int)> CreateSituationDetail(int situationId, int detailId);
 
-    Task<bool> DeleteCategorySituation(CategorySituationDto categorySituationDto);
+    Task<(int, int)> CreateSituationParameter(int situationId, int parameterId);
 
-    Task<bool> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto);
+    Task<(int, int)> CreateSituationQuestion(int situationId, int questionId);
 
-    Task<bool> DeleteQuestion(int situationId);
+    Task DeleteAssetSituation(int assetId, int situationId);
 
-    Task<bool> DeleteSituation(int situationId);
+    Task DeleteCategorySituation(int categoryId, int situationId);
 
-    Task<bool> DeleteSituationDetail(SituationDetailDto situationDetailDto);
+    Task DeleteDeviceSituation(int deviceId, int situationId);
 
-    Task<bool> DeleteSituationParameter(SituationParameterDto situationParameterDto);
+    Task DeleteQuestion(int situationId);
 
-    Task<bool> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto);
+    Task DeleteSituation(int situationId);
+
+    Task DeleteSituationDetail(int situationId, int detailId);
+
+    Task DeleteSituationParameter(int situationId, int parameterId);
+
+    Task DeleteSituationQuestion(int situationId, int questionId);
 
     Task<QuestionDto> GetQuestionById(int questionId);
 
@@ -55,33 +57,39 @@ public interface ISituationService
 
     Task<IEnumerable<SituationWithAssetsAndDetailsDto>> GetSituationWithAssetsAndDetails();
 
-    Task<bool> MarkDeleteAssetSituation(AssetSituationDto assetSituationDto);
+    Task MarkDeleteAssetSituation(int assetId, int situationId);
 
-    Task<bool> MarkDeleteCategorySituation(CategorySituationDto categorySituationDto);
+    Task MarkDeleteCategorySituation(int categoryId, int situationId);
 
-    Task<bool> MarkDeleteDeviceSituation(DeviceSituationDto deviceSituationDto);
+    Task MarkDeleteDeviceSituation(int deviceId, int situationId);
 
-    Task<bool> MarkDeleteQuestion(int questionId);
+    Task MarkDeleteQuestion(int questionId);
 
-    Task<bool> MarkDeleteSituation(int situationId);
+    Task MarkDeleteSituation(int situationId);
 
-    Task<bool> MarkDeleteSituationDetail(SituationDetailDto situationDetailDto);
+    Task MarkDeleteSituationDetail(int situationId, int detailId);
 
-    Task<bool> MarkDeleteSituationParameter(SituationParameterDto situationParameterDto);
+    Task MarkDeleteSituationParameter(int situationId, int parameterId);
 
-    Task<bool> MarkDeleteSituationQuestion(SituationQuestionDto situationQuestionDto);
+    Task MarkDeleteSituationQuestion(int situationId, int questionId);
 
-    Task<bool> UpdateQuestion(int questionId,  QuestionUpdateDto questionUpdateDto);
+    Task UpdateAssetSituation(int assetId, int situationId);
+    Task UpdateCategorySituation(int categoryId, int situationId);
+    Task UpdateDeviceSituation(int deviceId, int situationId);
+    Task UpdateQuestion(int questionId, QuestionUpdateDto questionUpdateDto);
 
-    Task<bool> UpdateSituation(int questionId,  SituationUpdateDto situationUpdateDto);
+    Task UpdateSituation(int questionId, SituationUpdateDto situationUpdateDto);
+
+    Task UpdateSituationDetail(int situationId, int detailId);
+    Task UpdateSituationParameter(int situationId, int parameterId);
+    Task UpdateSituationQuestion(int situationId, int questionId);
 }
 
 public class SituationService : ISituationService
 {
-    private readonly IUserContextService _userContextService;
     private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
     private readonly ILogger<SituationService> _logger;
-
+    private readonly IUserContextService _userContextService;
     public SituationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<SituationService> logger, IUserContextService userContextService)
     {
         _contextFactory = contextFactory;
@@ -89,332 +97,144 @@ public class SituationService : ISituationService
         _userContextService = userContextService;
     }
 
-    public async Task<bool> AddOrUpdateAssetSituation(AssetSituationDto assetSituationDto)
-    {var userId = _userContextService.UserId;
+    public async Task<(int, int)> CreateAssetSituation(int assetId, int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
-
         // get assetSituation
-        var assetSituation = await context.AssetSituations.FindAsync(assetSituationDto.AssetId, assetSituationDto.SituationId);
-        if (assetSituation == null)
+        var assetSituation = await context.AssetSituations.FindAsync(assetId, situationId);
+        if (assetSituation != null)
+            throw new BadRequestException("AssetSituation already exists");
+        var asset = await context.Assets.FindAsync(assetId);
+        if (asset == null || asset.IsDeleted)
         {
-            var asset = assetSituationDto.AssetId < 1?null:await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetSituationDto.AssetId);
-            if (asset == null || asset.IsDeleted)
-            {
-                _logger.LogWarning("Asset not found");
-                throw new NotFoundException("Asset not found");
-            }
-            var situation = assetSituationDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == assetSituationDto.SituationId);
-            if (situation == null || situation.IsDeleted)
-            {
-                _logger.LogWarning("Situation not found");
-                throw new NotFoundException("Situation not found");
-            }
-            assetSituation = new AssetSituation
-            {
-                AssetId = assetSituationDto.AssetId,
-                SituationId = assetSituationDto.SituationId,
-                UserId = userId,
-                IsDeleted = false
-            };
-            context.Add(assetSituation);
+            _logger.LogWarning("Asset not found");
+            throw new NotFoundException("Asset not found");
         }
-        else
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
         {
-            assetSituation.UserId = userId;
-            assetSituation.IsDeleted = false;
-            context.Update(assetSituation);
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
         }
-        // await using transaction
+        assetSituation = new AssetSituation
+        {
+            AssetId = assetId,
+            SituationId = situationId,
+            UserId = userId,
+            IsDeleted = false
+        };
+        context.Add(assetSituation);
+        // save changes
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("AssetSituation updated");
-            return true;
+            return (assetId, situationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating assetSituation");
             await transaction.RollbackAsync();
-            throw new BadRequestException("Error updating assetSituation");
+            _logger.LogError(ex, "Error creating assetSituation");
+            throw new BadRequestException("Error while saving changes");
         }
     }
 
-    public async Task<bool> AddOrUpdateCategorySituation(CategorySituationDto categorySituationDto)
-    {var userId = _userContextService.UserId;
+    public async Task<(int, int)> CreateCategorySituation(int categoryId, int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
-
         // get categorySituation
-        var categorySituation = await context.CategorySituations.FindAsync(categorySituationDto.CategoryId, categorySituationDto.SituationId);
-        if (categorySituation == null)
+        var categorySituation = await context.CategorySituations.FindAsync(categoryId, situationId);
+        if (categorySituation != null)
+            throw new BadRequestException("CategorySituation already exists");
+        var category = await context.Categories.FindAsync(categoryId);
+        if (category == null || category.IsDeleted)
         {
-            var category = categorySituationDto.CategoryId < 1?null:await context.Categories.FirstOrDefaultAsync(a => a.CategoryId == categorySituationDto.CategoryId);
-            if (category == null || category.IsDeleted)
-            {
-                _logger.LogWarning("Category not found");
-                throw new NotFoundException("Category not found");
-            }
-            var situation = categorySituationDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == categorySituationDto.SituationId);
-            if (situation == null || situation.IsDeleted)
-            {
-                _logger.LogWarning("Situation not found");
-                throw new NotFoundException("Situation not found");
-            }
-            categorySituation = new CategorySituation
-            {
-                CategoryId = categorySituationDto.CategoryId,
-                SituationId = categorySituationDto.SituationId,
-                UserId = userId,
-                IsDeleted = false
-            };
-            context.Add(categorySituation);
+            _logger.LogWarning("Category not found");
+            throw new NotFoundException("Category not found");
         }
-        else
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
         {
-            categorySituation.UserId = userId;
-            categorySituation.IsDeleted = false;
-            context.Update(categorySituation);
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
         }
-        // await using transaction
+        categorySituation = new CategorySituation
+        {
+            CategoryId = categoryId,
+            SituationId = situationId,
+            UserId = userId,
+            IsDeleted = false
+        };
+        context.Add(categorySituation);
+        // save changes
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("CategorySituation updated");
-            return true;
+            return (categoryId, situationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating categorySituation");
             await transaction.RollbackAsync();
-            throw new BadRequestException("Error updating categorySituation");
+            _logger.LogError(ex, "Error creating categorySituation");
+            throw new BadRequestException("Error while saving changes");
         }
     }
 
-    public async Task<bool> AddOrUpdateDeviceSituation(DeviceSituationDto deviceSituationDto)
-    {var userId = _userContextService.UserId;
+    public async Task<(int, int)> CreateDeviceSituation(int deviceId, int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
-
         // get deviceSituation
-        var deviceSituation = await context.DeviceSituations.FindAsync(deviceSituationDto.DeviceId, deviceSituationDto.SituationId);
-        if (deviceSituation == null)
+        var deviceSituation = await context.DeviceSituations.FindAsync(deviceId, situationId);
+        if (deviceSituation != null)
+            throw new BadRequestException("DeviceSituation already exists");
+        var device = await context.Devices.FindAsync(deviceId);
+        if (device == null || device.IsDeleted)
         {
-            var device = deviceSituationDto.DeviceId < 1?null:await context.Devices.FirstOrDefaultAsync(a => a.DeviceId == deviceSituationDto.DeviceId);
-            if (device == null || device.IsDeleted)
-            {
-                _logger.LogWarning("Device not found");
-                throw new NotFoundException("Device not found");
-            }
-            var situation = deviceSituationDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == deviceSituationDto.SituationId);
-            if (situation == null || situation.IsDeleted)
-            {
-                _logger.LogWarning("Situation not found");
-                throw new NotFoundException("Situation not found");
-            }
-            deviceSituation = new DeviceSituation
-            {
-                DeviceId = deviceSituationDto.DeviceId,
-                SituationId = deviceSituationDto.SituationId,
-                UserId = userId,
-                IsDeleted = false
-            };
-            context.Add(deviceSituation);
+            _logger.LogWarning("Device not found");
+            throw new NotFoundException("Device not found");
         }
-        else
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
         {
-            deviceSituation.UserId = userId;
-            deviceSituation.IsDeleted = false;
-            context.Update(deviceSituation);
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
         }
-        // await using transaction
+        deviceSituation = new DeviceSituation
+        {
+            DeviceId = deviceId,
+            SituationId = situationId,
+            UserId = userId,
+            IsDeleted = false
+        };
+        context.Add(deviceSituation);
+        // save changes
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("DeviceSituation updated");
-            return true;
+            return (deviceId, situationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating deviceSituation");
             await transaction.RollbackAsync();
-            throw new BadRequestException("Error updating deviceSituation");
-        }
-    }
-
-    public async Task<bool> AddOrUpdateSituationDetail(SituationDetailDto situationDetailDto)
-    {var userId = _userContextService.UserId;
-        // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        // get situationDetail
-        var situationDetail = await context.SituationDetails.FindAsync(situationDetailDto.SituationId, situationDetailDto.DetailId);
-        if (situationDetail == null)
-        {
-            var situation = situationDetailDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationDetailDto.SituationId);
-            if (situation == null || situation.IsDeleted)
-            {
-                _logger.LogWarning("Situation not found");
-                throw new NotFoundException("Situation not found");
-            }
-            var device = situationDetailDto.DetailId < 1?null:await context.Devices.FirstOrDefaultAsync(a => a.DeviceId == situationDetailDto.DetailId);
-            if (device == null || device.IsDeleted)
-            {
-                _logger.LogWarning("Device not found");
-                throw new NotFoundException("Device not found");
-            }
-            situationDetail = new SituationDetail
-            {
-                SituationId = situationDetailDto.SituationId,
-                DetailId = situationDetailDto.DetailId,
-                UserId = userId,
-                IsDeleted = false
-            };
-            context.Add(situationDetail);
-        }
-        else
-        {
-            situationDetail.UserId = userId;
-            situationDetail.IsDeleted = false;
-            context.Update(situationDetail);
-        }
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
-        try
-        {
-            // save changes
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("SituationDetail updated");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating situationDetail");
-            await transaction.RollbackAsync();
-            throw new BadRequestException("Error updating situationDetail");
-        }
-    }
-
-    public async Task<bool> AddOrUpdateSituationParameter(SituationParameterDto situationParameterDto)
-    {var userId = _userContextService.UserId;
-        // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        // get situationParameter
-        var situationParameter = await context.SituationParameters.FindAsync(situationParameterDto.SituationId, situationParameterDto.ParameterId);
-        if (situationParameter == null)
-        {
-            var situation = situationParameterDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationParameterDto.SituationId);
-            if (situation == null || situation.IsDeleted)
-            {
-                _logger.LogWarning("Situation not found");
-                throw new NotFoundException("Situation not found");
-            }
-            var parameter = situationParameterDto.ParameterId < 1?null:await context.Parameters.FirstOrDefaultAsync(a => a.ParameterId == situationParameterDto.ParameterId);
-            if (parameter == null || parameter.IsDeleted)
-            {
-                _logger.LogWarning("Parameter not found");
-                throw new NotFoundException("Parameter not found");
-            }
-            situationParameter = new SituationParameter
-            {
-                SituationId = situationParameterDto.SituationId,
-                ParameterId = situationParameterDto.ParameterId,
-                UserId = userId,
-                IsDeleted = false
-            };
-            context.Add(situationParameter);
-        }
-        else
-        {
-            situationParameter.UserId = userId;
-            situationParameter.IsDeleted = false;
-            context.Update(situationParameter);
-        }
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
-        try
-        {
-            // save changes
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("SituationParameter updated");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating situationParameter");
-            await transaction.RollbackAsync();
-            throw new BadRequestException("Error updating situationParameter");
-        }
-    }
-
-    public async Task<bool> AddOrUpdateSituationQuestion(SituationQuestionDto situationQuestionDto)
-    {var userId = _userContextService.UserId;
-        // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        // get situationQuestion
-        var situationQuestion = await context.SituationQuestions.FindAsync(situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
-        if (situationQuestion == null)
-        {
-            var situation = situationQuestionDto.SituationId < 1?null:await context.Situations.FirstOrDefaultAsync(a => a.SituationId == situationQuestionDto.SituationId);
-            if (situation == null || situation.IsDeleted)
-            {
-                _logger.LogWarning("Situation not found");
-                throw new NotFoundException("Situation not found");
-            }
-            var question = situationQuestionDto.QuestionId < 1?null:await context.Questions.FirstOrDefaultAsync(a => a.QuestionId == situationQuestionDto.QuestionId);
-            if (question == null || question.IsDeleted)
-            {
-                _logger.LogWarning("Question not found");
-                throw new NotFoundException("Question not found");
-            }
-            situationQuestion = new SituationQuestion
-            {
-                SituationId = situationQuestionDto.SituationId,
-                QuestionId = situationQuestionDto.QuestionId,
-                UserId = userId,
-                IsDeleted = false
-            };
-            context.Add(situationQuestion);
-        }
-        else
-        {
-            situationQuestion.UserId = userId;
-            situationQuestion.IsDeleted = false;
-            context.Update(situationQuestion);
-        }
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
-        try
-        {
-            // save changes
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("SituationQuestion updated");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating situationQuestion");
-            await transaction.RollbackAsync();
-            throw new BadRequestException("Error updating situationQuestion");
+            _logger.LogError(ex, "Error creating deviceSituation");
+            throw new BadRequestException("Error while saving changes");
         }
     }
 
     public async Task<int> CreateQuestion(QuestionCreateDto questionCreateDto)
-    {var userId = _userContextService.UserId;
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -455,7 +275,8 @@ public class SituationService : ISituationService
     }
 
     public async Task<int> CreateSituation(SituationCreateDto situationCreateDto)
-    {var userId = _userContextService.UserId;
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -496,13 +317,148 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteAssetSituation(AssetSituationDto assetSituationDto)
+    public async Task<(int, int)> CreateSituationDetail(int situationId, int detailId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get situationDetail
+        var situationDetail = await context.SituationDetails.FindAsync(situationId, detailId);
+        if (situationDetail != null)
+            throw new BadRequestException("SituationDetail already exists");
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        var detail = await context.Details.FindAsync(detailId);
+        if (detail == null || detail.IsDeleted)
+        {
+            _logger.LogWarning("Detail not found");
+            throw new NotFoundException("Detail not found");
+        }
+        situationDetail = new SituationDetail
+        {
+            SituationId = situationId,
+            DetailId = detailId,
+            UserId = userId,
+            IsDeleted = false
+        };
+        context.Add(situationDetail);
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return (situationId, detailId);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error creating situationDetail");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task<(int, int)> CreateSituationParameter(int situationId, int parameterId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get situationParameter
+        var situationParameter = await context.SituationParameters.FindAsync(situationId, parameterId);
+        if (situationParameter != null)
+            throw new BadRequestException("SituationParameter already exists");
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        var parameter = await context.Parameters.FindAsync(parameterId);
+        if (parameter == null || parameter.IsDeleted)
+        {
+            _logger.LogWarning("Parameter not found");
+            throw new NotFoundException("Parameter not found");
+        }
+        situationParameter = new SituationParameter
+        {
+            SituationId = situationId,
+            ParameterId = parameterId,
+            UserId = userId,
+            IsDeleted = false
+        };
+        context.Add(situationParameter);
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return (situationId, parameterId);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error creating situationParameter");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task<(int, int)> CreateSituationQuestion(int situationId, int questionId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get situationQuestion
+        var situationQuestion = await context.SituationQuestions.FindAsync(situationId, questionId);
+        if (situationQuestion != null)
+            throw new BadRequestException("SituationQuestion already exists");
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        var question = await context.Questions.FindAsync(questionId);
+        if (question == null || question.IsDeleted)
+        {
+            _logger.LogWarning("Question not found");
+            throw new NotFoundException("Question not found");
+        }
+        situationQuestion = new SituationQuestion
+        {
+            SituationId = situationId,
+            QuestionId = questionId,
+            UserId = userId,
+            IsDeleted = false
+        };
+        context.Add(situationQuestion);
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return (situationId, questionId);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error creating situationQuestion");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task DeleteAssetSituation(int assetId, int situationId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get asset situation
-        var assetSituation = await context.AssetSituations.FirstOrDefaultAsync(c => c.AssetId == assetSituationDto.AssetId && c.SituationId == assetSituationDto.SituationId);
+        var assetSituation = await context.AssetSituations.FindAsync(assetId, situationId);
         if (assetSituation == null)
         {
             _logger.LogWarning("Asset situation not found");
@@ -524,8 +480,7 @@ public class SituationService : ISituationService
             await context.SaveChangesAsync();
             // commit transaction
             await transaction.CommitAsync();
-            _logger.LogInformation("Asset situation with id {AssetId}, {SituationId}  deleted", assetSituationDto.AssetId, assetSituationDto.SituationId);
-            return true;
+            _logger.LogInformation("Asset situation with id {AssetId}, {SituationId}  deleted", assetId, situationId);
         }
         catch (Exception ex)
         {
@@ -536,13 +491,13 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteCategorySituation(CategorySituationDto categorySituationDto)
+    public async Task DeleteCategorySituation(int categoryId, int situationId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get category situation
-        var categorySituation = await context.CategorySituations.FirstOrDefaultAsync(c => c.CategoryId == categorySituationDto.CategoryId && c.SituationId == categorySituationDto.SituationId);
+        var categorySituation = await context.CategorySituations.FindAsync(categoryId, situationId);
         if (categorySituation == null)
         {
             _logger.LogWarning("Category situation not found");
@@ -564,8 +519,7 @@ public class SituationService : ISituationService
             await context.SaveChangesAsync();
             // commit transaction
             await transaction.CommitAsync();
-            _logger.LogInformation("Category situation with id {CategoryId}, {SituationId}  deleted", categorySituationDto.CategoryId, categorySituationDto.SituationId);
-            return true;
+            _logger.LogInformation("Category situation with id {CategoryId}, {SituationId}  deleted", categoryId, situationId);
         }
         catch (Exception ex)
         {
@@ -576,13 +530,13 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteDeviceSituation(DeviceSituationDto deviceSituationDto)
+    public async Task DeleteDeviceSituation(int deviceId, int situationId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get device situation
-        var deviceSituation = await context.DeviceSituations.FirstOrDefaultAsync(c => c.DeviceId == deviceSituationDto.DeviceId && c.SituationId == deviceSituationDto.SituationId);
+        var deviceSituation = await context.DeviceSituations.FindAsync(deviceId, situationId);
         if (deviceSituation == null)
         {
             _logger.LogWarning("Device situation not found");
@@ -604,8 +558,7 @@ public class SituationService : ISituationService
             await context.SaveChangesAsync();
             // commit transaction
             await transaction.CommitAsync();
-            _logger.LogInformation("Device situation with id {DeviceId}, {SituationId}  deleted", deviceSituationDto.DeviceId, deviceSituationDto.SituationId);
-            return true;
+            _logger.LogInformation("Device situation with id {DeviceId}, {SituationId}  deleted", deviceId, situationId);
         }
         catch (Exception ex)
         {
@@ -616,7 +569,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteQuestion(int situationId)
+    public async Task DeleteQuestion(int situationId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -645,7 +598,6 @@ public class SituationService : ISituationService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Question with id {QuestionId} deleted", question.QuestionId);
-            return true;
         }
         catch (Exception ex)
         {
@@ -656,7 +608,7 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituation(int situationId)
+    public async Task DeleteSituation(int situationId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -685,7 +637,6 @@ public class SituationService : ISituationService
             // commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Situation with id {SituationId} deleted", situationId);
-            return true;
         }
         catch (Exception ex)
         {
@@ -696,13 +647,13 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituationDetail(SituationDetailDto situationDetailDto)
+    public async Task DeleteSituationDetail(int situationId, int detailId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get situation detail
-        var situationDetail = await context.SituationDetails.FindAsync(situationDetailDto.SituationId, situationDetailDto.DetailId);
+        var situationDetail = await context.SituationDetails.FindAsync(situationId, detailId);
         if (situationDetail == null)
         {
             _logger.LogWarning("Situation detail not found");
@@ -724,8 +675,7 @@ public class SituationService : ISituationService
             await context.SaveChangesAsync();
             // commit transaction
             await transaction.CommitAsync();
-            _logger.LogInformation("Situation detail with id {SituationId}, {DetailId} deleted", situationDetailDto.SituationId, situationDetailDto.DetailId);
-            return true;
+            _logger.LogInformation("Situation detail with id {SituationId}, {DetailId} deleted", situationId, detailId);
         }
         catch (Exception ex)
         {
@@ -736,13 +686,13 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituationParameter(SituationParameterDto situationParameterDto)
+    public async Task DeleteSituationParameter(int situationId, int parameterId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get situation parameter
-        var situationParameter = await context.SituationParameters.FindAsync(situationParameterDto.SituationId, situationParameterDto.ParameterId);
+        var situationParameter = await context.SituationParameters.FindAsync(situationId, parameterId);
         if (situationParameter == null)
         {
             _logger.LogWarning("Situation parameter not found");
@@ -764,8 +714,7 @@ public class SituationService : ISituationService
             await context.SaveChangesAsync();
             // commit transaction
             await transaction.CommitAsync();
-            _logger.LogInformation("Situation parameter with id {SituationId}, {ParameterId} deleted", situationParameterDto.SituationId, situationParameterDto.ParameterId);
-            return true;
+            _logger.LogInformation("Situation parameter with id {SituationId}, {ParameterId} deleted", situationId, parameterId);
         }
         catch (Exception ex)
         {
@@ -776,13 +725,13 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> DeleteSituationQuestion(SituationQuestionDto situationQuestionDto)
+    public async Task DeleteSituationQuestion(int situationId, int questionId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get situation question
-        var situationQuestion = await context.SituationQuestions.FindAsync(situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
+        var situationQuestion = await context.SituationQuestions.FindAsync(situationId, questionId);
         if (situationQuestion == null)
         {
             _logger.LogWarning("Situation question not found");
@@ -804,8 +753,7 @@ public class SituationService : ISituationService
             await context.SaveChangesAsync();
             // commit transaction
             await transaction.CommitAsync();
-            _logger.LogInformation("Situation question with id {SituationId}, {QuestionId} deleted", situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
-            return true;
+            _logger.LogInformation("Situation question with id {SituationId}, {QuestionId} deleted", situationId, questionId);
         }
         catch (Exception ex)
         {
@@ -858,7 +806,7 @@ public class SituationService : ISituationService
                 UserId = q.UserId
             })
             .ToListAsync();
-        if (questions.Count == 0)
+        if (questions is null)
         {
             _logger.LogWarning("Questions not found");
             throw new NotFoundException("Questions not found");
@@ -912,7 +860,7 @@ public class SituationService : ISituationService
                 UserId = s.UserId
             })
             .ToListAsync();
-        if (situations.Count == 0)
+        if (situations is null)
         {
             _logger.LogWarning("Situations not found");
             throw new NotFoundException("Situations not found");
@@ -946,7 +894,7 @@ public class SituationService : ISituationService
                     UserId = a.Asset.UserId
                 }).ToList()
             }).ToListAsync();
-        if (situations.Count == 0)
+        if (situations is null)
         {
             _logger.LogWarning("Situations not found");
             throw new NotFoundException("Situations not found");
@@ -980,7 +928,7 @@ public class SituationService : ISituationService
                     UserId = c.Category.UserId
                 }).ToList()
             }).ToListAsync();
-        if (situations.Count == 0)
+        if (situations is null)
         {
             _logger.LogWarning("Situations not found");
             throw new NotFoundException("Situations not found");
@@ -1012,7 +960,7 @@ public class SituationService : ISituationService
                     UserId = q.Question.UserId
                 }).ToList()
             }).ToListAsync();
-        if (situations.Count == 0)
+        if (situations is null)
         {
             _logger.LogWarning("Situations not found");
             throw new NotFoundException("Situations not found");
@@ -1053,8 +1001,8 @@ public class SituationService : ISituationService
                     }).ToList()
                 }).ToList()
             }).ToListAsync();
-        // if (situations.Count == 0)
-        if (situations.Count == 0)
+        // if (situations is null)
+        if (situations is null)
         {
             _logger.LogWarning("Situations with asset details not found");
             throw new NotFoundException("Situations with asset details not found");
@@ -1064,13 +1012,14 @@ public class SituationService : ISituationService
         return situations;
     }
 
-    public async Task<bool> MarkDeleteAssetSituation(AssetSituationDto assetSituationDto)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteAssetSituation(int assetId, int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get assetSituation
-        var assetSituation = await context.AssetSituations.FindAsync(assetSituationDto.AssetId, assetSituationDto.SituationId);
+        var assetSituation = await context.AssetSituations.FindAsync(assetId, situationId);
         if (assetSituation == null)
         {
             _logger.LogWarning("AssetSituation not found");
@@ -1091,24 +1040,24 @@ public class SituationService : ISituationService
             // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("AssetSituation with id {AssetId}, {SituationId} marked as deleted", assetSituationDto.AssetId, assetSituationDto.SituationId);
-            return true;
+            _logger.LogInformation("AssetSituation with id {AssetId}, {SituationId} marked as deleted", assetId, situationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking assetSituation with id {AssetId}, {SituationId} as deleted", assetSituationDto.AssetId, assetSituationDto.SituationId);
+            _logger.LogError(ex, "Error marking assetSituation with id {AssetId}, {SituationId} as deleted", assetId, situationId);
             await transaction.RollbackAsync();
-            throw new BadRequestException($"Error marking assetSituation with id {assetSituationDto.AssetId}, {assetSituationDto.SituationId} as deleted");
+            throw new BadRequestException($"Error marking assetSituation with id {assetId}, {situationId} as deleted");
         }
     }
 
-    public async Task<bool> MarkDeleteCategorySituation(CategorySituationDto categorySituationDto)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteCategorySituation(int categoryId, int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get categorySituation
-        var categorySituation = await context.CategorySituations.FindAsync(categorySituationDto.CategoryId, categorySituationDto.SituationId);
+        var categorySituation = await context.CategorySituations.FindAsync(categoryId, situationId);
         if (categorySituation == null)
         {
             _logger.LogWarning("CategorySituation not found");
@@ -1129,24 +1078,24 @@ public class SituationService : ISituationService
             // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("CategorySituation with id {CategoryId}, {SituationId} marked as deleted", categorySituationDto.CategoryId, categorySituationDto.SituationId);
-            return true;
+            _logger.LogInformation("CategorySituation with id {CategoryId}, {SituationId} marked as deleted", categoryId, situationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking categorySituation with id {CategoryId}, {SituationId} as deleted", categorySituationDto.CategoryId, categorySituationDto.SituationId);
+            _logger.LogError(ex, "Error marking categorySituation with id {CategoryId}, {SituationId} as deleted", categoryId, situationId);
             await transaction.RollbackAsync();
-            throw new BadRequestException($"Error marking categorySituation with id {categorySituationDto.CategoryId}, {categorySituationDto.SituationId} as deleted");
+            throw new BadRequestException($"Error marking categorySituation with id {categoryId}, {situationId} as deleted");
         }
     }
 
-    public async Task<bool> MarkDeleteDeviceSituation(DeviceSituationDto deviceSituationDto)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteDeviceSituation(int deviceId, int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get deviceSituation
-        var deviceSituation = await context.DeviceSituations.FindAsync(deviceSituationDto.DeviceId, deviceSituationDto.SituationId);
+        var deviceSituation = await context.DeviceSituations.FindAsync(deviceId, situationId);
         if (deviceSituation == null)
         {
             _logger.LogWarning("DeviceSituation not found");
@@ -1167,19 +1116,19 @@ public class SituationService : ISituationService
             // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("DeviceSituation with id {DeviceId}, {SituationId} marked as deleted", deviceSituationDto.DeviceId, deviceSituationDto.SituationId);
-            return true;
+            _logger.LogInformation("DeviceSituation with id {DeviceId}, {SituationId} marked as deleted", deviceId, situationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking deviceSituation with id {DeviceId}, {SituationId} as deleted", deviceSituationDto.DeviceId, deviceSituationDto.SituationId);
+            _logger.LogError(ex, "Error marking deviceSituation with id {DeviceId}, {SituationId} as deleted", deviceId, situationId);
             await transaction.RollbackAsync();
-            throw new BadRequestException($"Error marking deviceSituation with id {deviceSituationDto.DeviceId}, {deviceSituationDto.SituationId} as deleted");
+            throw new BadRequestException($"Error marking deviceSituation with id {deviceId}, {situationId} as deleted");
         }
     }
 
-    public async Task<bool> MarkDeleteQuestion(int questionId)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteQuestion(int questionId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1219,7 +1168,6 @@ public class SituationService : ISituationService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Question with id {QuestionId} marked as deleted", questionId);
-            return true;
         }
         catch (Exception ex)
         {
@@ -1230,8 +1178,9 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteSituation(int situationId)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteSituation(int situationId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1305,7 +1254,6 @@ public class SituationService : ISituationService
             // await commit transaction
             await transaction.CommitAsync();
             _logger.LogInformation("Situation with id {SituationId} is marked as deleted", situationId);
-            return true;
         }
         catch (Exception ex)
         {
@@ -1317,13 +1265,14 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> MarkDeleteSituationDetail(SituationDetailDto situationDetailDto)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteSituationDetail(int situationId, int detailId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get situationDetail
-        var situationDetail = await context.SituationDetails.FindAsync(situationDetailDto.SituationId, situationDetailDto.DetailId);
+        var situationDetail = await context.SituationDetails.FindAsync(situationId, detailId);
         if (situationDetail == null)
         {
             _logger.LogWarning("SituationDetail not found");
@@ -1345,24 +1294,24 @@ public class SituationService : ISituationService
             // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("SituationDetail with id {SituationId}, {DetailId} marked as deleted", situationDetailDto.SituationId, situationDetailDto.DetailId);
-            return true;
+            _logger.LogInformation("SituationDetail with id {SituationId}, {DetailId} marked as deleted", situationId, detailId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking situationDetail with id {SituationId}, {DetailId} as deleted", situationDetailDto.SituationId, situationDetailDto.DetailId);
+            _logger.LogError(ex, "Error marking situationDetail with id {SituationId}, {DetailId} as deleted", situationId, detailId);
             await transaction.RollbackAsync();
-            throw new BadRequestException($"Error marking situationDetail with id {situationDetailDto.SituationId}, {situationDetailDto.DetailId} as deleted");
+            throw new BadRequestException($"Error marking situationDetail with id {situationId}, {detailId} as deleted");
         }
     }
 
-    public async Task<bool> MarkDeleteSituationParameter(SituationParameterDto situationParameterDto)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteSituationParameter(int situationId, int parameterId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get situationParameter
-        var situationParameter = await context.SituationParameters.FindAsync(situationParameterDto.SituationId, situationParameterDto.ParameterId);
+        var situationParameter = await context.SituationParameters.FindAsync(situationId, parameterId);
         if (situationParameter == null)
         {
             _logger.LogWarning("SituationParameter not found");
@@ -1383,24 +1332,24 @@ public class SituationService : ISituationService
             // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("SituationParameter with id {SituationId}, {ParameterId} marked as deleted", situationParameterDto.SituationId, situationParameterDto.ParameterId);
-            return true;
+            _logger.LogInformation("SituationParameter with id {SituationId}, {ParameterId} marked as deleted", situationId, parameterId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking situationParameter with id {SituationId}, {ParameterId} as deleted", situationParameterDto.SituationId, situationParameterDto.ParameterId);
+            _logger.LogError(ex, "Error marking situationParameter with id {SituationId}, {ParameterId} as deleted", situationId, parameterId);
             await transaction.RollbackAsync();
-            throw new BadRequestException($"Error marking situationParameter with id {situationParameterDto.SituationId}, {situationParameterDto.ParameterId} as deleted");
+            throw new BadRequestException($"Error marking situationParameter with id {situationId}, {parameterId} as deleted");
         }
     }
 
-    public async Task<bool> MarkDeleteSituationQuestion(SituationQuestionDto situationQuestionDto)
-    {var userId = _userContextService.UserId;
+    public async Task MarkDeleteSituationQuestion(int situationId, int questionId)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get situationQuestion
-        var situationQuestion = await context.SituationQuestions.FindAsync(situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
+        var situationQuestion = await context.SituationQuestions.FindAsync(situationId, questionId);
         if (situationQuestion == null)
         {
             _logger.LogWarning("SituationQuestion not found");
@@ -1421,19 +1370,148 @@ public class SituationService : ISituationService
             // save changes
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
-            _logger.LogInformation("SituationQuestion with id {SituationId}, {QuestionId} marked as deleted", situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
-            return true;
+            _logger.LogInformation("SituationQuestion with id {SituationId}, {QuestionId} marked as deleted", situationId, questionId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking situationQuestion with id {SituationId}, {QuestionId} as deleted", situationQuestionDto.SituationId, situationQuestionDto.QuestionId);
+            _logger.LogError(ex, "Error marking situationQuestion with id {SituationId}, {QuestionId} as deleted", situationId, questionId);
             await transaction.RollbackAsync();
-            throw new BadRequestException($"Error marking situationQuestion with id {situationQuestionDto.SituationId}, {situationQuestionDto.QuestionId} as deleted");
+            throw new BadRequestException($"Error marking situationQuestion with id {situationId}, {questionId} as deleted");
         }
     }
 
-    public async Task<bool> UpdateQuestion(int questionId,  QuestionUpdateDto questionUpdateDto)
-    {var userId = _userContextService.UserId;
+    public async Task UpdateAssetSituation(int assetId, int situationId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get assetSituation
+        var assetSituation = await context.AssetSituations.FindAsync(assetId, situationId);
+        if (assetSituation == null)
+        {
+            _logger.LogWarning("AssetSituation not found");
+            throw new NotFoundException("AssetSituation not found");
+        }
+        if (!assetSituation.IsDeleted)
+            throw new BadRequestException("AssetSituation not marked as deleted");
+        var asset = await context.Assets.FindAsync(assetId);
+        if (asset == null || asset.IsDeleted)
+        {
+            _logger.LogWarning("Asset not found");
+            throw new NotFoundException("Asset not found");
+        }
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        assetSituation.UserId = userId;
+        assetSituation.IsDeleted = false;
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error updating assetSituation");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task UpdateCategorySituation(int categoryId, int situationId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get categorySituation
+        var categorySituation = await context.CategorySituations.FindAsync(categoryId, situationId);
+        if (categorySituation == null)
+        {
+            _logger.LogWarning("CategorySituation not found");
+            throw new NotFoundException("CategorySituation not found");
+        }
+        if (!categorySituation.IsDeleted)
+            throw new BadRequestException("CategorySituation not marked as deleted");
+        var category = await context.Categories.FindAsync(categoryId);
+        if (category == null || category.IsDeleted)
+        {
+            _logger.LogWarning("Category not found");
+            throw new NotFoundException("Category not found");
+        }
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        categorySituation.UserId = userId;
+        categorySituation.IsDeleted = false;
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error updating categorySituation");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task UpdateDeviceSituation(int deviceId, int situationId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get deviceSituation
+        var deviceSituation = await context.DeviceSituations.FindAsync(deviceId, situationId);
+        if (deviceSituation == null)
+        {
+            _logger.LogWarning("DeviceSituation not found");
+            throw new NotFoundException("DeviceSituation not found");
+        }
+        if (!deviceSituation.IsDeleted)
+            throw new BadRequestException("DeviceSituation not marked as deleted");
+        var device = await context.Devices.FindAsync(deviceId);
+        if (device == null || device.IsDeleted)
+        {
+            _logger.LogWarning("Device not found");
+            throw new NotFoundException("Device not found");
+        }
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        deviceSituation.UserId = userId;
+        deviceSituation.IsDeleted = false;
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error updating deviceSituation");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task UpdateQuestion(int questionId, QuestionUpdateDto questionUpdateDto)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1468,7 +1546,6 @@ public class SituationService : ISituationService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Question updated");
-            return true;
         }
         catch (Exception e)
         {
@@ -1479,8 +1556,9 @@ public class SituationService : ISituationService
         }
     }
 
-    public async Task<bool> UpdateSituation(int situationId, SituationUpdateDto situationUpdateDto)
-    {var userId = _userContextService.UserId;
+    public async Task UpdateSituation(int situationId, SituationUpdateDto situationUpdateDto)
+    {
+        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1515,7 +1593,6 @@ public class SituationService : ISituationService
             await transaction.CommitAsync();
             // return success
             _logger.LogInformation("Situation updated");
-            return true;
         }
         catch (Exception e)
         {
@@ -1523,6 +1600,135 @@ public class SituationService : ISituationService
             // await rollback transaction
             await transaction.RollbackAsync();
             throw new BadRequestException("Error updating situation");
+        }
+    }
+
+    public async Task UpdateSituationDetail(int situationId, int detailId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get situationDetail
+        var situationDetail = await context.SituationDetails.FindAsync(situationId, detailId);
+        if (situationDetail == null)
+        {
+            _logger.LogWarning("SituationDetail not found");
+            throw new NotFoundException("SituationDetail not found");
+        }
+        if (!situationDetail.IsDeleted)
+            throw new BadRequestException("SituationDetail not marked as deleted");
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        var detail = await context.Details.FindAsync(detailId);
+        if (detail == null || detail.IsDeleted)
+        {
+            _logger.LogWarning("Detail not found");
+            throw new NotFoundException("Detail not found");
+        }
+        situationDetail.UserId = userId;
+        situationDetail.IsDeleted = false;
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error updating situationDetail");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task UpdateSituationParameter(int situationId, int parameterId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get situationParameter
+        var situationParameter = await context.SituationParameters.FindAsync(situationId, parameterId);
+        if (situationParameter == null)
+        {
+            _logger.LogWarning("SituationParameter not found");
+            throw new NotFoundException("SituationParameter not found");
+        }
+        if (!situationParameter.IsDeleted)
+            throw new BadRequestException("SituationParameter not marked as deleted");
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        var parameter = await context.Parameters.FindAsync(parameterId);
+        if (parameter == null || parameter.IsDeleted)
+        {
+            _logger.LogWarning("Parameter not found");
+            throw new NotFoundException("Parameter not found");
+        }
+        situationParameter.UserId = userId;
+        situationParameter.IsDeleted = false;
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error updating situationParameter");
+            throw new BadRequestException("Error while saving changes");
+        }
+    }
+
+    public async Task UpdateSituationQuestion(int situationId, int questionId)
+    {
+        var userId = _userContextService.UserId;
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get situationQuestion
+        var situationQuestion = await context.SituationQuestions.FindAsync(situationId, questionId);
+        if (situationQuestion == null)
+        {
+            _logger.LogWarning("SituationQuestion not found");
+            throw new NotFoundException("SituationQuestion not found");
+        }
+        if (!situationQuestion.IsDeleted)
+            throw new BadRequestException("SituationQuestion not marked as deleted");
+        var situation = await context.Situations.FindAsync(situationId);
+        if (situation == null || situation.IsDeleted)
+        {
+            _logger.LogWarning("Situation not found");
+            throw new NotFoundException("Situation not found");
+        }
+        var question = await context.Questions.FindAsync(questionId);
+        if (question == null || question.IsDeleted)
+        {
+            _logger.LogWarning("Question not found");
+            throw new NotFoundException("Question not found");
+        }
+        situationQuestion.UserId = userId;
+        situationQuestion.IsDeleted = false;
+        // save changes
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error updating situationQuestion");
+            throw new BadRequestException("Error while saving changes");
         }
     }
 }

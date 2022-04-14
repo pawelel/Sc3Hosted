@@ -33,9 +33,10 @@ public class AreasController : ControllerBase
 
     // POST api/<AreasController>
     [HttpPost]
-    public void Post([FromRoute]int plantId, [FromBody] AreaCreateDto area)
+    public async Task<ActionResult> Post([FromRoute]int plantId, [FromBody] AreaCreateDto area)
     {
-        _locationService.CreateArea(plantId, area);
+       var newAreaId = await _locationService.CreateArea(plantId, area);
+       return Created($"api/plants/{plantId}/areas/{newAreaId}", null);
     }
     
 
