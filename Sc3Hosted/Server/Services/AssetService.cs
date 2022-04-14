@@ -57,6 +57,8 @@ public interface IAssetService
 
     Task<IEnumerable<CategoryWithAssetsDto>> GetCategoriesWithAssets();
 
+    Task<IEnumerable<DeviceWithAssetsDto>> GetDevicesWithAssets();
+    Task<DeviceWithAssetsDto> GetDeviceWithAssets(int deviceId);
     Task<CategoryDto> GetCategoryById(int categoryId);
 
     Task<CategoryWithAssetsDto> GetCategoryByIdWithAssets(int categoryId);
@@ -1386,6 +1388,69 @@ public class AssetService : IAssetService
         }
         // return devices
         _logger.LogInformation("Devices found");
+        return query;
+    }
+
+    public async Task<IEnumerable<DeviceWithAssetsDto>> GetDevicesWithAssets()
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get devices
+        var query = await context.Devices
+            .AsNoTracking()
+            .Select(d => new DeviceWithAssetsDto
+            {
+                DeviceId = d.DeviceId,
+                Name = d.Name,
+                Description = d.Description,
+                IsDeleted = d.IsDeleted,
+                UserId = d.UserId,
+                Assets = d.Models.SelectMany(m => m.Assets).Select(a => new AssetDto
+                {
+                    AssetId = a.AssetId,
+                    Name = a.Name,
+                    Description = a.Description,
+                    IsDeleted = a.IsDeleted,
+                    UserId = a.UserId
+                }).ToList()
+            }).ToListAsync();
+        if (query is null)
+        {
+            _logger.LogWarning("No devices found");
+            throw new NotFoundException("No devices found");
+        }
+        // return devices
+        _logger.LogInformation("Devices found");
+        return query;
+    }
+    public async Task<DeviceWithAssetsDto> GetDeviceWithAssets(int deviceId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        // get device
+        var query = await context.Devices
+            .AsNoTracking()
+            .Select(d => new DeviceWithAssetsDto
+            {
+                DeviceId = d.DeviceId,
+                Name = d.Name,
+                Description = d.Description,
+                IsDeleted = d.IsDeleted,
+                UserId = d.UserId,
+                Assets = d.Models.SelectMany(m => m.Assets).Select(a => new AssetDto
+                {
+                    AssetId = a.AssetId,
+                    Name = a.Name,
+                    Description = a.Description,
+                    IsDeleted = a.IsDeleted,
+                    UserId = a.UserId
+                }).ToList()
+            }).FirstOrDefaultAsync(d => d.DeviceId == deviceId);
+        if(query is null)
+        {
+            _logger.LogWarning("No device found");
+            throw new NotFoundException("No device found");
+        }
+        // return device
+        _logger.LogInformation("Device found");
         return query;
     }
 
