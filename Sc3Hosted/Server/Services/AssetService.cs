@@ -126,20 +126,20 @@ public interface IAssetService
 
 public class AssetService : IAssetService
 {
-    private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<AssetService> _logger;
-    private readonly IUserContextService _userContextService;
+   
 
-    public AssetService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<AssetService> logger, IUserContextService userContextService)
+    public AssetService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<AssetService> logger)
     {
         _contextFactory = contextFactory;
         _logger = logger;
-        _userContextService = userContextService;
+       
     }
 
     public async Task ChangeModelOfAsset(int assetId, int modelId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -170,30 +170,28 @@ public class AssetService : IAssetService
 
         // update asset model
         asset.ModelId = modelId;
-        asset.UserId = userId;
         context.Assets.Update(asset);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Asset with id {AssetId} updated", assetId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating asset with id {AssetId}", assetId);
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException($"Error updating asset with id {assetId}");
         }
     }
 
     public async Task<int> CreateAsset(AssetCreateDto assetCreateDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -232,7 +230,6 @@ public class AssetService : IAssetService
 
         var asset = new Asset
         {
-            UserId = userId,
             ModelId = assetCreateDto.ModelId,
             CoordinateId = assetCreateDto.CoordinateId,
             Name = assetCreateDto.Name,
@@ -243,29 +240,24 @@ public class AssetService : IAssetService
         };
         // create asset
         context.Assets.Add(asset);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
             _logger.LogInformation("Asset with id {AssetId} created", asset.AssetId);
             return asset.AssetId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating asset");
-            // rollback transaction
-            await transaction.RollbackAsync();
             throw new BadRequestException("Error creating asset");
         }
     }
 
     public async Task<(int, int)> CreateAssetCategory(int assetId, int categoryId)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get assetCategory
@@ -288,21 +280,20 @@ public class AssetService : IAssetService
         {
             AssetId = assetId,
             CategoryId = categoryId,
-            UserId = userId,
             IsDeleted = false
         };
         context.Add(assetCategory);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+       
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (assetId, categoryId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating assetCategory");
             throw new BadRequestException("Error while saving changes");
         }
@@ -310,7 +301,6 @@ public class AssetService : IAssetService
 
     public async Task<(int, int)> CreateAssetDetail(AssetDetailDto assetDetailDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         var assetDetail = await context.AssetDetails.FindAsync(assetDetailDto.AssetId, assetDetailDto.DetailId);
@@ -336,21 +326,20 @@ public class AssetService : IAssetService
             AssetId = assetDetailDto.AssetId,
             DetailId = assetDetailDto.DetailId,
             Value = assetDetailDto.Value,
-            UserId = userId,
             IsDeleted = false
         };
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+       
         try
         {
             context.AssetDetails.Add(assetDetail);
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (assetDetailDto.AssetId, assetDetailDto.DetailId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating assetDetail");
             throw new BadRequestException("Error while saving changes");
         }
@@ -358,7 +347,6 @@ public class AssetService : IAssetService
 
     public async Task<int> CreateCategory(CategoryCreateDto categoryCreateDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -372,36 +360,34 @@ public class AssetService : IAssetService
 
         var category = new Category
         {
-            UserId = userId,
             Name = categoryCreateDto.Name,
             Description = categoryCreateDto.Description,
             IsDeleted = false
         };
         // create category
         context.Categories.Add(category);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Category with id {CategoryId} created", category.CategoryId);
             return category.CategoryId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating category");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating category");
         }
     }
 
     public async Task<int> CreateDetail(DetailCreateDto detailCreateDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -415,36 +401,34 @@ public class AssetService : IAssetService
 
         var detail = new Detail
         {
-            UserId = userId,
             Name = detailCreateDto.Name,
             Description = detailCreateDto.Description,
             IsDeleted = false
         };
         // create detail
         context.Details.Add(detail);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Detail with id {DetailId} created", detail.DetailId);
             return detail.DetailId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating detail");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating detail");
         }
     }
 
     public async Task<int> CreateDevice(DeviceCreateDto deviceCreateDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -458,36 +442,34 @@ public class AssetService : IAssetService
 
         var device = new Device
         {
-            UserId = userId,
             Name = deviceCreateDto.Name,
             Description = deviceCreateDto.Description,
             IsDeleted = false
         };
         // create device
         context.Devices.Add(device);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Device with id {DeviceId} created", device.DeviceId);
             return device.DeviceId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating device");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating device");
         }
     }
 
     public async Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -514,7 +496,6 @@ public class AssetService : IAssetService
 
         var model = new Model
         {
-            UserId = userId,
             DeviceId = deviceId,
             Name = modelCreateDto.Name,
             Description = modelCreateDto.Description,
@@ -522,29 +503,28 @@ public class AssetService : IAssetService
         };
         // create model
         context.Models.Add(model);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Model with id {ModelId} created", model.ModelId);
             return model.ModelId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating model");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating model");
         }
     }
 
     public async Task<(int, int)> CreateModelParameter(ModelParameterDto modelParameterDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         var modelParameter = await context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
@@ -569,21 +549,20 @@ public class AssetService : IAssetService
             ModelId = modelParameterDto.ModelId,
             ParameterId = modelParameterDto.ParameterId,
             Value = modelParameterDto.Value,
-            UserId = userId,
             IsDeleted = false
         };
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+       
         try
         {
             context.ModelParameters.Add(modelParameter);
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (modelParameter.ModelId, modelParameter.ParameterId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating modelParameter");
             throw new BadRequestException("Error while saving changes");
         }
@@ -591,7 +570,6 @@ public class AssetService : IAssetService
 
     public async Task<int> CreateParameter(ParameterCreateDto parameterCreateDto)
     {
-        var userId = _userContextService.UserId;
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -604,29 +582,29 @@ public class AssetService : IAssetService
         }
         var parameter = new Parameter
         {
-            UserId = userId,
+            
             Name = parameterCreateDto.Name,
             Description = parameterCreateDto.Description,
             IsDeleted = false
         };
         // create parameter
         context.Parameters.Add(parameter);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Parameter with id {ParameterId} created", parameter.ParameterId);
             return parameter.ParameterId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating parameter");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating parameter");
         }
     }
@@ -651,21 +629,21 @@ public class AssetService : IAssetService
         }
         // delete asset
         context.Assets.Remove(asset);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Asset with id {AssetId} deleted", asset.AssetId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting asset");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting asset");
         }
     }
@@ -689,19 +667,19 @@ public class AssetService : IAssetService
         }
 
         context.AssetCategories.Remove(assetCategory);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("AssetCategory deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting assetCategory");
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting assetCategory");
         }
     }
@@ -724,20 +702,20 @@ public class AssetService : IAssetService
             throw new BadRequestException("AssetDetail is not marked as deleted");
         }
 
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             context.AssetDetails.Remove(assetDetail);
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("AssetDetail deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting assetDetail");
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting assetDetail");
         }
     }
@@ -762,21 +740,21 @@ public class AssetService : IAssetService
         }
         // delete category
         context.Categories.Remove(category);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Category with id {CategoryId} deleted", category.CategoryId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting category");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting category");
         }
     }
@@ -801,21 +779,21 @@ public class AssetService : IAssetService
         }
         // delete detail
         context.Details.Remove(detail);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Detail with id {DetailId} deleted", detail.DetailId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting detail");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting detail");
         }
     }
@@ -840,21 +818,21 @@ public class AssetService : IAssetService
         }
         // delete device
         context.Devices.Remove(device);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Device with id {DeviceId} deleted", device.DeviceId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting device");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting device");
         }
     }
@@ -879,21 +857,21 @@ public class AssetService : IAssetService
         }
         // delete model
         context.Models.Remove(model);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Model with id {ModelId} deleted", model.ModelId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting model");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting model");
         }
     }
@@ -911,20 +889,20 @@ public class AssetService : IAssetService
             throw new NotFoundException("ModelParameter not found");
         }
         if (modelParameter.IsDeleted)
-        {// await using transaction
-            await using var transaction = await context.Database.BeginTransactionAsync();
+        {
+           
             try
             {
                 context.ModelParameters.Remove(modelParameter);
                 // save changes
                 await context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                
                 _logger.LogInformation("ModelParameter deleted");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting modelParameter");
-                await transaction.RollbackAsync();
+                
                 throw new BadRequestException("Error deleting modelParameter");
             }
         }
@@ -952,21 +930,21 @@ public class AssetService : IAssetService
         }
         // delete parameter
         context.Parameters.Remove(parameter);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Parameter with id {ParameterId} deleted", parameter.ParameterId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting parameter");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting parameter");
         }
     }
@@ -983,7 +961,7 @@ public class AssetService : IAssetService
             Name = a.Name,
             Description = a.Description,
             IsDeleted = a.IsDeleted,
-            UserId = a.UserId,
+            UserId = a.UpdatedBy,
             Status = a.Status,
             CoordinateId = a.CoordinateId,
             ModelId = a.ModelId,
@@ -1021,12 +999,12 @@ public class AssetService : IAssetService
                 CoordinateName = a.Coordinate.Name,
                 Status = a.Status,
                 IsDeleted = a.IsDeleted,
-                UserId = a.UserId,
+                UserId = a.UpdatedBy,
                 Categories = a.AssetCategories.Select(ac => new AssetCategoryDisplayDto
                 {
                     Name = ac.Category.Name,
                     AssetId = ac.AssetId,
-                    UserId = ac.UserId,
+                    UserId = ac.UpdatedBy,
                     CategoryId = ac.CategoryId,
                     Description = ac.Category.Description,
                     IsDeleted = ac.IsDeleted
@@ -1036,7 +1014,7 @@ public class AssetService : IAssetService
                     Name = ad.Detail.Name,
                     Value = ad.Value,
                     DetailId = ad.DetailId,
-                    UserId = ad.UserId,
+                    UserId = ad.UpdatedBy,
                     AssetId = ad.AssetId,
                     Description = ad.Detail.Description,
                     IsDeleted = ad.IsDeleted
@@ -1046,7 +1024,7 @@ public class AssetService : IAssetService
                     Name = mp.Parameter.Name,
                     Value = mp.Value,
                     ParameterId = mp.ParameterId,
-                    UserId = mp.UserId,
+                    UserId = mp.UpdatedBy,
                     ModelId = mp.ModelId,
                     Description = mp.Parameter.Description,
                     IsDeleted = mp.IsDeleted
@@ -1076,7 +1054,7 @@ public class AssetService : IAssetService
                 Name = a.Name,
                 Description = a.Description,
                 IsDeleted = a.IsDeleted,
-                UserId = a.UserId,
+                UserId = a.UpdatedBy,
                 Status = a.Status,
                 CoordinateId = a.CoordinateId,
                 ModelId = a.ModelId,
@@ -1106,7 +1084,7 @@ public class AssetService : IAssetService
                 Description = c.Description,
                 CategoryId = c.CategoryId,
                 IsDeleted = c.IsDeleted,
-                UserId = c.UserId
+                UserId = c.UpdatedBy
             }).ToListAsync();
         if (query is null)
         {
@@ -1131,7 +1109,7 @@ public class AssetService : IAssetService
                 CategoryId = c.CategoryId,
                 Name = c.Name,
                 Description = c.Description,
-                UserId = c.UserId,
+                UserId = c.UpdatedBy,
                 IsDeleted = c.IsDeleted,
                 Assets = c.AssetCategories.Select(ac => new AssetDto
                 {
@@ -1139,7 +1117,7 @@ public class AssetService : IAssetService
                     Description = ac.Asset.Description,
                     AssetId = ac.AssetId,
                     Status = ac.Asset.Status,
-                    UserId = ac.UserId,
+                    UserId = ac.UpdatedBy,
                     Process = ac.Asset.Process,
                     IsDeleted = ac.Asset.IsDeleted
                 }).ToList()
@@ -1165,7 +1143,7 @@ public class AssetService : IAssetService
             .Select(c => new CategoryDto
             {
                 Name = c.Name,
-                UserId = c.UserId,
+                UserId = c.UpdatedBy,
                 IsDeleted = c.IsDeleted,
                 Description = c.Description,
                 CategoryId = c.CategoryId
@@ -1193,14 +1171,14 @@ public class AssetService : IAssetService
                 CategoryId = c.CategoryId,
                 Name = c.Name,
                 Description = c.Description,
-                UserId = c.UserId,
+                UserId = c.UpdatedBy,
                 IsDeleted = c.IsDeleted,
                 Assets = c.AssetCategories.Select(ac => new AssetDto
                 {
                     Name = ac.Asset.Name,
                     Description = ac.Asset.Description,
                     AssetId = ac.AssetId,
-                    UserId = ac.UserId,
+                    UserId = ac.UpdatedBy,
                     IsDeleted = ac.IsDeleted,
                     Status = ac.Asset.Status,
                     Process = ac.Asset.Process
@@ -1228,7 +1206,7 @@ public class AssetService : IAssetService
             {
                 DetailId = d.DetailId,
                 Name = d.Name,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted
             }).FirstOrDefaultAsync(d => d.DetailId == detailId);
@@ -1254,7 +1232,7 @@ public class AssetService : IAssetService
             {
                 DetailId = d.DetailId,
                 Name = d.Name,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted
             }).ToListAsync();
@@ -1281,7 +1259,7 @@ public class AssetService : IAssetService
             {
                 DetailId = d.DetailId,
                 Name = d.Name,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted,
                 Assets = d.AssetDetails.Select(ad => new AssetDto
@@ -1289,7 +1267,7 @@ public class AssetService : IAssetService
                     Name = ad.Asset.Name,
                     Description = ad.Asset.Description,
                     AssetId = ad.AssetId,
-                    UserId = ad.UserId,
+                    UserId = ad.UpdatedBy,
                     Status = ad.Asset.Status,
                     Process = ad.Asset.Process,
                     IsDeleted = ad.Asset.IsDeleted
@@ -1316,7 +1294,7 @@ public class AssetService : IAssetService
             .Select(d => new DeviceDto
             {
                 DeviceId = d.DeviceId,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Name = d.Name,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted
@@ -1345,7 +1323,7 @@ public class AssetService : IAssetService
                 Name = d.Name,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted,
-                UserId = d.UserId
+                UserId = d.UpdatedBy
             }).ToListAsync();
         if (query is null)
         {
@@ -1371,14 +1349,14 @@ public class AssetService : IAssetService
                 Name = d.Name,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Models = d.Models.Select(m => new ModelDto
                 {
                     ModelId = m.ModelId,
                     Name = m.Name,
                     Description = m.Description,
                     IsDeleted = m.IsDeleted,
-                    UserId = m.UserId
+                    UserId = m.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (query is null)
@@ -1403,14 +1381,14 @@ public class AssetService : IAssetService
                 Name = d.Name,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Assets = d.Models.SelectMany(m => m.Assets).Select(a => new AssetDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Name,
                     Description = a.Description,
                     IsDeleted = a.IsDeleted,
-                    UserId = a.UserId
+                    UserId = a.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (query is null)
@@ -1434,14 +1412,14 @@ public class AssetService : IAssetService
                 Name = d.Name,
                 Description = d.Description,
                 IsDeleted = d.IsDeleted,
-                UserId = d.UserId,
+                UserId = d.UpdatedBy,
                 Assets = d.Models.SelectMany(m => m.Assets).Select(a => new AssetDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Name,
                     Description = a.Description,
                     IsDeleted = a.IsDeleted,
-                    UserId = a.UserId
+                    UserId = a.UpdatedBy
                 }).ToList()
             }).FirstOrDefaultAsync(d => d.DeviceId == deviceId);
         if(query is null)
@@ -1467,7 +1445,7 @@ public class AssetService : IAssetService
                 Name = m.Name,
                 Description = m.Description,
                 IsDeleted = m.IsDeleted,
-                UserId = m.UserId
+                UserId = m.UpdatedBy
             }).FirstOrDefaultAsync(m => m.ModelId == modelId);
         if (query == null)
         {
@@ -1493,7 +1471,7 @@ public class AssetService : IAssetService
                 Name = m.Name,
                 Description = m.Description,
                 IsDeleted = m.IsDeleted,
-                UserId = m.UserId
+                UserId = m.UpdatedBy
             }).ToListAsync();
         if (query is null)
         {
@@ -1519,14 +1497,14 @@ public class AssetService : IAssetService
                 Name = m.Name,
                 Description = m.Description,
                 IsDeleted = m.IsDeleted,
-                UserId = m.UserId,
+                UserId = m.UpdatedBy,
                 Assets = m.Assets.Select(a => new AssetDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Name,
                     Description = a.Description,
                     IsDeleted = a.IsDeleted,
-                    UserId = a.UserId
+                    UserId = a.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (query is null)
@@ -1553,7 +1531,7 @@ public class AssetService : IAssetService
                 Name = m.Name,
                 Description = m.Description,
                 IsDeleted = m.IsDeleted,
-                UserId = m.UserId
+                UserId = m.UpdatedBy
             }).FirstOrDefaultAsync(m => m.ParameterId == parameterId);
         if (query == null)
         {
@@ -1579,7 +1557,7 @@ public class AssetService : IAssetService
                 Name = m.Name,
                 Description = m.Description,
                 IsDeleted = m.IsDeleted,
-                UserId = m.UserId
+                UserId = m.UpdatedBy
             }).ToListAsync();
         if (query is null)
         {
@@ -1605,14 +1583,14 @@ public class AssetService : IAssetService
                 Name = p.Name,
                 Description = p.Description,
                 IsDeleted = p.IsDeleted,
-                UserId = p.UserId,
+                UserId = p.UpdatedBy,
                 Models = p.ModelParameters.Select(mp => new ModelDto
                 {
                     ModelId = mp.ModelId,
                     Name = mp.Model.Name,
                     Description = mp.Model.Description,
                     IsDeleted = mp.Model.IsDeleted,
-                    UserId = mp.Model.UserId
+                    UserId = mp.Model.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (query is null)
@@ -1627,7 +1605,7 @@ public class AssetService : IAssetService
 
     public async Task MarkDeleteAsset(int assetId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1647,17 +1625,16 @@ public class AssetService : IAssetService
         }
         // mark asset as deleted
         asset.IsDeleted = true;
-        asset.UserId = userId;
         // update asset
         context.Update(asset);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Asset marked as deleted");
         }
@@ -1665,14 +1642,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error marking asset as deleted");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking asset as deleted");
         }
     }
 
     public async Task MarkDeleteAssetCategory(int assetId, int categoryId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1689,29 +1666,28 @@ public class AssetService : IAssetService
             _logger.LogWarning("AssetCategory already deleted");
             throw new BadRequestException("AssetCategory already deleted");
         }
-        assetCategory.UserId = userId;
         assetCategory.IsDeleted = true;
         context.Update(assetCategory);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("AssetCategory marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking assetCategory as deleted");
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking assetCategory as deleted");
         }
     }
 
     public async Task MarkDeleteAssetDetail(int assetId, int detailId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1728,29 +1704,28 @@ public class AssetService : IAssetService
             _logger.LogWarning("AssetDetail already deleted");
             throw new BadRequestException("AssetDetail already deleted");
         }
-        assetDetail.UserId = userId;
         assetDetail.IsDeleted = true;
         context.Update(assetDetail);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("AssetDetail marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking assetDetail as deleted");
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking assetDetail as deleted");
         }
     }
 
     public async Task MarkDeleteCategory(int categoryId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1770,17 +1745,16 @@ public class AssetService : IAssetService
         }
         // mark category as deleted
         category.IsDeleted = true;
-        category.UserId = userId;
         // update category
         context.Update(category);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Category marked as deleted");
         }
@@ -1788,14 +1762,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error marking category as deleted");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking category as deleted");
         }
     }
 
     public async Task MarkDeleteDetail(int detailId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1815,17 +1789,16 @@ public class AssetService : IAssetService
         }
         // mark detail as deleted
         detail.IsDeleted = true;
-        detail.UserId = userId;
         // update detail
         context.Update(detail);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Detail marked as deleted");
         }
@@ -1833,14 +1806,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error marking detail as deleted");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking detail as deleted");
         }
     }
 
     public async Task MarkDeleteDevice(int deviceId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1860,17 +1833,16 @@ public class AssetService : IAssetService
         }
         // mark device as deleted
         device.IsDeleted = true;
-        device.UserId = userId;
         // update device
         context.Update(device);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Device marked as deleted");
         }
@@ -1878,14 +1850,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error marking device as deleted");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking device as deleted");
         }
     }
 
     public async Task MarkDeleteModel(int modelId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1905,17 +1877,16 @@ public class AssetService : IAssetService
         }
         // mark model as deleted
         model.IsDeleted = true;
-        model.UserId = userId;
         // update model
         context.Update(model);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Model marked as deleted");
         }
@@ -1923,14 +1894,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error marking model as deleted");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking model as deleted");
         }
     }
 
     public async Task MarkDeleteModelParameter(int modelId, int parameterId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1945,29 +1916,28 @@ public class AssetService : IAssetService
             _logger.LogWarning("ModelParameter already deleted");
             throw new BadRequestException("ModelParameter already deleted");
         }
-        modelParameter.UserId = userId;
         modelParameter.IsDeleted = true;
         context.Update(modelParameter);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("ModelParameter marked as deleted");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking modelParameter as deleted");
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking modelParameter as deleted");
         }
     }
 
     public async Task MarkDeleteParameter(int parameterId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1987,17 +1957,16 @@ public class AssetService : IAssetService
         }
         // mark parameter as deleted
         parameter.IsDeleted = true;
-        parameter.UserId = userId;
         // update parameter
         context.Update(parameter);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Parameter marked as deleted");
         }
@@ -2005,14 +1974,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error marking parameter as deleted");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error marking parameter as deleted");
         }
     }
 
     public async Task UpdateAsset(int assetId, AssetUpdateDto assetUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2058,18 +2027,17 @@ public class AssetService : IAssetService
 
         // assign userId to update
         asset.Description = assetUpdateDto.Description;
-        asset.UserId = userId;
         asset.IsDeleted = false;
         // update asset
         context.Update(asset);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Asset updated");
         }
@@ -2077,14 +2045,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error updating asset");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating asset");
         }
     }
 
     public async Task UpdateAssetCategory(int assetId, int categoryId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get assetCategory
@@ -2108,18 +2076,17 @@ public class AssetService : IAssetService
             _logger.LogWarning("Category not found");
             throw new NotFoundException("Category not found");
         }
-        assetCategory.UserId = userId;
         assetCategory.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+       
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating assetCategory");
             throw new BadRequestException("Error while saving changes");
         }
@@ -2128,7 +2095,7 @@ public class AssetService : IAssetService
 
     public async Task UpdateAssetDetail(AssetDetailDto assetDetailDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         var assetDetail = await context.AssetDetails.FindAsync(assetDetailDto.AssetId, assetDetailDto.DetailId);
@@ -2152,19 +2119,18 @@ public class AssetService : IAssetService
 
         assetDetail.IsDeleted = false;
         assetDetail.Value = assetDetailDto.Value;
-        assetDetail.UserId = userId;
 
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+       
         try
         {
             context.AssetDetails.Update(assetDetail);
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating assetDetail");
             throw new BadRequestException("Error while saving changes");
         }
@@ -2172,7 +2138,7 @@ public class AssetService : IAssetService
 
     public async Task UpdateCategory(int categoryId, CategoryUpdateDto categoryUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2192,19 +2158,18 @@ public class AssetService : IAssetService
         }
         category.Name = categoryUpdateDto.Name;
         // assign userId to update
-        category.UserId = userId;
         category.Description = categoryUpdateDto.Description;
         category.IsDeleted = false;
         // update category
         context.Update(category);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Category updated");
         }
@@ -2212,14 +2177,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error updating category");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating category");
         }
     }
 
     public async Task UpdateDetail(int detailId, DetailUpdateDto detailUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2239,19 +2204,18 @@ public class AssetService : IAssetService
         }
         detail.Name = detailUpdateDto.Name;
         // assign userId to update
-        detail.UserId = userId;
         detail.Description = detailUpdateDto.Description;
         detail.IsDeleted = false;
         // update detail
         context.Update(detail);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Detail updated");
         }
@@ -2259,14 +2223,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error updating detail");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating detail");
         }
     }
 
     public async Task UpdateDevice(int deviceId, DeviceUpdateDto deviceUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2286,19 +2250,18 @@ public class AssetService : IAssetService
         }
         device.Name = deviceUpdateDto.Name;
         // assign userId to update
-        device.UserId = userId;
         device.Description = deviceUpdateDto.Description;
         device.IsDeleted = false;
         // update device
         context.Update(device);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Device updated");
         }
@@ -2306,14 +2269,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error updating device");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating device");
         }
     }
 
     public async Task UpdateModel(int modelId, ModelUpdateDto modelUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2333,19 +2296,18 @@ public class AssetService : IAssetService
         }
         model.Name = modelUpdateDto.Name;
         // assign userId to update
-        model.UserId = userId;
         model.Description = modelUpdateDto.Description;
         model.IsDeleted = false;
         // update model
         context.Update(model);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Model updated");
         }
@@ -2353,14 +2315,14 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error updating model");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating model");
         }
     }
 
     public async Task UpdateModelParameter(ModelParameterDto modelParameterDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         var modelParameter = await context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
@@ -2384,18 +2346,17 @@ public class AssetService : IAssetService
 
         modelParameter.IsDeleted = false;
         modelParameter.Value = modelParameterDto.Value;
-        modelParameter.UserId = userId;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+       
         try
         {
             context.ModelParameters.Update(modelParameter);
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating modelParameter");
             throw new BadRequestException("Error while saving changes");
         }
@@ -2403,7 +2364,7 @@ public class AssetService : IAssetService
 
     public async Task UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -2423,19 +2384,18 @@ public class AssetService : IAssetService
         }
         parameter.Name = parameterUpdateDto.Name;
         // assign userId to update
-        parameter.UserId = userId;
         parameter.Description = parameterUpdateDto.Description;
         parameter.IsDeleted = false;
         // update parameter
         context.Update(parameter);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+       
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Parameter updated");
         }
@@ -2443,7 +2403,7 @@ public class AssetService : IAssetService
         {
             _logger.LogError(e, "Error updating parameter");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating parameter");
         }
     }

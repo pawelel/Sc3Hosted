@@ -3,7 +3,8 @@ namespace Sc3Hosted.Server.Services;
 public interface IUserContextService
 {
     ClaimsPrincipal User { get; }
-    string UserId { get; }
+    string GetUserId { get; }
+    string GetCurrentUserName();
 }
 
 public class UserContextService : IUserContextService
@@ -12,9 +13,15 @@ public class UserContextService : IUserContextService
 
     public UserContextService(IHttpContextAccessor httpContextAccessor)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
 
+    
     public ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User??new ClaimsPrincipal();
-    public string UserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value??string.Empty;
+    public string GetUserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value??string.Empty;
+
+    public string GetCurrentUserName()
+    {
+        return _httpContextAccessor.HttpContext?.User?.Identity?.Name??string.Empty;
+    }
 }

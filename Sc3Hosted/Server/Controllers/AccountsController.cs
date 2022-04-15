@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Shared.Dtos;
+
 namespace Sc3Hosted.Server.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
 public class AccountsController : ControllerBase

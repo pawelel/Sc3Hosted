@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sc3Hosted.Server.Services;
 using Sc3Hosted.Shared.Dtos;
 
@@ -13,97 +14,112 @@ public class SituationsController : ControllerBase
    {
       _situationService = situationService;
    }
-
+[Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateAssetSituation(int assetId, int situationId)
    {
       await _situationService.CreateAssetSituation(assetId, situationId);
       return Created($"api/assets/{assetId}/situations/{situationId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateCategorySituation(int categoryId, int situationId)
    {
       await _situationService.CreateCategorySituation(categoryId, situationId);
       return Created($"api/categories/{categoryId}/situations/{situationId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateDeviceSituation(int deviceId, int situationId)
    {
       await _situationService.CreateDeviceSituation(deviceId, situationId);
       return Created($"api/devices/{deviceId}/situations/{situationId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult>  CreateQuestion(QuestionCreateDto questionCreateDto)
    {
      var questionId = await _situationService.CreateQuestion(questionCreateDto);
       return Created($"api/questions/{questionId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateSituation(SituationCreateDto situationCreateDto)
    {
       var situationId = await _situationService.CreateSituation(situationCreateDto);
       return Created($"api/situations/{situationId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateSituationQuestion(int situationId, int questionId)
    {
       await _situationService.CreateSituationQuestion(situationId, questionId);
       return Created($"api/situations/{situationId}/questions/{questionId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateSituationDetail(int situationId, int detailId)
    {
       await _situationService.CreateSituationDetail(situationId, detailId);
       return Created($"api/situations/{situationId}/details/{detailId}", null);
    }
+   [Authorize]
    [HttpPost]
    public async Task<IActionResult> CreateSituationParameter(int situationId, int parameterId)
    {
       await _situationService.CreateSituationParameter(situationId, parameterId);
       return Created($"api/situations/{situationId}/parameters/{parameterId}", null);
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteAssetSituation(int assetId, int situationId)
    {
       await _situationService.DeleteAssetSituation(assetId, situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteCategorySituation(int categoryId, int situationId)
    {
       await _situationService.DeleteCategorySituation(categoryId, situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteDeviceSituation(int deviceId, int situationId)
    {
       await _situationService.DeleteDeviceSituation(deviceId, situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteQuestion(int questionId)
    {
       await _situationService.DeleteQuestion(questionId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteSituation(int situationId)
    {
       await _situationService.DeleteSituation(situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteSituationQuestion(int situationId, int questionId)
    {
       await _situationService.DeleteSituationQuestion(situationId, questionId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteSituationDetail(int situationId, int detailId)
    {
       await _situationService.DeleteSituationDetail(situationId, detailId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpDelete]
    public async Task<IActionResult> DeleteSituationParameter(int situationId, int parameterId)
    {
@@ -158,36 +174,42 @@ public class SituationsController : ControllerBase
       var situations = await _situationService.GetSituationWithAssetsAndDetails();
       return Ok(situations);
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpPut]
    public async Task<IActionResult>  MarkDeleteAssetSituation(int assetId, int situationId)
    {
      await _situationService.MarkDeleteAssetSituation(assetId, situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpPut]
    public async Task<IActionResult>  MarkDeleteCategorySituation(int categoryId, int situationId)
    {
       await _situationService.MarkDeleteCategorySituation(categoryId, situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpPut]
    public async Task<IActionResult> MarkDeleteDeviceSituation(int deviceId, int situationId)
    {
       await _situationService.MarkDeleteDeviceSituation(deviceId, situationId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpPut]
    public async Task<IActionResult>  MarkDeleteQuestion(int questionId)
    {
       await _situationService.MarkDeleteQuestion(questionId);
       return NoContent();
    }
+   [Authorize (Roles = "Admin, Manager")]
    [HttpPut]
    public async Task<IActionResult>  MarkDeleteSituation(int situationId)
    {
       await _situationService.MarkDeleteSituation(situationId);
       return NoContent();
    }
+   
    [HttpPut]
    public async Task<IActionResult>  MarkDeleteSituationDetail(int situationId, int detailId)
    {

@@ -87,19 +87,17 @@ public interface ISituationService
 
 public class SituationService : ISituationService
 {
-    private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<SituationService> _logger;
-    private readonly IUserContextService _userContextService;
-    public SituationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<SituationService> logger, IUserContextService userContextService)
+    public SituationService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<SituationService> logger)
     {
         _contextFactory = contextFactory;
         _logger = logger;
-        _userContextService = userContextService;
     }
 
     public async Task<(int, int)> CreateAssetSituation(int assetId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get assetSituation
@@ -122,21 +120,20 @@ public class SituationService : ISituationService
         {
             AssetId = assetId,
             SituationId = situationId,
-            UserId = userId,
             IsDeleted = false
         };
         context.Add(assetSituation);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (assetId, situationId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating assetSituation");
             throw new BadRequestException("Error while saving changes");
         }
@@ -144,7 +141,7 @@ public class SituationService : ISituationService
 
     public async Task<(int, int)> CreateCategorySituation(int categoryId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get categorySituation
@@ -167,21 +164,21 @@ public class SituationService : ISituationService
         {
             CategoryId = categoryId,
             SituationId = situationId,
-            UserId = userId,
+            
             IsDeleted = false
         };
         context.Add(categorySituation);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (categoryId, situationId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating categorySituation");
             throw new BadRequestException("Error while saving changes");
         }
@@ -189,7 +186,7 @@ public class SituationService : ISituationService
 
     public async Task<(int, int)> CreateDeviceSituation(int deviceId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get deviceSituation
@@ -212,21 +209,21 @@ public class SituationService : ISituationService
         {
             DeviceId = deviceId,
             SituationId = situationId,
-            UserId = userId,
+            
             IsDeleted = false
         };
         context.Add(deviceSituation);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (deviceId, situationId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating deviceSituation");
             throw new BadRequestException("Error while saving changes");
         }
@@ -234,7 +231,7 @@ public class SituationService : ISituationService
 
     public async Task<int> CreateQuestion(QuestionCreateDto questionCreateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -248,20 +245,20 @@ public class SituationService : ISituationService
 
         var question = new Question
         {
-            UserId = userId,
+            
             Name = questionCreateDto.Name,
             IsDeleted = false
         };
         // create question
         context.Questions.Add(question);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Question with id {QuestionId} created", question.QuestionId);
             return question.QuestionId;
         }
@@ -269,14 +266,14 @@ public class SituationService : ISituationService
         {
             _logger.LogError(ex, "Error creating question");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error creating question");
         }
     }
 
     public async Task<int> CreateSituation(SituationCreateDto situationCreateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -290,7 +287,7 @@ public class SituationService : ISituationService
 
         var situation = new Situation
         {
-            UserId = userId,
+            
             Name = situationCreateDto.Name,
             Description = situationCreateDto.Description,
             IsDeleted = false
@@ -298,13 +295,13 @@ public class SituationService : ISituationService
         // create situation
         context.Situations.Add(situation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Situation with id {SituationId} created", situation.SituationId);
             return situation.SituationId;
         }
@@ -312,14 +309,14 @@ public class SituationService : ISituationService
         {
             _logger.LogError(ex, "Error creating situation");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error creating situation");
         }
     }
 
     public async Task<(int, int)> CreateSituationDetail(int situationId, int detailId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get situationDetail
@@ -342,21 +339,21 @@ public class SituationService : ISituationService
         {
             SituationId = situationId,
             DetailId = detailId,
-            UserId = userId,
+            
             IsDeleted = false
         };
         context.Add(situationDetail);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (situationId, detailId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating situationDetail");
             throw new BadRequestException("Error while saving changes");
         }
@@ -364,7 +361,7 @@ public class SituationService : ISituationService
 
     public async Task<(int, int)> CreateSituationParameter(int situationId, int parameterId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get situationParameter
@@ -387,21 +384,21 @@ public class SituationService : ISituationService
         {
             SituationId = situationId,
             ParameterId = parameterId,
-            UserId = userId,
+            
             IsDeleted = false
         };
         context.Add(situationParameter);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (situationId, parameterId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating situationParameter");
             throw new BadRequestException("Error while saving changes");
         }
@@ -409,7 +406,7 @@ public class SituationService : ISituationService
 
     public async Task<(int, int)> CreateSituationQuestion(int situationId, int questionId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get situationQuestion
@@ -432,21 +429,21 @@ public class SituationService : ISituationService
         {
             SituationId = situationId,
             QuestionId = questionId,
-            UserId = userId,
+            
             IsDeleted = false
         };
         context.Add(situationQuestion);
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             return (situationId, questionId);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error creating situationQuestion");
             throw new BadRequestException("Error while saving changes");
         }
@@ -473,20 +470,20 @@ public class SituationService : ISituationService
         // delete asset situation
         context.AssetSituations.Remove(assetSituation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Asset situation with id {AssetId}, {SituationId}  deleted", assetId, situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting asset situation");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting asset situation");
         }
     }
@@ -512,20 +509,20 @@ public class SituationService : ISituationService
         // delete category situation
         context.CategorySituations.Remove(categorySituation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Category situation with id {CategoryId}, {SituationId}  deleted", categoryId, situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting category situation");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting category situation");
         }
     }
@@ -551,20 +548,20 @@ public class SituationService : ISituationService
         // delete device situation
         context.DeviceSituations.Remove(deviceSituation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Device situation with id {DeviceId}, {SituationId}  deleted", deviceId, situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting device situation");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting device situation");
         }
     }
@@ -590,20 +587,20 @@ public class SituationService : ISituationService
         // delete question
         context.Questions.Remove(question);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Question with id {QuestionId} deleted", question.QuestionId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting question");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting question");
         }
     }
@@ -629,20 +626,20 @@ public class SituationService : ISituationService
         // delete situation
         context.Situations.Remove(situation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Situation with id {SituationId} deleted", situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting situation");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting situation");
         }
     }
@@ -668,20 +665,20 @@ public class SituationService : ISituationService
         // delete situation detail
         context.SituationDetails.Remove(situationDetail);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Situation detail with id {SituationId}, {DetailId} deleted", situationId, detailId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting situation detail");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting situation detail");
         }
     }
@@ -707,20 +704,20 @@ public class SituationService : ISituationService
         // delete situation parameter
         context.SituationParameters.Remove(situationParameter);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Situation parameter with id {SituationId}, {ParameterId} deleted", situationId, parameterId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting situation parameter");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting situation parameter");
         }
     }
@@ -746,20 +743,20 @@ public class SituationService : ISituationService
         // delete situation question
         context.SituationQuestions.Remove(situationQuestion);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Situation question with id {SituationId}, {QuestionId} deleted", situationId, questionId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting situation question");
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error deleting situation question");
         }
     }
@@ -777,7 +774,7 @@ public class SituationService : ISituationService
                 QuestionId = q.QuestionId,
                 Name = q.Name,
                 IsDeleted = q.IsDeleted,
-                UserId = q.UserId
+                UserId = q.UpdatedBy
             })
             .FirstOrDefaultAsync(c => c.QuestionId == questionId);
         if (question == null)
@@ -803,7 +800,7 @@ public class SituationService : ISituationService
                 QuestionId = q.QuestionId,
                 Name = q.Name,
                 IsDeleted = q.IsDeleted,
-                UserId = q.UserId
+                UserId = q.UpdatedBy
             })
             .ToListAsync();
         if (questions is null)
@@ -830,7 +827,7 @@ public class SituationService : ISituationService
                 Name = s.Name,
                 Description = s.Description,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId
+                UserId = s.UpdatedBy
             })
             .FirstOrDefaultAsync(c => c.SituationId == situationId);
         if (situation == null)
@@ -857,7 +854,7 @@ public class SituationService : ISituationService
                 Name = s.Name,
                 Description = s.Description,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId
+                UserId = s.UpdatedBy
             })
             .ToListAsync();
         if (situations is null)
@@ -884,14 +881,14 @@ public class SituationService : ISituationService
                 Description = s.Description,
                 SituationId = s.SituationId,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId,
+                UserId = s.UpdatedBy,
                 Assets = s.AssetSituations.Select(a => new AssetDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Asset.Name,
                     Description = a.Asset.Description,
                     IsDeleted = a.Asset.IsDeleted,
-                    UserId = a.Asset.UserId
+                    UserId = a.Asset.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (situations is null)
@@ -918,14 +915,14 @@ public class SituationService : ISituationService
                 Description = s.Description,
                 SituationId = s.SituationId,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId,
+                UserId = s.UpdatedBy,
                 Categories = s.CategorySituations.Select(c => new CategoryDto
                 {
                     CategoryId = c.CategoryId,
                     Name = c.Category.Name,
                     Description = c.Category.Description,
                     IsDeleted = c.Category.IsDeleted,
-                    UserId = c.Category.UserId
+                    UserId = c.Category.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (situations is null)
@@ -952,12 +949,12 @@ public class SituationService : ISituationService
                 Description = s.Description,
                 SituationId = s.SituationId,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId,
+                UserId = s.UpdatedBy,
                 Questions = s.SituationQuestions.Select(q => new QuestionDto
                 {
                     QuestionId = q.QuestionId,
                     IsDeleted = q.Question.IsDeleted,
-                    UserId = q.Question.UserId
+                    UserId = q.Question.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (situations is null)
@@ -984,20 +981,20 @@ public class SituationService : ISituationService
                 Description = s.Description,
                 SituationId = s.SituationId,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId,
+                UserId = s.UpdatedBy,
                 Assets = s.AssetSituations.Select(a => new AssetWithDetailsDisplayDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Asset.Name,
                     Description = a.Asset.Description,
                     IsDeleted = a.Asset.IsDeleted,
-                    UserId = a.Asset.UserId,
+                    UserId = a.Asset.UpdatedBy,
                     Details = a.Asset.AssetDetails.Select(d => new AssetDetailDisplayDto
                     {
                         Name = d.Detail.Name,
                         Description = d.Detail.Description,
                         IsDeleted = d.Detail.IsDeleted,
-                        UserId = d.Detail.UserId
+                        UserId = d.Detail.UpdatedBy
                     }).ToList()
                 }).ToList()
             }).ToListAsync();
@@ -1014,7 +1011,7 @@ public class SituationService : ISituationService
 
     public async Task MarkDeleteAssetSituation(int assetId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1030,29 +1027,28 @@ public class SituationService : ISituationService
             _logger.LogWarning("AssetSituation already marked as deleted");
             throw new BadRequestException("AssetSituation already marked as deleted");
         }
-        assetSituation.UserId = userId;
         assetSituation.IsDeleted = true;
         context.Update(assetSituation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("AssetSituation with id {AssetId}, {SituationId} marked as deleted", assetId, situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking assetSituation with id {AssetId}, {SituationId} as deleted", assetId, situationId);
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking assetSituation with id {assetId}, {situationId} as deleted");
         }
     }
 
     public async Task MarkDeleteCategorySituation(int categoryId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1068,29 +1064,28 @@ public class SituationService : ISituationService
             _logger.LogWarning("CategorySituation already marked as deleted");
             throw new BadRequestException("CategorySituation already marked as deleted");
         }
-        categorySituation.UserId = userId;
         categorySituation.IsDeleted = true;
         context.Update(categorySituation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("CategorySituation with id {CategoryId}, {SituationId} marked as deleted", categoryId, situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking categorySituation with id {CategoryId}, {SituationId} as deleted", categoryId, situationId);
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking categorySituation with id {categoryId}, {situationId} as deleted");
         }
     }
 
     public async Task MarkDeleteDeviceSituation(int deviceId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1106,29 +1101,28 @@ public class SituationService : ISituationService
             _logger.LogWarning("DeviceSituation already marked as deleted");
             throw new BadRequestException("DeviceSituation already marked as deleted");
         }
-        deviceSituation.UserId = userId;
         deviceSituation.IsDeleted = true;
         context.Update(deviceSituation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("DeviceSituation with id {DeviceId}, {SituationId} marked as deleted", deviceId, situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking deviceSituation with id {DeviceId}, {SituationId} as deleted", deviceId, situationId);
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking deviceSituation with id {deviceId}, {situationId} as deleted");
         }
     }
 
     public async Task MarkDeleteQuestion(int questionId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1157,15 +1151,14 @@ public class SituationService : ISituationService
 
         // mark question as deleted
         question.IsDeleted = true;
-        question.UserId = userId;
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Question with id {QuestionId} marked as deleted", questionId);
         }
@@ -1173,14 +1166,14 @@ public class SituationService : ISituationService
         {
             _logger.LogError(ex, "Error marking question with id {QuestionId} as deleted", questionId);
             // rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking question with id {questionId} as deleted");
         }
     }
 
     public async Task MarkDeleteSituation(int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1243,23 +1236,22 @@ public class SituationService : ISituationService
         }
         // mark delete situation
         situation.IsDeleted = true;
-        situation.UserId = userId;
         context.Situations.Update(situation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("Situation with id {SituationId} is marked as deleted", situationId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while marking as deleted situation with id {SituationId}", situationId);
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
 
             throw new BadRequestException($"Error while marking as deleted situation with id {situationId}");
         }
@@ -1267,7 +1259,7 @@ public class SituationService : ISituationService
 
     public async Task MarkDeleteSituationDetail(int situationId, int detailId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1284,29 +1276,28 @@ public class SituationService : ISituationService
             throw new BadRequestException("SituationDetail already marked as deleted");
         }
 
-        situationDetail.UserId = userId;
         situationDetail.IsDeleted = true;
         context.Update(situationDetail);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("SituationDetail with id {SituationId}, {DetailId} marked as deleted", situationId, detailId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking situationDetail with id {SituationId}, {DetailId} as deleted", situationId, detailId);
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking situationDetail with id {situationId}, {detailId} as deleted");
         }
     }
 
     public async Task MarkDeleteSituationParameter(int situationId, int parameterId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1322,29 +1313,28 @@ public class SituationService : ISituationService
             _logger.LogWarning("SituationParameter already marked as deleted");
             throw new BadRequestException("SituationParameter already marked as deleted");
         }
-        situationParameter.UserId = userId;
         situationParameter.IsDeleted = true;
         context.Update(situationParameter);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("SituationParameter with id {SituationId}, {ParameterId} marked as deleted", situationId, parameterId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking situationParameter with id {SituationId}, {ParameterId} as deleted", situationId, parameterId);
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking situationParameter with id {situationId}, {parameterId} as deleted");
         }
     }
 
     public async Task MarkDeleteSituationQuestion(int situationId, int questionId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1360,29 +1350,28 @@ public class SituationService : ISituationService
             _logger.LogWarning("SituationQuestion already marked as deleted");
             throw new BadRequestException("SituationQuestion already marked as deleted");
         }
-        situationQuestion.UserId = userId;
         situationQuestion.IsDeleted = true;
         context.Update(situationQuestion);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
             _logger.LogInformation("SituationQuestion with id {SituationId}, {QuestionId} marked as deleted", situationId, questionId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking situationQuestion with id {SituationId}, {QuestionId} as deleted", situationId, questionId);
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException($"Error marking situationQuestion with id {situationId}, {questionId} as deleted");
         }
     }
 
     public async Task UpdateAssetSituation(int assetId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get assetSituation
@@ -1406,18 +1395,17 @@ public class SituationService : ISituationService
             _logger.LogWarning("Situation not found");
             throw new NotFoundException("Situation not found");
         }
-        assetSituation.UserId = userId;
         assetSituation.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating assetSituation");
             throw new BadRequestException("Error while saving changes");
         }
@@ -1425,7 +1413,7 @@ public class SituationService : ISituationService
 
     public async Task UpdateCategorySituation(int categoryId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get categorySituation
@@ -1449,18 +1437,17 @@ public class SituationService : ISituationService
             _logger.LogWarning("Situation not found");
             throw new NotFoundException("Situation not found");
         }
-        categorySituation.UserId = userId;
         categorySituation.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating categorySituation");
             throw new BadRequestException("Error while saving changes");
         }
@@ -1468,7 +1455,7 @@ public class SituationService : ISituationService
 
     public async Task UpdateDeviceSituation(int deviceId, int situationId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get deviceSituation
@@ -1492,18 +1479,17 @@ public class SituationService : ISituationService
             _logger.LogWarning("Situation not found");
             throw new NotFoundException("Situation not found");
         }
-        deviceSituation.UserId = userId;
         deviceSituation.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating deviceSituation");
             throw new BadRequestException("Error while saving changes");
         }
@@ -1511,7 +1497,7 @@ public class SituationService : ISituationService
 
     public async Task UpdateQuestion(int questionId, QuestionUpdateDto questionUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1532,18 +1518,17 @@ public class SituationService : ISituationService
 
         question.Name = questionUpdateDto.Name;
         // assign userId to update
-        question.UserId = userId;
         question.IsDeleted = false;
         // update question
         context.Update(question);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Question updated");
         }
@@ -1551,14 +1536,14 @@ public class SituationService : ISituationService
         {
             _logger.LogError(e, "Error updating question");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating question");
         }
     }
 
     public async Task UpdateSituation(int situationId, SituationUpdateDto situationUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1579,18 +1564,17 @@ public class SituationService : ISituationService
 
         situation.Name = situationUpdateDto.Name;
         // assign userId to update
-        situation.UserId = userId;
         situation.IsDeleted = false;
         // update situation
         context.Update(situation);
         // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
             // await commit transaction
-            await transaction.CommitAsync();
+            
             // return success
             _logger.LogInformation("Situation updated");
         }
@@ -1598,14 +1582,14 @@ public class SituationService : ISituationService
         {
             _logger.LogError(e, "Error updating situation");
             // await rollback transaction
-            await transaction.RollbackAsync();
+            
             throw new BadRequestException("Error updating situation");
         }
     }
 
     public async Task UpdateSituationDetail(int situationId, int detailId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get situationDetail
@@ -1629,18 +1613,17 @@ public class SituationService : ISituationService
             _logger.LogWarning("Detail not found");
             throw new NotFoundException("Detail not found");
         }
-        situationDetail.UserId = userId;
         situationDetail.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating situationDetail");
             throw new BadRequestException("Error while saving changes");
         }
@@ -1648,7 +1631,7 @@ public class SituationService : ISituationService
 
     public async Task UpdateSituationParameter(int situationId, int parameterId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get situationParameter
@@ -1672,18 +1655,17 @@ public class SituationService : ISituationService
             _logger.LogWarning("Parameter not found");
             throw new NotFoundException("Parameter not found");
         }
-        situationParameter.UserId = userId;
         situationParameter.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating situationParameter");
             throw new BadRequestException("Error while saving changes");
         }
@@ -1691,7 +1673,7 @@ public class SituationService : ISituationService
 
     public async Task UpdateSituationQuestion(int situationId, int questionId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
         // get situationQuestion
@@ -1715,18 +1697,17 @@ public class SituationService : ISituationService
             _logger.LogWarning("Question not found");
             throw new NotFoundException("Question not found");
         }
-        situationQuestion.UserId = userId;
         situationQuestion.IsDeleted = false;
         // save changes
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
         try
         {
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            
             _logger.LogError(ex, "Error updating situationQuestion");
             throw new BadRequestException("Error while saving changes");
         }

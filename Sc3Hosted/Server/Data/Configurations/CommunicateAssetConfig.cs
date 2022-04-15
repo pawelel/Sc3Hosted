@@ -6,11 +6,10 @@ public class CommunicateAssetConfig : IEntityTypeConfiguration<CommunicateAsset>
 {
     public void Configure(EntityTypeBuilder<CommunicateAsset> builder)
     {
-        builder.ToTable("CommunicateAssets", x => x.IsTemporal());
         builder.HasKey(x => new { x.CommunicateId, x.AssetId });
         builder.Property(x => x.AssetId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
-        builder.HasOne(x => x.Asset).WithMany(x => x.CommunicateAssets).HasForeignKey(x => x.AssetId).OnDelete(DeleteBehavior.ClientCascade);
-        builder.HasOne(x => x.Communicate).WithMany(x => x.CommunicateAssets).HasForeignKey(x => x.CommunicateId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Asset).WithMany(x => x.CommunicateAssets).HasForeignKey(x => x.AssetId);
+        builder.HasOne(x => x.Communicate).WithMany(x => x.CommunicateAssets).HasForeignKey(x => x.CommunicateId);
     }
 }

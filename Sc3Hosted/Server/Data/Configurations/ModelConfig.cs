@@ -6,15 +6,11 @@ public class ModelConfig : IEntityTypeConfiguration<Model>
 {
     public void Configure(EntityTypeBuilder<Model> builder)
     {
-        builder.ToTable("Models", x => x.IsTemporal());
         builder.HasKey(x => x.ModelId);
         builder.Property(x => x.ModelId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(200);
         builder.Property(x => x.DeviceId).IsRequired();
-        builder.HasOne(x=>x.Device).WithMany(x=>x.Models).HasForeignKey(x=>x.DeviceId).OnDelete(DeleteBehavior.ClientCascade);
-        builder.HasMany(x => x.ModelParameters).WithOne(x => x.Model).HasForeignKey(x => x.ModelId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(x => x.Assets).WithOne(x => x.Model).HasForeignKey(x => x.ModelId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(x=>x.CommunicateModels).WithOne(x=>x.Model).HasForeignKey(x=>x.ModelId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(x=>x.Device).WithMany(x=>x.Models).HasForeignKey(x=>x.DeviceId);
     }
 }

@@ -8,19 +8,25 @@ using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Extensions;
 using Sc3Hosted.Server.Middleware;
 using Sc3Hosted.Shared.Helpers;
+using Serilog;
 var builder = WebApplication.CreateBuilder(args);
-
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var jwtIssuer = builder.Configuration["JwtIssuer"];
 var jwtAudience = builder.Configuration["JwtAudience"];
 var jwtSecurityKey = builder.Configuration["JwtSecurityKey"];
 
-builder.Services.AddDbContextFactory<Sc3HostedDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<Sc3HostedDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddSwaggerGen();
 builder.Services.ServiceWrapper();
 

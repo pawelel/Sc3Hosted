@@ -12,20 +12,14 @@ public class AssetsController : ControllerBase
         _assetService = assetService;
     }
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] AssetCreateDto assetCreateDto)
+    public async Task<IActionResult> CreateAsset([FromBody] AssetCreateDto assetCreateDto)
     {
         var newAssetId = await _assetService.CreateAsset(assetCreateDto);
         return Created($"/api/assets/{newAssetId}", null);
     }
-    [HttpPut("{assetId:int}")]
-    public async Task<IActionResult> Update(int assetId, AssetUpdateDto assetUpdateDto)
-    {
-        await _assetService.UpdateAsset(assetId, assetUpdateDto);
-        return NoContent();
-    }
 
     [HttpDelete("{assetId:int}")]
-    public async Task<IActionResult> Delete(int assetId)
+    public async Task<IActionResult> DeleteAsset(int assetId)
     {
         await _assetService.DeleteAsset(assetId);
         return NoContent();
@@ -78,6 +72,7 @@ public class AssetsController : ControllerBase
         await _assetService.UpdateAssetCategory(assetId, categoryId);
         return NoContent();
     }
+    [HttpPost]
     public async Task<IActionResult> CreateAssetDetail(AssetDetailDto assetDetailDto)
     {
         await _assetService.CreateAssetDetail(assetDetailDto);

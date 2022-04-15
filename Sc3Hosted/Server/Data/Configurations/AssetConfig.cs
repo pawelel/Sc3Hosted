@@ -6,18 +6,13 @@ public class AssetConfig : IEntityTypeConfiguration<Asset>
 {
     public void Configure(EntityTypeBuilder<Asset> builder)
     {
-        builder.ToTable("Assets", x => x.IsTemporal());
         builder.HasKey(x => x.AssetId);
         builder.Property(x => x.AssetId).ValueGeneratedOnAdd();
         builder.HasAlternateKey(x => x.Name);
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.CoordinateId).IsRequired();
         builder.Property(x => x.ModelId).IsRequired();
-        builder.HasOne(x=>x.Coordinate).WithMany(x=>x.Assets).HasForeignKey(x=>x.CoordinateId).OnDelete(DeleteBehavior.ClientCascade);
-        builder.HasOne(x=>x.Model).WithMany(x=>x.Assets).HasForeignKey(x=>x.ModelId).OnDelete(DeleteBehavior.ClientCascade);
-        builder.HasMany(x=>x.AssetCategories).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(x=>x.AssetDetails).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(x=>x.AssetSituations).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(x=>x.CommunicateAssets).WithOne(x=>x.Asset).HasForeignKey(x=>x.AssetId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(x => x.Model).WithMany(x => x.Assets).HasForeignKey(x => x.ModelId);
+        builder.HasOne(x => x.Coordinate).WithMany(x => x.Assets).HasForeignKey(x => x.CoordinateId);
     }
 }

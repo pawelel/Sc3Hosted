@@ -6,12 +6,11 @@ public class ModelParameterConfig : IEntityTypeConfiguration<ModelParameter>
 {
     public void Configure(EntityTypeBuilder<ModelParameter> builder)
     {
-        builder.ToTable("ModelParameters", x => x.IsTemporal());
         builder.HasKey(x => new { x.ModelId, x.ParameterId });
         builder.Property(x => x.ModelId).IsRequired();
         builder.Property(x => x.ParameterId).IsRequired();
         builder.Property(x => x.Value).HasMaxLength(50);
-        builder.HasOne(x => x.Model).WithMany(x => x.ModelParameters).HasForeignKey(x => x.ModelId).OnDelete(DeleteBehavior.ClientCascade);
-        builder.HasOne(x => x.Parameter).WithMany(x => x.ModelParameters).HasForeignKey(x => x.ParameterId).OnDelete(DeleteBehavior.ClientCascade);
+        builder.HasOne(x => x.Model).WithMany(x => x.ModelParameters).HasForeignKey(x => x.ModelId);
+        builder.HasOne(x => x.Parameter).WithMany(x => x.ModelParameters).HasForeignKey(x => x.ParameterId);
     }
 }

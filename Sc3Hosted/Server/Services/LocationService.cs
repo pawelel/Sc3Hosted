@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 using Sc3Hosted.Server.Data;
 using Sc3Hosted.Server.Entities;
 using Sc3Hosted.Server.Exceptions;
 using Sc3Hosted.Shared.Dtos;
 
 namespace Sc3Hosted.Server.Services;
-
 public interface ILocationService
 {
     Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto);
@@ -68,72 +66,67 @@ public interface ILocationService
 
 public class LocationService : ILocationService
 {
-    private readonly IDbContextFactory<Sc3HostedDbContext> _contextFactory;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<LocationService> _logger;
-    private readonly IUserContextService _userContextService;
 
-    public LocationService(IDbContextFactory<Sc3HostedDbContext> contextFactory, ILogger<LocationService> logger, IUserContextService userContextService)
+    public LocationService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<LocationService> logger)
     {
         _contextFactory = contextFactory;
         _logger = logger;
-        _userContextService = userContextService;
+       
     }
 
     public async Task<int> CreateArea(int plantId, AreaCreateDto areaCreateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get plant
-        var plant = await context.Plants.FirstOrDefaultAsync(p => p.PlantId == plantId);
+        var plant = await context.Plants.Include(a=>a.Areas).FirstOrDefaultAsync(p => p.PlantId == plantId);
         if (plant is null || plant.IsDeleted)
         {
             throw new NotFoundException("Plant not found");
         }
-
-        // validate area name
-        var duplicate = await context.Areas
-            .AnyAsync(a => a.PlantId == plantId && a.Name.ToLower().Trim() == areaCreateDto.Name.ToLower().Trim());
-        if (duplicate)
+        if (plant.Areas.Any(a => a.Name.ToLower().Trim() == areaCreateDto.Name.ToLower().Trim()))
         {
             _logger.LogWarning("Area name already exists");
-            throw new BadRequestException("Area name already exists");
+            throw new BadRequestException("Area with this name already exists");
         }
 
         var area = new Area
         {
-            UserId = userId,
+            
             Name = areaCreateDto.Name,
             Description = areaCreateDto.Description,
-            PlantId = plantId,
+            PlantId = plant.PlantId,
             IsDeleted = false
         };
         // create area
         context.Areas.Add(area);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Area with id {AreaId} created", area.AreaId);
             return area.AreaId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating area");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating area");
         }
     }
 
     public async Task<int> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -154,7 +147,7 @@ public class LocationService : ILocationService
 
         var coordinate = new Coordinate
         {
-            UserId = userId,
+            
             Name = coordinateCreateDto.Name,
             Description = coordinateCreateDto.Description,
             SpaceId = spaceId,
@@ -162,29 +155,29 @@ public class LocationService : ILocationService
         };
         // create coordinate
         context.Coordinates.Add(coordinate);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Coordinate with id {CoordinateId} created", coordinate.CoordinateId);
             return coordinate.CoordinateId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating coordinate");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating coordinate");
         }
     }
 
     public async Task<int> CreatePlant(PlantCreateDto plantCreateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -199,36 +192,36 @@ public class LocationService : ILocationService
 
         var plant = new Plant
         {
-            UserId = userId,
+            
             Name = plantCreateDto.Name,
             Description = plantCreateDto.Description,
             IsDeleted = false
         };
         // create plant
         context.Plants.Add(plant);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Plant with id {PlantId} created", plant.PlantId);
             return plant.PlantId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating plant");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating plant");
         }
     }
 
     public async Task<int> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -241,8 +234,8 @@ public class LocationService : ILocationService
         }
         // validate space name
         var duplicate = await context.Spaces
-            .AnyAsync(s => s.AreaId == areaId && s.Name.ToLower().Trim() == spaceCreateDto.Name.ToLower().Trim());
-        if (duplicate)
+            .Where(s => area.AreaId == areaId && Equals(s.Name.ToLower().Trim(), spaceCreateDto.Name.ToLower().Trim())).FirstOrDefaultAsync();
+        if (duplicate!=null)
         {
             _logger.LogWarning("Space name already exists");
             throw new BadRequestException("Space name already exists");
@@ -250,30 +243,31 @@ public class LocationService : ILocationService
 
         var space = new Space
         {
-            UserId = userId,
+            
             Name = spaceCreateDto.Name,
             Description = spaceCreateDto.Description,
             AreaId = areaId,
+            SpaceType = spaceCreateDto.SpaceType,
             IsDeleted = false
         };
         // create space
         context.Spaces.Add(space);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Space with id {SpaceId} created", space.SpaceId);
             return space.SpaceId;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating space");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error creating space");
         }
     }
@@ -297,22 +291,22 @@ public class LocationService : ILocationService
             throw new BadRequestException("Area not marked as deleted");
         }
         context.Areas.Remove(area);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Area with id {AreaId} deleted", area.AreaId);
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting area");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting area");
         }
     }
@@ -336,22 +330,22 @@ public class LocationService : ILocationService
             throw new BadRequestException("Coordinate not marked as deleted");
         }
         context.Coordinates.Remove(coordinate);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Coordinate with id {CoordinateId} deleted", coordinate.CoordinateId);
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting coordinate");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting coordinate");
         }
     }
@@ -375,22 +369,22 @@ public class LocationService : ILocationService
             throw new BadRequestException("Plant not marked as deleted");
         }
         context.Plants.Remove(plant);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Plant with id {PlantId} deleted", plant.PlantId);
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting plant");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting plant");
         }
     }
@@ -414,22 +408,22 @@ public class LocationService : ILocationService
             throw new BadRequestException("Space not marked as deleted");
         }
         context.Spaces.Remove(space);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             _logger.LogInformation("Space with id {SpaceId} deleted", space.SpaceId);
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting space");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error deleting space");
         }
     }
@@ -448,7 +442,7 @@ public class LocationService : ILocationService
                 Name = a.Name,
                 Description = a.Description,
                 IsDeleted = a.IsDeleted,
-                UserId = a.UserId
+                UserId = a.UpdatedBy
             }).FirstOrDefaultAsync(a => a.AreaId == areaId);
         if (area == null)
         {
@@ -474,7 +468,7 @@ public class LocationService : ILocationService
                 Name = a.Name,
                 Description = a.Description,
                 IsDeleted = a.IsDeleted,
-                UserId = a.UserId
+                UserId = a.UpdatedBy
             }).ToListAsync();
         if (areas is null)
         {
@@ -501,14 +495,14 @@ public class LocationService : ILocationService
                 Name = a.Name,
                 Description = a.Description,
                 IsDeleted = a.IsDeleted,
-                UserId = a.UserId,
+                UserId = a.UpdatedBy,
                 Spaces = a.Spaces.Select(s => new SpaceDto
                 {
                     SpaceId = s.SpaceId,
                     Name = s.Name,
                     Description = s.Description,
                     IsDeleted = s.IsDeleted,
-                    UserId = s.UserId
+                    UserId = s.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (areas is null)
@@ -535,14 +529,14 @@ public class LocationService : ILocationService
                 Name = c.Name,
                 Description = c.Description,
                 IsDeleted = c.IsDeleted,
-                UserId = c.UserId,
+                UserId = c.UpdatedBy,
                 Assets = c.Assets.Select(a => new AssetDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Name,
                     Description = a.Description,
                     IsDeleted = a.IsDeleted,
-                    UserId = a.UserId
+                    UserId = a.UpdatedBy
                 }).ToList()
             }).FirstOrDefaultAsync(c => c.CoordinateId == coordinateId);
         if (coordinate == null)
@@ -569,7 +563,7 @@ public class LocationService : ILocationService
                 Name = c.Name,
                 Description = c.Description,
                 IsDeleted = c.IsDeleted,
-                UserId = c.UserId
+                UserId = c.UpdatedBy
             }).ToListAsync();
         if (coordinates is null)
         {
@@ -595,14 +589,14 @@ public class LocationService : ILocationService
                 Name = c.Name,
                 Description = c.Description,
                 IsDeleted = c.IsDeleted,
-                UserId = c.UserId,
+                UserId = c.UpdatedBy,
                 Assets = c.Assets.Select(a => new AssetDto
                 {
                     AssetId = a.AssetId,
                     Name = a.Name,
                     Description = a.Description,
                     IsDeleted = a.IsDeleted,
-                    UserId = a.UserId
+                    UserId = a.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (coordinates is null)
@@ -629,7 +623,7 @@ public class LocationService : ILocationService
                 Name = p.Name,
                 Description = p.Description,
                 IsDeleted = p.IsDeleted,
-                UserId = p.UserId
+                UserId = p.UpdatedBy
             }).FirstOrDefaultAsync(p => p.PlantId == plantId);
         if (plant == null)
         {
@@ -655,7 +649,7 @@ public class LocationService : ILocationService
                 Name = p.Name,
                 Description = p.Description,
                 IsDeleted = p.IsDeleted,
-                UserId = p.UserId
+                UserId = p.UpdatedBy
             }).ToListAsync();
         if (plants is null)
         {
@@ -681,14 +675,14 @@ public class LocationService : ILocationService
                 Name = p.Name,
                 Description = p.Description,
                 IsDeleted = p.IsDeleted,
-                UserId = p.UserId,
+                UserId = p.UpdatedBy,
                 Areas = p.Areas.Select(a => new AreaDto
                 {
                     AreaId = a.AreaId,
                     Name = a.Name,
                     Description = a.Description,
                     IsDeleted = a.IsDeleted,
-                    UserId = a.UserId
+                    UserId = a.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (plants is null)
@@ -714,8 +708,9 @@ public class LocationService : ILocationService
                 SpaceId = s.SpaceId,
                 Name = s.Name,
                 Description = s.Description,
+                AreaId = s.AreaId,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId
+                UserId = s.UpdatedBy
             }).FirstOrDefaultAsync(s => s.SpaceId == spaceId);
         if (space == null)
         {
@@ -740,8 +735,9 @@ public class LocationService : ILocationService
                 SpaceId = s.SpaceId,
                 Name = s.Name,
                 Description = s.Description,
+                AreaId = s.AreaId,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId
+                UserId = s.UpdatedBy
             }).ToListAsync();
         if (spaces is null)
         {
@@ -766,14 +762,14 @@ public class LocationService : ILocationService
                 Name = s.Name,
                 Description = s.Description,
                 IsDeleted = s.IsDeleted,
-                UserId = s.UserId,
+                UserId = s.UpdatedBy,
                 Coordinates = s.Coordinates.Select(c => new CoordinateDto
                 {
                     CoordinateId = c.CoordinateId,
                     Name = c.Name,
                     Description = c.Description,
                     IsDeleted = c.IsDeleted,
-                    UserId = c.UserId
+                    UserId = c.UpdatedBy
                 }).ToList()
             }).ToListAsync();
         if (spaces is null)
@@ -788,7 +784,7 @@ public class LocationService : ILocationService
 
     public async Task<bool> MarkDeleteArea(int areaId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -815,17 +811,16 @@ public class LocationService : ILocationService
         }
         // mark area as deleted
         area.IsDeleted = true;
-        area.UserId = userId;
         //update area
         context.Areas.Update(area);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Area with id {AreaId} marked as deleted", area.AreaId);
             return true;
@@ -833,15 +828,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking area as deleted");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error marking area as deleted");
         }
     }
 
     public async Task<bool> MarkDeleteCoordinate(int coordinateId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -866,17 +861,16 @@ public class LocationService : ILocationService
         }
         // mark coordinate as deleted
         coordinate.IsDeleted = true;
-        coordinate.UserId = userId;
         //update coordinate
         context.Coordinates.Update(coordinate);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Coordinate with id {CoordinateId} marked as deleted", coordinate.CoordinateId);
             return true;
@@ -884,15 +878,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking coordinate as deleted");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error marking coordinate as deleted");
         }
     }
 
     public async Task<bool> MarkDeletePlant(int plantId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -917,17 +911,16 @@ public class LocationService : ILocationService
         }
         // mark plant as deleted
         plant.IsDeleted = true;
-        plant.UserId = userId;
         //update plant
         context.Plants.Update(plant);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Plant with id {PlantId} marked as deleted", plant.PlantId);
             return true;
@@ -935,15 +928,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking plant as deleted");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error marking plant as deleted");
         }
     }
 
     public async Task<bool> MarkDeleteSpace(int spaceId)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -968,17 +961,16 @@ public class LocationService : ILocationService
         }
         // mark space as deleted
         space.IsDeleted = true;
-        space.UserId = userId;
         //update space
         context.Spaces.Update(space);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Space with id {SpaceId} marked as deleted", space.SpaceId);
             return true;
@@ -986,15 +978,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error marking space as deleted");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error marking space as deleted");
         }
     }
 
     public async Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1016,17 +1008,16 @@ public class LocationService : ILocationService
         area.Name = areaUpdateDto.Name;
         area.Description = areaUpdateDto.Description;
         area.IsDeleted = false;
-        area.UserId = userId;
         // update area
         context.Areas.Update(area);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Area with id {AreaId} updated", area.AreaId);
             return true;
@@ -1034,15 +1025,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating area");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error updating area");
         }
     }
 
     public async Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1064,17 +1055,16 @@ public class LocationService : ILocationService
         coordinate.Name = coordinateUpdateDto.Name;
         coordinate.Description = coordinateUpdateDto.Description;
         coordinate.IsDeleted = false;
-        coordinate.UserId = userId;
         // update coordinate
         context.Coordinates.Update(coordinate);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Coordinate with id {CoordinateId} updated", coordinate.CoordinateId);
             return true;
@@ -1082,15 +1072,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating coordinate");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error updating coordinate");
         }
     }
 
     public async Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1113,17 +1103,16 @@ public class LocationService : ILocationService
         plant.Name = plantUpdateDto.Name;
         plant.Description = plantUpdateDto.Description;
         plant.IsDeleted = false;
-        plant.UserId = userId;
         // update plant
         context.Plants.Update(plant);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Plant with id {PlantId} updated", plant.PlantId);
             return true;
@@ -1131,15 +1120,15 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating plant");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error updating plant");
         }
     }
 
     public async Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto)
     {
-        var userId = _userContextService.UserId;
+        
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -1161,17 +1150,16 @@ public class LocationService : ILocationService
         space.Name = spaceUpdateDto.Name;
         space.Description = spaceUpdateDto.Description;
         space.IsDeleted = false;
-        space.UserId = userId;
         // update space
         context.Spaces.Update(space);
-        // await using transaction
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        
+        
         try
         {
             // save changes
             await context.SaveChangesAsync();
-            // commit transaction
-            await transaction.CommitAsync();
+            
+            
             // return success
             _logger.LogInformation("Space with id {SpaceId} updated", space.SpaceId);
             return true;
@@ -1179,8 +1167,8 @@ public class LocationService : ILocationService
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating space");
-            // rollback transaction
-            await transaction.RollbackAsync();
+            
+            
             throw new BadRequestException("Error updating space");
         }
     }
