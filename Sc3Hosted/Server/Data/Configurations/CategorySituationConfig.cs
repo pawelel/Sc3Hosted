@@ -6,10 +6,11 @@ public class CategorySituationConfig : IEntityTypeConfiguration<CategorySituatio
 {
     public void Configure(EntityTypeBuilder<CategorySituation> builder)
     {
+        builder.ToTable("CategorySituations", x => x.IsTemporal());
         builder.HasKey(x => new { x.CategoryId, x.SituationId });
         builder.Property(x => x.SituationId).IsRequired();
         builder.Property(x => x.CategoryId).IsRequired();
-        builder.HasOne(x => x.Category).WithMany(x => x.CategorySituations).HasForeignKey(x => x.CategoryId);
-        builder.HasOne(x => x.Situation).WithMany(x => x.CategorySituations).HasForeignKey(x => x.SituationId);
+        builder.HasOne(x => x.Category).WithMany(x => x.CategorySituations).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Situation).WithMany(x => x.CategorySituations).HasForeignKey(x => x.SituationId).OnDelete(DeleteBehavior.Restrict);
     }
 }

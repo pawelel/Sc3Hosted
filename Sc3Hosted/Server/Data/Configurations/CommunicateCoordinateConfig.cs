@@ -6,10 +6,11 @@ public class CommunicateCoordinateConfig : IEntityTypeConfiguration<CommunicateC
 {
     public void Configure(EntityTypeBuilder<CommunicateCoordinate> builder)
     {
+        builder.ToTable("CommunicateCoordinates", x => x.IsTemporal());
         builder.HasKey(x => new { x.CommunicateId, x.CoordinateId });
         builder.Property(x => x.CoordinateId).IsRequired();
         builder.Property(x => x.CommunicateId).IsRequired();
-        builder.HasOne(x => x.Coordinate).WithMany(x => x.CommunicateCoordinates).HasForeignKey(x => x.CoordinateId);
-        builder.HasOne(x => x.Communicate).WithMany(x => x.CommunicateCoordinates).HasForeignKey(x => x.CommunicateId);
+        builder.HasOne(x => x.Coordinate).WithMany(x => x.CommunicateCoordinates).HasForeignKey(x => x.CoordinateId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Communicate).WithMany(x => x.CommunicateCoordinates).HasForeignKey(x => x.CommunicateId).OnDelete(DeleteBehavior.Restrict);
     }
 }

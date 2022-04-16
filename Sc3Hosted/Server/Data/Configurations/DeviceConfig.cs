@@ -6,6 +6,7 @@ public class DeviceConfig : IEntityTypeConfiguration<Device>
 {
     public void Configure(EntityTypeBuilder<Device> builder)
     {
+        builder.ToTable("Devices", x => x.IsTemporal());
         builder.HasKey(x => x.DeviceId);
         builder.Property(x => x.DeviceId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();

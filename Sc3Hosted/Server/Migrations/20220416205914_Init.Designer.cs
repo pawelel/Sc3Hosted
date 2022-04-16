@@ -12,7 +12,7 @@ using Sc3Hosted.Server.Data;
 namespace Sc3Hosted.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220415210427_Init")]
+    [Migration("20220416205914_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,22 +53,22 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "01b5796e-ddc0-467b-8d3b-01d7576fd5d9",
-                            ConcurrencyStamp = "29d15fd6-a565-4e0d-be37-aec4979bfecb",
+                            Id = "01bdcd45-43ea-4882-8dd8-1d8e00a227a3",
+                            ConcurrencyStamp = "3ec640f0-aa76-4327-8118-74fba0874297",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "e3edcfb8-edbe-4aec-a7fc-094ca5a4ca6a",
-                            ConcurrencyStamp = "3e3161fc-da9c-4870-a43b-68a7fd55bb5c",
+                            Id = "b2a35a2e-5af4-43c5-ba98-f1460b1c398f",
+                            ConcurrencyStamp = "520b7bb1-06c1-4183-9835-150b8c2973ac",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ed8e3f8e-f565-4de8-84d3-cb55fe056bdf",
-                            ConcurrencyStamp = "04421003-6c01-4767-ac0a-1cfc4976ace9",
+                            Id = "334cb813-5058-43d3-82d2-895070e290c1",
+                            ConcurrencyStamp = "7adcced3-201b-45a7-81c6-89c667cc7132",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         });
@@ -291,6 +291,16 @@ namespace Sc3Hosted.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<int>("PlantId")
                         .HasColumnType("int");
 
@@ -305,7 +315,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("Areas");
+                    b.ToTable("Areas", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Asset", b =>
@@ -340,6 +361,16 @@ namespace Sc3Hosted.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<string>("Process")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -362,7 +393,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("ModelId");
 
-                    b.ToTable("Assets");
+                    b.ToTable("Assets", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.AssetCategory", b =>
@@ -383,6 +425,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -394,7 +446,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("AssetCategories");
+                    b.ToTable("AssetCategories", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.AssetDetail", b =>
@@ -415,6 +478,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -430,7 +503,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("DetailId");
 
-                    b.ToTable("AssetDetails");
+                    b.ToTable("AssetDetails", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.AssetSituation", b =>
@@ -451,6 +535,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -463,6 +557,17 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasIndex("SituationId");
 
                     b.ToTable("AssetSituations", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Category", b =>
@@ -491,6 +596,16 @@ namespace Sc3Hosted.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -500,7 +615,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("CategoryId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CategorySituation", b =>
@@ -521,6 +647,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -532,7 +668,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("SituationId");
 
-                    b.ToTable("CategorySituations");
+                    b.ToTable("CategorySituations", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Communicate", b =>
@@ -567,6 +714,16 @@ namespace Sc3Hosted.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<int>("Scope")
                         .HasColumnType("int");
 
@@ -582,7 +739,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("CommunicateId");
 
-                    b.ToTable("Communicates");
+                    b.ToTable("Communicates", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateArea", b =>
@@ -603,6 +771,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -614,7 +792,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("AreaId");
 
-                    b.ToTable("CommunicateAreas");
+                    b.ToTable("CommunicateAreas", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateAsset", b =>
@@ -635,6 +824,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -646,7 +845,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("AssetId");
 
-                    b.ToTable("CommunicateAssets");
+                    b.ToTable("CommunicateAssets", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateCategory", b =>
@@ -667,6 +877,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -678,7 +898,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CommunicateCategories");
+                    b.ToTable("CommunicateCategories", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateCoordinate", b =>
@@ -699,6 +930,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -710,7 +951,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("CoordinateId");
 
-                    b.ToTable("CommunicateCoordinates");
+                    b.ToTable("CommunicateCoordinates", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateDevice", b =>
@@ -731,6 +983,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -742,7 +1004,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("CommunicateDevices");
+                    b.ToTable("CommunicateDevices", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateModel", b =>
@@ -763,6 +1036,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -774,7 +1057,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("ModelId");
 
-                    b.ToTable("CommunicateModels");
+                    b.ToTable("CommunicateModels", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.CommunicateSpace", b =>
@@ -795,6 +1089,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -806,7 +1110,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("SpaceId");
 
-                    b.ToTable("CommunicateSpaces");
+                    b.ToTable("CommunicateSpaces", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Coordinate", b =>
@@ -837,6 +1152,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<int>("SpaceId")
                         .HasColumnType("int");
 
@@ -851,7 +1176,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("SpaceId");
 
-                    b.ToTable("Coordinates");
+                    b.ToTable("Coordinates", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Detail", b =>
@@ -882,6 +1218,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -891,7 +1237,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("DetailId");
 
-                    b.ToTable("Details");
+                    b.ToTable("Details", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Device", b =>
@@ -922,6 +1279,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -931,7 +1298,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("DeviceId");
 
-                    b.ToTable("Devices");
+                    b.ToTable("Devices", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.DeviceSituation", b =>
@@ -952,6 +1330,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -963,7 +1351,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("SituationId");
 
-                    b.ToTable("DeviceSituations");
+                    b.ToTable("DeviceSituations", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Model", b =>
@@ -997,6 +1396,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1008,7 +1417,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("Models");
+                    b.ToTable("Models", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.ModelParameter", b =>
@@ -1029,6 +1449,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1045,7 +1475,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("ParameterId");
 
-                    b.ToTable("ModelParameters");
+                    b.ToTable("ModelParameters", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Parameter", b =>
@@ -1076,6 +1517,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1085,7 +1536,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("ParameterId");
 
-                    b.ToTable("Parameters");
+                    b.ToTable("Parameters", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Plant", b =>
@@ -1149,6 +1611,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1158,7 +1630,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("QuestionId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Questions", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Situation", b =>
@@ -1189,6 +1672,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1198,7 +1691,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasKey("SituationId");
 
-                    b.ToTable("Situations");
+                    b.ToTable("Situations", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.SituationDetail", b =>
@@ -1219,6 +1723,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1230,7 +1744,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("DetailId");
 
-                    b.ToTable("SituationDetails");
+                    b.ToTable("SituationDetails", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.SituationParameter", b =>
@@ -1251,6 +1776,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1262,7 +1797,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("ParameterId");
 
-                    b.ToTable("SituationParameters");
+                    b.ToTable("SituationParameters", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.SituationQuestion", b =>
@@ -1283,6 +1829,16 @@ namespace Sc3Hosted.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1294,7 +1850,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("SituationQuestions");
+                    b.ToTable("SituationQuestions", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Sc3Hosted.Server.Entities.Space", b =>
@@ -1328,6 +1895,16 @@ namespace Sc3Hosted.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.Property<int>("SpaceType")
                         .HasColumnType("int");
 
@@ -1342,7 +1919,18 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.HasIndex("AreaId");
 
-                    b.ToTable("Spaces");
+                    b.ToTable("Spaces", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                        {
+                            ttb
+                                .HasPeriodStart("PeriodStart")
+                                .HasColumnName("PeriodStart");
+                            ttb
+                                .HasPeriodEnd("PeriodEnd")
+                                .HasColumnName("PeriodEnd");
+                        }
+                    ));
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1401,7 +1989,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Plant", "Plant")
                         .WithMany("Areas")
                         .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Plant");
@@ -1412,13 +2000,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Coordinate", "Coordinate")
                         .WithMany("Assets")
                         .HasForeignKey("CoordinateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Model", "Model")
                         .WithMany("Assets")
                         .HasForeignKey("ModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Coordinate");
@@ -1431,13 +2019,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("AssetCategories")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Category", "Category")
                         .WithMany("AssetCategories")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Asset");
@@ -1450,13 +2038,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("AssetDetails")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Detail", "Detail")
                         .WithMany("AssetDetails")
                         .HasForeignKey("DetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Asset");
@@ -1469,13 +2057,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("AssetSituations")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("AssetSituations")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Asset");
@@ -1488,13 +2076,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Category", "Category")
                         .WithMany("CategorySituations")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("CategorySituations")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1507,13 +2095,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Area", "Area")
                         .WithMany("CommunicateAreas")
                         .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateAreas")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Area");
@@ -1526,13 +2114,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Asset", "Asset")
                         .WithMany("CommunicateAssets")
                         .HasForeignKey("AssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateAssets")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Asset");
@@ -1545,13 +2133,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Category", "Category")
                         .WithMany("CommunicateCategories")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateCategories")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1564,13 +2152,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateCoordinates")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Coordinate", "Coordinate")
                         .WithMany("CommunicateCoordinates")
                         .HasForeignKey("CoordinateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Communicate");
@@ -1583,13 +2171,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateDevices")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Device", "Device")
                         .WithMany("CommunicateDevices")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Communicate");
@@ -1602,13 +2190,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateModels")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Model", "Model")
                         .WithMany("CommunicateModels")
                         .HasForeignKey("ModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Communicate");
@@ -1621,13 +2209,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Communicate", "Communicate")
                         .WithMany("CommunicateSpaces")
                         .HasForeignKey("CommunicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Space", "Space")
                         .WithMany("CommunicateSpaces")
                         .HasForeignKey("SpaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Communicate");
@@ -1640,7 +2228,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Space", "Space")
                         .WithMany("Coordinates")
                         .HasForeignKey("SpaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Space");
@@ -1651,13 +2239,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Device", "Device")
                         .WithMany("DeviceSituations")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("DeviceSituations")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Device");
@@ -1670,7 +2258,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Device", "Device")
                         .WithMany("Models")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Device");
@@ -1681,13 +2269,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Model", "Model")
                         .WithMany("ModelParameters")
                         .HasForeignKey("ModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Parameter", "Parameter")
                         .WithMany("ModelParameters")
                         .HasForeignKey("ParameterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Model");
@@ -1700,13 +2288,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Detail", "Detail")
                         .WithMany("SituationDetails")
                         .HasForeignKey("DetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("SituationDetails")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Detail");
@@ -1719,13 +2307,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Parameter", "Parameter")
                         .WithMany("SituationParameters")
                         .HasForeignKey("ParameterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("SituationParameters")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Parameter");
@@ -1738,13 +2326,13 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Question", "Question")
                         .WithMany("SituationQuestions")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Sc3Hosted.Server.Entities.Situation", "Situation")
                         .WithMany("SituationQuestions")
                         .HasForeignKey("SituationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Question");
@@ -1757,7 +2345,7 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasOne("Sc3Hosted.Server.Entities.Area", "Area")
                         .WithMany("Spaces")
                         .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Area");

@@ -7,45 +7,45 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blazored.LocalStorage" Version="4.2.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3"/>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all"/>
-        <PackageReference Include="MudBlazor" Version="6.0.9"/>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.4" PrivateAssets="all" />
+        <PackageReference Include="MudBlazor" Version="6.0.9" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Shared\Sc3Hosted.Shared.csproj"/>
+        <ProjectReference Include="..\Shared\Sc3Hosted.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap\bootstrap.min.css"/>
-        <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap\bootstrap.min.css.map"/>
+        <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap\bootstrap.min.css" />
+        <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap\bootstrap.min.css.map" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="Components\AssetComponents\AssetCard.razor"/>
-        <None Include="Components\AssetComponents\AssetForm.razor"/>
-        <None Include="Components\AssetComponents\AssetGrid.razor"/>
-        <None Include="Components\AssetComponents\AssetSearch.razor"/>
-        <None Include="Components\AssetComponents\DeviceForm.razor"/>
-        <None Include="Components\AssetComponents\DeviceGrid.razor"/>
-        <None Include="Components\AssetComponents\DevicesSearch.razor"/>
-        <None Include="Components\AssetComponents\ModelForm.razor"/>
-        <None Include="Components\CommunicateComponents\CommunicateForm.razor"/>
-        <None Include="Components\CommunicateComponents\CommunicateGrid.razor"/>
-        <None Include="Components\DocumentationComponents\AboutApp.razor"/>
-        <None Include="Components\DocumentationComponents\ChromeApp.razor"/>
-        <None Include="Components\DocumentationComponents\NetApp.razor"/>
-        <None Include="Components\DocumentationComponents\RoadMap.razor"/>
-        <None Include="Components\LocationComponents\AreaForm.razor"/>
-        <None Include="Components\LocationComponents\CoordinateForm.razor"/>
-        <None Include="Components\LocationComponents\LocationGrid.razor"/>
-        <None Include="Components\LocationComponents\LocationSearch.razor"/>
-        <None Include="Components\LocationComponents\PlantForm.razor"/>
-        <None Include="Components\LocationComponents\SpaceForm.razor"/>
-        <None Include="Components\SituationComponents\SituationForm.razor"/>
-        <None Include="Components\SituationComponents\SituationGrid.razor"/>
-        <None Include="Components\SituationComponents\SituationSearch.razor"/>
+        <None Include="Components\AssetComponents\AssetCard.razor" />
+        <None Include="Components\AssetComponents\AssetForm.razor" />
+        <None Include="Components\AssetComponents\AssetGrid.razor" />
+        <None Include="Components\AssetComponents\AssetSearch.razor" />
+        <None Include="Components\AssetComponents\DeviceForm.razor" />
+        <None Include="Components\AssetComponents\DeviceGrid.razor" />
+        <None Include="Components\AssetComponents\DevicesSearch.razor" />
+        <None Include="Components\AssetComponents\ModelForm.razor" />
+        <None Include="Components\CommunicateComponents\CommunicateForm.razor" />
+        <None Include="Components\CommunicateComponents\CommunicateGrid.razor" />
+        <None Include="Components\DocumentationComponents\AboutApp.razor" />
+        <None Include="Components\DocumentationComponents\ChromeApp.razor" />
+        <None Include="Components\DocumentationComponents\NetApp.razor" />
+        <None Include="Components\DocumentationComponents\RoadMap.razor" />
+        <None Include="Components\LocationComponents\AreaForm.razor" />
+        <None Include="Components\LocationComponents\CoordinateForm.razor" />
+        <None Include="Components\LocationComponents\LocationGrid.razor" />
+        <None Include="Components\LocationComponents\LocationSearch.razor" />
+        <None Include="Components\LocationComponents\PlantForm.razor" />
+        <None Include="Components\LocationComponents\SpaceForm.razor" />
+        <None Include="Components\SituationComponents\SituationForm.razor" />
+        <None Include="Components\SituationComponents\SituationGrid.razor" />
+        <None Include="Components\SituationComponents\SituationSearch.razor" />
     </ItemGroup>
 
 </Project>

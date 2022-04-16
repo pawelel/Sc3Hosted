@@ -6,6 +6,7 @@ public class PlantConfig : IEntityTypeConfiguration<Plant>
 {
     public void Configure(EntityTypeBuilder<Plant> builder)
     {
+        builder.ToTable("Plants", x => x.IsTemporal());
         builder.HasKey(x => x.PlantId);
         builder.Property(x => x.PlantId).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
