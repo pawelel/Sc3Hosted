@@ -16,13 +16,13 @@ public interface ILocationService
 
     Task<int> CreateSpace(int areaId, SpaceCreateDto spaceCreateDto);
 
-    Task<bool> DeleteArea(int areaId);
+    Task DeleteArea(int areaId);
 
-    Task<bool> DeleteCoordinate(int coordinateId);
+    Task DeleteCoordinate(int coordinateId);
 
-    Task<bool> DeletePlant(int plantId);
+    Task DeletePlant(int plantId);
 
-    Task<bool> DeleteSpace(int spaceId);
+    Task DeleteSpace(int spaceId);
 
     Task<AreaDto> GetAreaById(int areaId);
 
@@ -48,21 +48,21 @@ public interface ILocationService
 
     Task<IEnumerable<SpaceDto>> GetSpacesWithCoordinates();
 
-    Task<bool> MarkDeleteArea(int areaId);
+    Task MarkDeleteArea(int areaId);
 
-    Task<bool> MarkDeleteCoordinate(int coordinateId);
+    Task MarkDeleteCoordinate(int coordinateId);
 
-    Task<bool> MarkDeletePlant(int plantId);
+    Task MarkDeletePlant(int plantId);
 
-    Task<bool> MarkDeleteSpace(int spaceId);
+    Task MarkDeleteSpace(int spaceId);
 
-    Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto);
+    Task UpdateArea(int areaId, AreaUpdateDto areaUpdateDto);
 
-    Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto);
+    Task UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto);
 
-    Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto);
+    Task UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto);
 
-    Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto);
+    Task UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto);
 }
 
 public class LocationService : ILocationService
@@ -272,7 +272,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> DeleteArea(int areaId)
+    public async Task DeleteArea(int areaId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -300,7 +300,7 @@ public class LocationService : ILocationService
 
 
             _logger.LogInformation("Area with id {AreaId} deleted", area.AreaId);
-            return true;
+           
         }
         catch (Exception ex)
         {
@@ -311,7 +311,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> DeleteCoordinate(int coordinateId)
+    public async Task DeleteCoordinate(int coordinateId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -339,7 +339,7 @@ public class LocationService : ILocationService
 
 
             _logger.LogInformation("Coordinate with id {CoordinateId} deleted", coordinate.CoordinateId);
-            return true;
+           
         }
         catch (Exception ex)
         {
@@ -350,7 +350,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> DeletePlant(int plantId)
+    public async Task DeletePlant(int plantId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -378,7 +378,7 @@ public class LocationService : ILocationService
 
 
             _logger.LogInformation("Plant with id {PlantId} deleted", plant.PlantId);
-            return true;
+          
         }
         catch (Exception ex)
         {
@@ -389,7 +389,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> DeleteSpace(int spaceId)
+    public async Task DeleteSpace(int spaceId)
     {
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
@@ -417,7 +417,7 @@ public class LocationService : ILocationService
 
 
             _logger.LogInformation("Space with id {SpaceId} deleted", space.SpaceId);
-            return true;
+           
         }
         catch (Exception ex)
         {
@@ -782,7 +782,7 @@ public class LocationService : ILocationService
         return spaces;
     }
 
-    public async Task<bool> MarkDeleteArea(int areaId)
+    public async Task MarkDeleteArea(int areaId)
     {
 
         // await using context
@@ -823,7 +823,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Area with id {AreaId} marked as deleted", area.AreaId);
-            return true;
+            
         }
         catch (Exception e)
         {
@@ -834,7 +834,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> MarkDeleteCoordinate(int coordinateId)
+    public async Task MarkDeleteCoordinate(int coordinateId)
     {
 
         // await using context
@@ -873,7 +873,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Coordinate with id {CoordinateId} marked as deleted", coordinate.CoordinateId);
-            return true;
+          
         }
         catch (Exception e)
         {
@@ -884,7 +884,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> MarkDeletePlant(int plantId)
+    public async Task MarkDeletePlant(int plantId)
     {
 
         // await using context
@@ -923,7 +923,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Plant with id {PlantId} marked as deleted", plant.PlantId);
-            return true;
+            
         }
         catch (Exception e)
         {
@@ -934,7 +934,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> MarkDeleteSpace(int spaceId)
+    public async Task MarkDeleteSpace(int spaceId)
     {
 
         // await using context
@@ -973,7 +973,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Space with id {SpaceId} marked as deleted", space.SpaceId);
-            return true;
+           
         }
         catch (Exception e)
         {
@@ -984,7 +984,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdateArea(int areaId, AreaUpdateDto areaUpdateDto)
+    public async Task UpdateArea(int areaId, AreaUpdateDto areaUpdateDto)
     {
 
         // await using context
@@ -1020,7 +1020,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Area with id {AreaId} updated", area.AreaId);
-            return true;
+            
         }
         catch (Exception e)
         {
@@ -1031,7 +1031,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto)
+    public async Task UpdateCoordinate(int coordinateId, CoordinateUpdateDto coordinateUpdateDto)
     {
 
         // await using context
@@ -1067,7 +1067,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Coordinate with id {CoordinateId} updated", coordinate.CoordinateId);
-            return true;
+            
         }
         catch (Exception e)
         {
@@ -1078,7 +1078,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto)
+    public async Task UpdatePlant(int plantId, PlantUpdateDto plantUpdateDto)
     {
 
         // await using context
@@ -1115,7 +1115,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Plant with id {PlantId} updated", plant.PlantId);
-            return true;
+            
         }
         catch (Exception e)
         {
@@ -1126,7 +1126,7 @@ public class LocationService : ILocationService
         }
     }
 
-    public async Task<bool> UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto)
+    public async Task UpdateSpace(int spaceId, SpaceUpdateDto spaceUpdateDto)
     {
 
         // await using context
@@ -1162,7 +1162,7 @@ public class LocationService : ILocationService
 
             // return success
             _logger.LogInformation("Space with id {SpaceId} updated", space.SpaceId);
-            return true;
+            
         }
         catch (Exception e)
         {
