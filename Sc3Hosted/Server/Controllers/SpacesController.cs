@@ -34,7 +34,7 @@ public class SpacesController : ControllerBase
     public async Task<IActionResult> DeleteSpace(int spaceId)
     {
         await _locationService.DeleteSpace(spaceId);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost]

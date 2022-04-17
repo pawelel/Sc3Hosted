@@ -148,7 +148,7 @@ public class CommunicatesController : ControllerBase
         var communicates = await _communicatesService.GetCommunicatesWithAssets();
         return Ok(communicates);
     }
-
+    [HttpPut]
     public async Task<ActionResult> MarkDeleteCommunicate(int communicateId)
     {
         await _communicatesService.MarkDeleteCommunicate(communicateId);

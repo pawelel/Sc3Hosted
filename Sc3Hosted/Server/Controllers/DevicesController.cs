@@ -75,7 +75,7 @@ public class DevicesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateDevice(DeviceCreateDto deviceCreateDto)
     {
-        await _assetService.CreateDevice(deviceCreateDto);
-        return NoContent();
+       var deviceId = await _assetService.CreateDevice(deviceCreateDto);
+        return Created($"api/devices/{deviceId}", null);
     }
 }

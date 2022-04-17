@@ -1030,7 +1030,7 @@ namespace Sc3Hosted.Server.Migrations
                 {
                     AssetId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Process = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
@@ -1053,7 +1053,6 @@ namespace Sc3Hosted.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Assets", x => x.AssetId);
-                    table.UniqueConstraint("AK_Assets_Name", x => x.Name);
                     table.ForeignKey(
                         name: "FK_Assets_Coordinates_CoordinateId",
                         column: x => x.CoordinateId,
@@ -1287,17 +1286,17 @@ namespace Sc3Hosted.Server.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "01bdcd45-43ea-4882-8dd8-1d8e00a227a3", "3ec640f0-aa76-4327-8118-74fba0874297", "User", "USER" });
+                values: new object[] { "a8f6a8f0-77b3-4de4-bfce-ba45207c37fb", "46fcf7f8-513e-44ae-a37e-5c7544295af9", "Admin", "ADMIN" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "334cb813-5058-43d3-82d2-895070e290c1", "7adcced3-201b-45a7-81c6-89c667cc7132", "Manager", "MANAGER" });
+                values: new object[] { "aaa297fc-e303-496a-a933-f98df63a8cc6", "771a08f3-31fe-4077-b90c-60aedbfcd480", "Manager", "MANAGER" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "b2a35a2e-5af4-43c5-ba98-f1460b1c398f", "520b7bb1-06c1-4183-9835-150b8c2973ac", "Admin", "ADMIN" });
+                values: new object[] { "bb28dbb9-f7cf-400c-9a90-ce0662657996", "6c70d70a-2dca-47cb-8832-ed410befca4e", "User", "USER" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Areas_PlantId",

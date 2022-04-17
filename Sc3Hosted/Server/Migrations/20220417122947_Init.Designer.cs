@@ -12,7 +12,7 @@ using Sc3Hosted.Server.Data;
 namespace Sc3Hosted.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220416205914_Init")]
+    [Migration("20220417122947_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,22 +53,22 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "01bdcd45-43ea-4882-8dd8-1d8e00a227a3",
-                            ConcurrencyStamp = "3ec640f0-aa76-4327-8118-74fba0874297",
+                            Id = "bb28dbb9-f7cf-400c-9a90-ce0662657996",
+                            ConcurrencyStamp = "6c70d70a-2dca-47cb-8832-ed410befca4e",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "b2a35a2e-5af4-43c5-ba98-f1460b1c398f",
-                            ConcurrencyStamp = "520b7bb1-06c1-4183-9835-150b8c2973ac",
+                            Id = "a8f6a8f0-77b3-4de4-bfce-ba45207c37fb",
+                            ConcurrencyStamp = "46fcf7f8-513e-44ae-a37e-5c7544295af9",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "334cb813-5058-43d3-82d2-895070e290c1",
-                            ConcurrencyStamp = "7adcced3-201b-45a7-81c6-89c667cc7132",
+                            Id = "aaa297fc-e303-496a-a933-f98df63a8cc6",
+                            ConcurrencyStamp = "771a08f3-31fe-4077-b90c-60aedbfcd480",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         });
@@ -359,7 +359,8 @@ namespace Sc3Hosted.Server.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("PeriodEnd")
                         .ValueGeneratedOnAddOrUpdate()
@@ -386,8 +387,6 @@ namespace Sc3Hosted.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AssetId");
-
-                    b.HasAlternateKey("Name");
 
                     b.HasIndex("CoordinateId");
 

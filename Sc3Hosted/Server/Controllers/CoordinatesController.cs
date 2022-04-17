@@ -34,14 +34,14 @@ public class CoordinatesController : ControllerBase
     public async Task<IActionResult> DeleteCoordinate(int coordinateId)
     {
         await _locationService.DeleteCoordinate(coordinateId);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateCoordinate(int spaceId, CoordinateCreateDto coordinateCreateDto)
     {
-        var coordinate = await _locationService.CreateCoordinate(spaceId, coordinateCreateDto);
-        return Ok(coordinate);
+        var coordinateId = await _locationService.CreateCoordinate(spaceId, coordinateCreateDto);
+        return Created($"api/coordinates/{coordinateId}", null);
     }
 
     [HttpGet]

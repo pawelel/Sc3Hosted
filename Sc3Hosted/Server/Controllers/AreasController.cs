@@ -34,7 +34,7 @@ public class AreasController : ControllerBase
     public async Task<IActionResult> DeleteArea(int areaId)
     {
         await _locationService.DeleteArea(areaId);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost]
@@ -64,4 +64,5 @@ public class AreasController : ControllerBase
         var areas = await _locationService.GetAreas();
         return Ok(areas);
     }
+
 }

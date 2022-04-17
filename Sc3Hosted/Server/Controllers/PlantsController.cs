@@ -27,7 +27,7 @@ public class PlantsController : ControllerBase
     public async Task<IActionResult> DeletePlant(int plantId)
     {
         await _locationService.DeletePlant(plantId);
-        return Ok();
+        return NoContent();
     }
 
     [HttpGet]

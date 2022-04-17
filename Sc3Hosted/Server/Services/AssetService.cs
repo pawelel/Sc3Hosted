@@ -122,6 +122,7 @@ public interface IAssetService
     Task UpdateModelParameter(ModelParameterDto modelParameterDto);
 
     Task UpdateParameter(int parameterId, ParameterUpdateDto parameterUpdateDto);
+    Task UpdateAssetName(int assetId, string name);
 }
 
 public class AssetService : IAssetService
@@ -196,7 +197,7 @@ public class AssetService : IAssetService
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         // get model
-        var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == assetCreateDto.ModelId);
+        var model = await context.Models.Include(m=>m.Assets).AsNoTracking().FirstOrDefaultAsync(m => m.ModelId == assetCreateDto.ModelId);
         if (model == null)
         {
             _logger.LogWarning("Model not found");
@@ -208,7 +209,7 @@ public class AssetService : IAssetService
             throw new BadRequestException("Model marked as deleted");
         }
         // get coordinate
-        var coordinate = await context.Coordinates.FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
+        var coordinate = await context.Coordinates.AsNoTracking().FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
         if (coordinate == null)
         {
             _logger.LogWarning("Coordinate not found");
@@ -221,7 +222,7 @@ public class AssetService : IAssetService
         }
 
         // validate asset name
-        var duplicate = await context.Assets.AnyAsync(a => a.Name.ToLower().Trim() == assetCreateDto.Name.ToLower().Trim());
+        var duplicate = model.Assets.Any(a => a.Name.ToLower().Trim() == assetCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Asset name already exists");
@@ -236,12 +237,14 @@ public class AssetService : IAssetService
             Description = assetCreateDto.Description,
             Process = assetCreateDto.Process,
             Status = assetCreateDto.Status,
-            IsDeleted = false
+            IsDeleted = false,
+            Model = new() { ModelId = assetCreateDto.ModelId },
+            Coordinate = new() { CoordinateId = assetCreateDto.CoordinateId }
         };
         // create asset
-        context.Assets.Add(asset);
+        context.Attach(asset);
         
-       
+
         try
         {
             // save changes
@@ -282,7 +285,7 @@ public class AssetService : IAssetService
             CategoryId = categoryId,
             IsDeleted = false
         };
-        context.Add(assetCategory);
+        context.Attach(assetCategory);
         // save changes
        
         try
@@ -332,7 +335,7 @@ public class AssetService : IAssetService
        
         try
         {
-            context.AssetDetails.Add(assetDetail);
+            context.AssetDetails.Attach(assetDetail);
             await context.SaveChangesAsync();
             
             return (assetDetailDto.AssetId, assetDetailDto.DetailId);
@@ -365,7 +368,7 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create category
-        context.Categories.Add(category);
+        context.Categories.Attach(category);
         
        
         try
@@ -406,7 +409,7 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create detail
-        context.Details.Add(detail);
+        context.Details.Attach(detail);
         
        
         try
@@ -447,7 +450,7 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create device
-        context.Devices.Add(device);
+        context.Devices.Attach(device);
         
        
         try
@@ -473,38 +476,34 @@ public class AssetService : IAssetService
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
 
+        // get device
+        var device = await context.Devices.Include(d=>d.Models).AsNoTracking().FirstOrDefaultAsync(d => d.DeviceId == deviceId);
+        if (device == null|| device.IsDeleted)
+        {
+            _logger.LogWarning("Device not found");
+            throw new NotFoundException("Device not found");
+        }
+        
         // validate model name
-        var duplicate = await context.Models.AnyAsync(m => m.Name.ToLower().Trim() == modelCreateDto.Name.ToLower().Trim());
+        var duplicate = device.Models.Any(m => m.Name.ToLower().Trim() == modelCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Model name already exists");
             throw new BadRequestException("Model name already exists");
         }
-        // get device
-        var device = await context.Devices.FirstOrDefaultAsync(d => d.DeviceId == deviceId);
-        if (device == null)
-        {
-            _logger.LogWarning("Device not found");
-            throw new NotFoundException("Device not found");
-        }
         // check if device is marked as deleted
-        if (device.IsDeleted)
-        {
-            _logger.LogWarning("Device is marked as deleted");
-            throw new BadRequestException("Device is marked as deleted");
-        }
 
         var model = new Model
         {
             DeviceId = deviceId,
+            Device = new() { DeviceId = deviceId },
             Name = modelCreateDto.Name,
             Description = modelCreateDto.Description,
             IsDeleted = false
         };
         // create model
-        context.Models.Add(model);
-        
-       
+        context.Attach(model);
+
         try
         {
             // save changes
@@ -555,7 +554,7 @@ public class AssetService : IAssetService
        
         try
         {
-            context.ModelParameters.Add(modelParameter);
+            context.ModelParameters.Attach(modelParameter);
             await context.SaveChangesAsync();
             
             return (modelParameter.ModelId, modelParameter.ParameterId);
@@ -588,7 +587,7 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create parameter
-        context.Parameters.Add(parameter);
+        context.Parameters.Attach(parameter);
         
        
         try
@@ -1984,54 +1983,35 @@ public class AssetService : IAssetService
         
         // await using context
         await using var context = await _contextFactory.CreateDbContextAsync();
-
+        
         // get asset with all related data
-        var asset = await context.Assets.Include(a => a.AssetCategories).Include(a => a.AssetDetails).Include(a => a.AssetSituations).Include(a => a.CommunicateAssets)
-            .FirstOrDefaultAsync(m => m.AssetId == assetId);
+        var asset = await context.Assets.FirstOrDefaultAsync(m => m.AssetId == assetId);
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
-        var modelFromDto = asset.ModelId == assetUpdateDto.ModelId ? null : await context.Models.FirstOrDefaultAsync(m => m.ModelId == assetUpdateDto.ModelId);
-
-        // if new asset model is different from old model
-        if (modelFromDto is { IsDeleted: true } && asset.ModelId != assetUpdateDto.ModelId)
-        {
-            context.RemoveRange(asset.AssetCategories);
-            context.RemoveRange(asset.AssetDetails);
-            context.RemoveRange(asset.AssetSituations);
-            context.RemoveRange(asset.CommunicateAssets);
-            asset.ModelId = assetUpdateDto.ModelId;
-        }
-
+        
         // get coordinate
         var coordinateFromDto = asset.CoordinateId == assetUpdateDto.CoordinateId
             ? null
-            : await context.Coordinates
+            : await context.Coordinates.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.CoordinateId == assetUpdateDto.CoordinateId);
 
         // if new coordinate is different from old coordinate
         if (coordinateFromDto is { IsDeleted: false } && asset.CoordinateId != assetUpdateDto.CoordinateId)
-            asset.CoordinateId = assetUpdateDto.CoordinateId;
-        // if new asset name is different from old asset name
-
-        // check if asset name from dto is already taken
-        var duplicate = await context.Assets.AnyAsync(a => a.Name.ToLower().Trim() == assetUpdateDto.Name.ToLower().Trim());
-        if (duplicate || asset.Name.ToLower().Trim() == assetUpdateDto.Name.ToLower().Trim())
         {
-            _logger.LogWarning("Asset name is already taken");
-            throw new BadRequestException("Asset name is already taken");
+            asset.CoordinateId = assetUpdateDto.CoordinateId;
+            asset.Coordinate = coordinateFromDto;
+            context.Attach(asset);
         }
-        asset.Name = assetUpdateDto.Name;
-
+          
         // assign userId to update
         asset.Description = assetUpdateDto.Description;
         asset.IsDeleted = false;
         // update asset
         context.Update(asset);
         
-       
         try
         {
             // save changes
@@ -2046,6 +2026,49 @@ public class AssetService : IAssetService
             _logger.LogError(e, "Error updating asset");
             // await rollback transaction
             
+            throw new BadRequestException("Error updating asset");
+        }
+    }
+
+    public async Task UpdateAssetName(int assetId, string name)
+    {
+
+        // await using context
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        // get asset
+        var asset = await context.Assets.FirstOrDefaultAsync(m => m.AssetId == assetId);
+        if (asset == null)
+        {
+            _logger.LogWarning("Asset not found");
+            throw new NotFoundException("Asset not found");
+        }
+
+        var allAssets = await context.Assets.AsNoTracking().ToListAsync();
+        if (allAssets.Any(a => a.Name.ToLower().Trim() == name.ToLower().Trim() && a.AssetId != assetId))
+        {
+            _logger.LogWarning("Asset name already exists");
+            throw new BadRequestException("Asset name already exists");
+        }
+        // assign userId to update
+        asset.Name = name;
+        // update asset
+        context.Update(asset);
+
+        try
+        {
+            // save changes
+            await context.SaveChangesAsync();
+            // await commit transaction
+
+         
+            _logger.LogInformation("Asset updated");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error updating asset");
+            // await rollback transaction
+
             throw new BadRequestException("Error updating asset");
         }
     }

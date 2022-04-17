@@ -83,13 +83,13 @@ public class ModelsController : ControllerBase
     public async Task<IActionResult> CreateModelParameter(ModelParameterDto modelParameterDto)
     {
         await _assetService.CreateModelParameter(modelParameterDto);
-        return NoContent();
+        return Created($"api/models/{modelParameterDto.ModelId}/parameters/{modelParameterDto.ParameterId}", null);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateModel(int deviceId, ModelCreateDto modelCreateDto)
     {
-        await _assetService.CreateModel(deviceId, modelCreateDto);
-        return NoContent();
+     var modelId =   await _assetService.CreateModel(deviceId, modelCreateDto);
+        return Created($"api/models/{modelId}", null);
     }
 }

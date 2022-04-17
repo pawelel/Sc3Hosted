@@ -48,6 +48,14 @@ public class AssetsController : ControllerBase
         await _assetService.ChangeModelOfAsset(assetId, modelId);
         return NoContent();
     }
+    
+    [HttpPut]
+    public async Task<IActionResult> UpdateAssetName(int assetId, string name)
+    {
+        await _assetService.UpdateAssetName(assetId, name);
+        return NoContent();
+    }
+    
     [HttpPost]
     public async Task<IActionResult> CreateAssetCategory(int assetId, int categoryId)
     {
