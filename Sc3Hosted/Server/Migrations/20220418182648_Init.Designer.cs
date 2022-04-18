@@ -12,14 +12,14 @@ using Sc3Hosted.Server.Data;
 namespace Sc3Hosted.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220417122947_Init")]
+    [Migration("20220418182648_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.3")
+                .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -53,22 +53,22 @@ namespace Sc3Hosted.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "bb28dbb9-f7cf-400c-9a90-ce0662657996",
-                            ConcurrencyStamp = "6c70d70a-2dca-47cb-8832-ed410befca4e",
+                            Id = "05b87865-1f01-4575-bead-38cc5ee5a0b3",
+                            ConcurrencyStamp = "b938f76f-d1f5-4520-92de-46d52111914e",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "a8f6a8f0-77b3-4de4-bfce-ba45207c37fb",
-                            ConcurrencyStamp = "46fcf7f8-513e-44ae-a37e-5c7544295af9",
+                            Id = "669960a0-94cd-490d-9cdd-4d5fb6b887b0",
+                            ConcurrencyStamp = "ee23241f-32a4-49a1-afc7-2848c3373448",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "aaa297fc-e303-496a-a933-f98df63a8cc6",
-                            ConcurrencyStamp = "771a08f3-31fe-4077-b90c-60aedbfcd480",
+                            Id = "3eac76a8-c332-418a-8c8d-ae71dcfce299",
+                            ConcurrencyStamp = "b7e98fcf-b0e1-431b-9e45-25052005c74c",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         });

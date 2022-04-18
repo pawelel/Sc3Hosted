@@ -34,7 +34,7 @@ namespace Sc3Hosted.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task CreateAsset_StateUnderTest_ExpectedBehavior()
+        public async Task CreateAsset_ProperAssetCreateDto_ReturnsCreatedResult()
         {
             // Arrange
             var assetsController = this.CreateAssetsController();

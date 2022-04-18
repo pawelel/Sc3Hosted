@@ -76,12 +76,12 @@ public interface ICommunicateService
 
 public class CommunicateService : ICommunicateService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<CommunicateService> _logger;
     
-    public CommunicateService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<CommunicateService> logger)
+    public CommunicateService(ApplicationDbContext context, ILogger<CommunicateService> logger)
     {
-        _contextFactory = contextFactory;
+        _context = context;
         _logger = logger;
     
     }
@@ -90,10 +90,10 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // validate category name
-        var duplicate = await context.Communicates.AnyAsync(c => c.Name.ToLower().Trim() == communicateCreateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Communicates.AnyAsync(c => c.Name.ToLower().Trim() == communicateCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Communicate name already exists");
@@ -108,13 +108,13 @@ public class CommunicateService : ICommunicateService
             IsDeleted = false
         };
         // create category
-        context.Communicates.Add(communicate);
+        _context.Communicates.Add(communicate);
         
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate with id {CommunicateId} created", communicate.CommunicateId);
@@ -133,18 +133,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateArea
-        var communicateArea = await context.CommunicateAreas.FindAsync(communicateId, areaId);
+        var communicateArea = await _context.CommunicateAreas.FindAsync(communicateId, areaId);
         if (communicateArea != null)
             throw new BadRequestException("CommunicateArea already exists");
-        var area = await context.Areas.FindAsync(areaId);
+        var area = await _context.Areas.FindAsync(areaId);
         if (area == null || area.IsDeleted)
         {
             _logger.LogWarning("Area not found");
             throw new NotFoundException("Area not found");
         }
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
@@ -157,12 +157,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateArea);
+        _context.Add(communicateArea);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, areaId);
         }
@@ -178,18 +178,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateAsset
-        var communicateAsset = await context.CommunicateAssets.FindAsync(communicateId, assetId);
+        var communicateAsset = await _context.CommunicateAssets.FindAsync(communicateId, assetId);
         if (communicateAsset != null)
             throw new BadRequestException("CommunicateAsset already exists");
-        var asset = await context.Assets.FindAsync(assetId);
+        var asset = await _context.Assets.FindAsync(assetId);
         if (asset == null || asset.IsDeleted)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
@@ -202,12 +202,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateAsset);
+        _context.Add(communicateAsset);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, assetId);
         }
@@ -223,18 +223,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateCategory
-        var communicateCategory = await context.CommunicateCategories.FindAsync(communicateId, categoryId);
+        var communicateCategory = await _context.CommunicateCategories.FindAsync(communicateId, categoryId);
         if (communicateCategory != null)
             throw new BadRequestException("CommunicateCategory already exists");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var category = await context.Categories.FindAsync(categoryId);
+        var category = await _context.Categories.FindAsync(categoryId);
         if (category == null || category.IsDeleted)
         {
             _logger.LogWarning("Category not found");
@@ -247,12 +247,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateCategory);
+        _context.Add(communicateCategory);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, categoryId);
         }
@@ -268,18 +268,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateCoordinate
-        var communicateCoordinate = await context.CommunicateCoordinates.FindAsync(communicateId, coordinateId);
+        var communicateCoordinate = await _context.CommunicateCoordinates.FindAsync(communicateId, coordinateId);
         if (communicateCoordinate != null)
             throw new BadRequestException("CommunicateCoordinate already exists");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var coordinate = await context.Coordinates.FindAsync(coordinateId);
+        var coordinate = await _context.Coordinates.FindAsync(coordinateId);
         if (coordinate == null || coordinate.IsDeleted)
         {
             _logger.LogWarning("Coordinate not found");
@@ -292,12 +292,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateCoordinate);
+        _context.Add(communicateCoordinate);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, coordinateId);
         }
@@ -313,18 +313,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateDevice
-        var communicateDevice = await context.CommunicateDevices.FindAsync(communicateId, deviceId);
+        var communicateDevice = await _context.CommunicateDevices.FindAsync(communicateId, deviceId);
         if (communicateDevice != null)
             throw new BadRequestException("CommunicateDevice already exists");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var device = await context.Devices.FindAsync(deviceId);
+        var device = await _context.Devices.FindAsync(deviceId);
         if (device == null || device.IsDeleted)
         {
             _logger.LogWarning("Device not found");
@@ -337,12 +337,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateDevice);
+        _context.Add(communicateDevice);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, deviceId);
         }
@@ -358,18 +358,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateModel
-        var communicateModel = await context.CommunicateModels.FindAsync(communicateId, modelId);
+        var communicateModel = await _context.CommunicateModels.FindAsync(communicateId, modelId);
         if (communicateModel != null)
             throw new BadRequestException("CommunicateModel already exists");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var model = await context.Models.FindAsync(modelId);
+        var model = await _context.Models.FindAsync(modelId);
         if (model == null || model.IsDeleted)
         {
             _logger.LogWarning("Model not found");
@@ -382,12 +382,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateModel);
+        _context.Add(communicateModel);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, modelId);
         }
@@ -403,18 +403,18 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateSpace
-        var communicateSpace = await context.CommunicateSpaces.FindAsync(communicateId, spaceId);
+        var communicateSpace = await _context.CommunicateSpaces.FindAsync(communicateId, spaceId);
         if (communicateSpace != null)
             throw new BadRequestException("CommunicateSpace already exists");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var space = await context.Spaces.FindAsync(spaceId);
+        var space = await _context.Spaces.FindAsync(spaceId);
         if (space == null || space.IsDeleted)
         {
             _logger.LogWarning("Space not found");
@@ -427,12 +427,12 @@ public class CommunicateService : ICommunicateService
             
             IsDeleted = false
         };
-        context.Add(communicateSpace);
+        _context.Add(communicateSpace);
         // save changes
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (communicateId, spaceId);
         }
@@ -447,10 +447,10 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicate(int communicateId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicate
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null)
         {
             _logger.LogWarning("Communicate not found");
@@ -463,13 +463,13 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate is not marked as deleted");
         }
         // delete communicate
-        context.Communicates.Remove(communicate);
+        _context.Communicates.Remove(communicate);
         
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate with id {CommunicateId} deleted", communicate.CommunicateId);
@@ -486,10 +486,10 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateArea(int communicateId, int areaId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicate area
-        var communicateArea = await context.CommunicateAreas.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.AreaId == areaId);
+        var communicateArea = await _context.CommunicateAreas.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.AreaId == areaId);
         if (communicateArea == null)
         {
             _logger.LogWarning("Communicate area not found");
@@ -502,13 +502,13 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate area is not marked as deleted");
         }
         // delete communicate area
-        context.CommunicateAreas.Remove(communicateArea);
+        _context.CommunicateAreas.Remove(communicateArea);
         
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate area with id {CommunicateId}, {AreaId}  deleted", communicateId, areaId);
@@ -525,10 +525,10 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateAsset(int communicateId, int assetId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicate asset
-        var communicateAsset = await context.CommunicateAssets.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.AssetId == assetId);
+        var communicateAsset = await _context.CommunicateAssets.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.AssetId == assetId);
         if (communicateAsset == null)
         {
             _logger.LogWarning("Communicate asset not found");
@@ -541,13 +541,13 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate asset is not marked as deleted");
         }
         // delete communicate asset
-        context.CommunicateAssets.Remove(communicateAsset);
+        _context.CommunicateAssets.Remove(communicateAsset);
         
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate asset with id {CommunicateId}, {AssetId}  deleted", communicateId, assetId);
@@ -564,10 +564,10 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateCategory(int communicateId, int categoryId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicate category
-        var communicateCategory = await context.CommunicateCategories.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.CategoryId == categoryId);
+        var communicateCategory = await _context.CommunicateCategories.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.CategoryId == categoryId);
         if (communicateCategory == null)
         {
             _logger.LogWarning("Communicate category not found");
@@ -580,13 +580,13 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate category is not marked as deleted");
         }
         // delete communicate category
-        context.CommunicateCategories.Remove(communicateCategory);
+        _context.CommunicateCategories.Remove(communicateCategory);
         
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate category with id {CommunicateId}, {CategoryId}  deleted", communicateId, categoryId);
@@ -603,11 +603,11 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateCoordinate(int communicateId, int coordinateId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
 
         // get communicate coordinate
-        var communicateCoordinate = await context.CommunicateCoordinates.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.CoordinateId == coordinateId);
+        var communicateCoordinate = await _context.CommunicateCoordinates.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.CoordinateId == coordinateId);
         if (communicateCoordinate == null)
         {
             _logger.LogWarning("Communicate coordinate not found");
@@ -620,12 +620,12 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate coordinate is not marked as deleted");
         }
         // delete communicate coordinate
-        context.CommunicateCoordinates.Remove(communicateCoordinate);
+        _context.CommunicateCoordinates.Remove(communicateCoordinate);
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate coordinate with id {CommunicateId}, {CoordinateId}  deleted", communicateId, coordinateId);
@@ -642,11 +642,11 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateDevice(int communicateId, int deviceId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
 
         // get communicate device
-        var communicateDevice = await context.CommunicateDevices.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.DeviceId == deviceId);
+        var communicateDevice = await _context.CommunicateDevices.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.DeviceId == deviceId);
         if (communicateDevice == null)
         {
             _logger.LogWarning("Communicate device not found");
@@ -659,12 +659,12 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate device is not marked as deleted");
         }
         // delete communicate device
-        context.CommunicateDevices.Remove(communicateDevice);
+        _context.CommunicateDevices.Remove(communicateDevice);
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate device with id {CommunicateId}, {DeviceId}  deleted", communicateId, deviceId);
@@ -681,11 +681,11 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateModel(int communicateId, int modelId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
 
         // get communicate model
-        var communicateModel = await context.CommunicateModels.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.ModelId == modelId);
+        var communicateModel = await _context.CommunicateModels.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.ModelId == modelId);
         if (communicateModel == null)
         {
             _logger.LogWarning("Communicate model not found");
@@ -698,12 +698,12 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate model is not marked as deleted");
         }
         // delete communicate model
-        context.CommunicateModels.Remove(communicateModel);
+        _context.CommunicateModels.Remove(communicateModel);
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate model with id {CommunicateId}, {ModelId}  deleted", communicateId, modelId);
@@ -720,11 +720,11 @@ public class CommunicateService : ICommunicateService
     public async Task DeleteCommunicateSpace(int communicateId, int spaceId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
 
         // get communicate space
-        var communicateSpace = await context.CommunicateSpaces.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.SpaceId == spaceId);
+        var communicateSpace = await _context.CommunicateSpaces.FirstOrDefaultAsync(c => c.CommunicateId == communicateId && c.SpaceId == spaceId);
         if (communicateSpace == null)
         {
             _logger.LogWarning("Communicate space not found");
@@ -737,12 +737,12 @@ public class CommunicateService : ICommunicateService
             throw new BadRequestException("Communicate space is not marked as deleted");
         }
         // delete communicate space
-        context.CommunicateSpaces.Remove(communicateSpace);
+        _context.CommunicateSpaces.Remove(communicateSpace);
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Communicate space with id {CommunicateId}, {SpaceId}  deleted", communicateId, spaceId);
@@ -759,10 +759,10 @@ public class CommunicateService : ICommunicateService
     public async Task<CommunicateDto> GetCommunicateById(int communicateId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicate
-        var communicate = await context.Communicates
+        var communicate = await _context.Communicates
             .AsNoTracking()
             .Select(c => new CommunicateDto
             {
@@ -787,10 +787,10 @@ public class CommunicateService : ICommunicateService
     public async Task<IEnumerable<CommunicateDto>> GetCommunicates()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicates
-        var communicates = await context.Communicates
+        var communicates = await _context.Communicates
             .AsNoTracking()
             .Select(c => new CommunicateDto
             {
@@ -815,10 +815,10 @@ public class CommunicateService : ICommunicateService
     public async Task<IEnumerable<CommunicateWithAssetsDto>> GetCommunicatesWithAssets()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get communicates
-        var communicates = await context.Communicates
+        var communicates = await _context.Communicates
             .AsNoTracking()
             .Select(c => new CommunicateWithAssetsDto
             {
@@ -850,10 +850,10 @@ public class CommunicateService : ICommunicateService
     public async Task<SituationDto> GetSituationById(int situationId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get situation
-        var situation = await context.Situations
+        var situation = await _context.Situations
             .AsNoTracking()
             .Select(s => new SituationDto
             {
@@ -878,13 +878,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicate
-            var communicate = await context.Communicates
+            var communicate = await _context.Communicates
                 .Include(c => c.CommunicateAssets)
                 .FirstOrDefaultAsync(c => c.CommunicateId == communicateId);
             // if communicate not found
@@ -910,7 +910,7 @@ public class CommunicateService : ICommunicateService
             communicate.IsDeleted = true;
             
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             // return success
@@ -929,13 +929,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateArea
-            var communicateArea = await context.CommunicateAreas.FindAsync(communicateId, areaId);
+            var communicateArea = await _context.CommunicateAreas.FindAsync(communicateId, areaId);
             if (communicateArea == null)
             {
                 _logger.LogWarning("CommunicateArea not found");
@@ -948,9 +948,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateArea.IsDeleted = true;
-            context.Update(communicateArea);
+            _context.Update(communicateArea);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateArea with id {CommunicateId}, {AreaId} marked as deleted", communicateId, areaId);
         }
@@ -966,13 +966,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateAsset
-            var communicateAsset = await context.CommunicateAssets.FindAsync(communicateId, assetId);
+            var communicateAsset = await _context.CommunicateAssets.FindAsync(communicateId, assetId);
             if (communicateAsset == null)
             {
                 _logger.LogWarning("CommunicateAsset not found");
@@ -985,9 +985,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateAsset.IsDeleted = true;
-            context.Update(communicateAsset);
+            _context.Update(communicateAsset);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateAsset with id {CommunicateId}, {AssetId} marked as deleted", communicateId, assetId);
         }
@@ -1003,13 +1003,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateCategory
-            var communicateCategory = await context.CommunicateCategories.FindAsync(communicateId, categoryId);
+            var communicateCategory = await _context.CommunicateCategories.FindAsync(communicateId, categoryId);
             if (communicateCategory == null)
             {
                 _logger.LogWarning("CommunicateCategory not found");
@@ -1022,9 +1022,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateCategory.IsDeleted = true;
-            context.Update(communicateCategory);
+            _context.Update(communicateCategory);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateCategory with id {CommunicateId}, {CategoryId} marked as deleted", communicateId, categoryId);
         }
@@ -1040,13 +1040,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateCoordinate
-            var communicateCoordinate = await context.CommunicateCoordinates.FindAsync(communicateId, coordinateId);
+            var communicateCoordinate = await _context.CommunicateCoordinates.FindAsync(communicateId, coordinateId);
             if (communicateCoordinate == null)
             {
                 _logger.LogWarning("CommunicateCoordinate not found");
@@ -1059,9 +1059,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateCoordinate.IsDeleted = true;
-            context.Update(communicateCoordinate);
+            _context.Update(communicateCoordinate);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateCoordinate with id {CommunicateId}, {CoordinateId} marked as deleted", communicateId, coordinateId);
         }
@@ -1077,13 +1077,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateDevice
-            var communicateDevice = await context.CommunicateDevices.FindAsync(communicateId, deviceId);
+            var communicateDevice = await _context.CommunicateDevices.FindAsync(communicateId, deviceId);
             if (communicateDevice == null)
             {
                 _logger.LogWarning("CommunicateDevice not found");
@@ -1096,9 +1096,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateDevice.IsDeleted = true;
-            context.Update(communicateDevice);
+            _context.Update(communicateDevice);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateDevice with id {CommunicateId}, {DeviceId} marked as deleted", communicateId, deviceId);
         }
@@ -1114,13 +1114,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateModel
-            var communicateModel = await context.CommunicateModels.FindAsync(communicateId, modelId);
+            var communicateModel = await _context.CommunicateModels.FindAsync(communicateId, modelId);
             if (communicateModel == null)
             {
                 _logger.LogWarning("CommunicateModel not found");
@@ -1133,9 +1133,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateModel.IsDeleted = true;
-            context.Update(communicateModel);
+            _context.Update(communicateModel);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateModel with id {CommunicateId}, {ModelId} marked as deleted", communicateId, modelId);
         }
@@ -1151,13 +1151,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         try
         {
             // get communicateSpace
-            var communicateSpace = await context.CommunicateSpaces.FindAsync(communicateId, spaceId);
+            var communicateSpace = await _context.CommunicateSpaces.FindAsync(communicateId, spaceId);
             if (communicateSpace == null)
             {
                 _logger.LogWarning("CommunicateSpace not found");
@@ -1170,9 +1170,9 @@ public class CommunicateService : ICommunicateService
             }
 
             communicateSpace.IsDeleted = true;
-            context.Update(communicateSpace);
+            _context.Update(communicateSpace);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("CommunicateSpace with id {CommunicateId}, {SpaceId} marked as deleted", communicateId, spaceId);
         }
@@ -1188,13 +1188,13 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         
         // try-catch
         try
         {
-            var communicate = await context.Communicates.FirstOrDefaultAsync(c => c.CommunicateId == communicateId);
+            var communicate = await _context.Communicates.FirstOrDefaultAsync(c => c.CommunicateId == communicateId);
             if (communicate == null)
                 throw new NotFoundException("Communicate not found");
             // check if communicate is not marked as deleted
@@ -1204,7 +1204,7 @@ public class CommunicateService : ICommunicateService
                 throw new BadRequestException("Communicate is marked as deleted");
             }
             // check if duplicate exists and is not marked as deleted
-            var exists = await context.Communicates.AnyAsync(c =>
+            var exists = await _context.Communicates.AnyAsync(c =>
                 c.Name.ToLower().Trim() == communicateUpdateDto.Name.ToLower().Trim() && c.IsDeleted == false &&
                 c.CommunicateId != communicateId);
             if (exists)
@@ -1224,8 +1224,8 @@ public class CommunicateService : ICommunicateService
                 communicate.Description = communicateUpdateDto.Description;
             }
 
-            context.Communicates.Update(communicate);
-            await context.SaveChangesAsync();
+            _context.Communicates.Update(communicate);
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1240,9 +1240,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateArea
-        var communicateArea = await context.CommunicateAreas.FindAsync(communicateId, areaId);
+        var communicateArea = await _context.CommunicateAreas.FindAsync(communicateId, areaId);
         if (communicateArea == null)
         {
             _logger.LogWarning("CommunicateArea not found");
@@ -1250,13 +1250,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateArea.IsDeleted)
             throw new BadRequestException("CommunicateArea not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var area = await context.Areas.FindAsync(areaId);
+        var area = await _context.Areas.FindAsync(areaId);
         if (area == null || area.IsDeleted)
         {
             _logger.LogWarning("Area not found");
@@ -1267,7 +1267,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1282,9 +1282,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateAsset
-        var communicateAsset = await context.CommunicateAssets.FindAsync(communicateId, assetId);
+        var communicateAsset = await _context.CommunicateAssets.FindAsync(communicateId, assetId);
         if (communicateAsset == null)
         {
             _logger.LogWarning("CommunicateAsset not found");
@@ -1292,13 +1292,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateAsset.IsDeleted)
             throw new BadRequestException("CommunicateAsset not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var asset = await context.Assets.FindAsync(assetId);
+        var asset = await _context.Assets.FindAsync(assetId);
         if (asset == null || asset.IsDeleted)
         {
             _logger.LogWarning("Asset not found");
@@ -1309,7 +1309,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1324,9 +1324,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateCategory
-        var communicateCategory = await context.CommunicateCategories.FindAsync(communicateId, categoryId);
+        var communicateCategory = await _context.CommunicateCategories.FindAsync(communicateId, categoryId);
         if (communicateCategory == null)
         {
             _logger.LogWarning("CommunicateCategory not found");
@@ -1334,13 +1334,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateCategory.IsDeleted)
             throw new BadRequestException("CommunicateCategory not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var category = await context.Categories.FindAsync(categoryId);
+        var category = await _context.Categories.FindAsync(categoryId);
         if (category == null || category.IsDeleted)
         {
             _logger.LogWarning("Category not found");
@@ -1351,7 +1351,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1366,9 +1366,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateCoordinate
-        var communicateCoordinate = await context.CommunicateCoordinates.FindAsync(communicateId, coordinateId);
+        var communicateCoordinate = await _context.CommunicateCoordinates.FindAsync(communicateId, coordinateId);
         if (communicateCoordinate == null)
         {
             _logger.LogWarning("CommunicateCoordinate not found");
@@ -1376,13 +1376,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateCoordinate.IsDeleted)
             throw new BadRequestException("CommunicateCoordinate not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var coordinate = await context.Coordinates.FindAsync(coordinateId);
+        var coordinate = await _context.Coordinates.FindAsync(coordinateId);
         if (coordinate == null || coordinate.IsDeleted)
         {
             _logger.LogWarning("Coordinate not found");
@@ -1393,7 +1393,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1408,9 +1408,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateDevice
-        var communicateDevice = await context.CommunicateDevices.FindAsync(communicateId, deviceId);
+        var communicateDevice = await _context.CommunicateDevices.FindAsync(communicateId, deviceId);
         if (communicateDevice == null)
         {
             _logger.LogWarning("CommunicateDevice not found");
@@ -1418,13 +1418,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateDevice.IsDeleted)
             throw new BadRequestException("CommunicateDevice not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var device = await context.Devices.FindAsync(deviceId);
+        var device = await _context.Devices.FindAsync(deviceId);
         if (device == null || device.IsDeleted)
         {
             _logger.LogWarning("Device not found");
@@ -1435,7 +1435,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1450,9 +1450,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateModel
-        var communicateModel = await context.CommunicateModels.FindAsync(communicateId, modelId);
+        var communicateModel = await _context.CommunicateModels.FindAsync(communicateId, modelId);
         if (communicateModel == null)
         {
             _logger.LogWarning("CommunicateModel not found");
@@ -1460,13 +1460,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateModel.IsDeleted)
             throw new BadRequestException("CommunicateModel not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var model = await context.Models.FindAsync(modelId);
+        var model = await _context.Models.FindAsync(modelId);
         if (model == null || model.IsDeleted)
         {
             _logger.LogWarning("Model not found");
@@ -1477,7 +1477,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -1492,9 +1492,9 @@ public class CommunicateService : ICommunicateService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get communicateSpace
-        var communicateSpace = await context.CommunicateSpaces.FindAsync(communicateId, spaceId);
+        var communicateSpace = await _context.CommunicateSpaces.FindAsync(communicateId, spaceId);
         if (communicateSpace == null)
         {
             _logger.LogWarning("CommunicateSpace not found");
@@ -1502,13 +1502,13 @@ public class CommunicateService : ICommunicateService
         }
         if (!communicateSpace.IsDeleted)
             throw new BadRequestException("CommunicateSpace not marked as deleted");
-        var communicate = await context.Communicates.FindAsync(communicateId);
+        var communicate = await _context.Communicates.FindAsync(communicateId);
         if (communicate == null || communicate.IsDeleted)
         {
             _logger.LogWarning("Communicate not found");
             throw new NotFoundException("Communicate not found");
         }
-        var space = await context.Spaces.FindAsync(spaceId);
+        var space = await _context.Spaces.FindAsync(spaceId);
         if (space == null || space.IsDeleted)
         {
             _logger.LogWarning("Space not found");
@@ -1519,7 +1519,7 @@ public class CommunicateService : ICommunicateService
         
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)

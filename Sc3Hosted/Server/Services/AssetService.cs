@@ -127,13 +127,13 @@ public interface IAssetService
 
 public class AssetService : IAssetService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<AssetService> _logger;
    
 
-    public AssetService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<AssetService> logger)
+    public AssetService(ApplicationDbContext context, ILogger<AssetService> logger)
     {
-        _contextFactory = contextFactory;
+        _context = context;
         _logger = logger;
        
     }
@@ -142,42 +142,42 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
-        var asset = await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
+        var asset = await _context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
+        _context.Entry(asset).State = EntityState.Modified;
+        
         if (asset.ModelId == modelId)
         {
             _logger.LogWarning("Asset already assigned to model");
             throw new BadRequestException("Asset already has this model");
         }
-        var model = await context.Models.FindAsync(modelId);
+        var model = await _context.Models.Include(a => a.Assets).FirstOrDefaultAsync(m => m.ModelId == modelId);
         if (model == null || model.IsDeleted)
         {
             _logger.LogWarning("Model not found");
             throw new NotFoundException("Model not found");
         }
-
+        
         // delete all asset details
-        context.AssetDetails.RemoveRange(asset.AssetDetails);
+        _context.AssetDetails.RemoveRange(asset.AssetDetails);
         // delete all asset categories
-        context.AssetCategories.RemoveRange(asset.AssetCategories);
+        _context.AssetCategories.RemoveRange(asset.AssetCategories);
         // delete all communicate assets
-        context.CommunicateAssets.RemoveRange(asset.CommunicateAssets);
+        _context.CommunicateAssets.RemoveRange(asset.CommunicateAssets);
 
         // update asset model
         asset.ModelId = modelId;
-        context.Assets.Update(asset);
-        
-       
+
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Asset with id {AssetId} updated", assetId);
@@ -194,10 +194,10 @@ public class AssetService : IAssetService
     public async Task<int> CreateAsset(AssetCreateDto assetCreateDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get model
-        var model = await context.Models.Include(m=>m.Assets).AsNoTracking().FirstOrDefaultAsync(m => m.ModelId == assetCreateDto.ModelId);
+        var model = await _context.Models.Include(m=>m.Assets).AsNoTracking().FirstOrDefaultAsync(m => m.ModelId == assetCreateDto.ModelId);
         if (model == null)
         {
             _logger.LogWarning("Model not found");
@@ -209,7 +209,7 @@ public class AssetService : IAssetService
             throw new BadRequestException("Model marked as deleted");
         }
         // get coordinate
-        var coordinate = await context.Coordinates.AsNoTracking().FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
+        var coordinate = await _context.Coordinates.AsNoTracking().FirstOrDefaultAsync(c => c.CoordinateId == assetCreateDto.CoordinateId);
         if (coordinate == null)
         {
             _logger.LogWarning("Coordinate not found");
@@ -242,13 +242,13 @@ public class AssetService : IAssetService
             Coordinate = new() { CoordinateId = assetCreateDto.CoordinateId }
         };
         // create asset
-        context.Attach(asset);
+        _context.Attach(asset);
         
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             _logger.LogInformation("Asset with id {AssetId} created", asset.AssetId);
             return asset.AssetId;
         }
@@ -262,18 +262,18 @@ public class AssetService : IAssetService
     public async Task<(int, int)> CreateAssetCategory(int assetId, int categoryId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+
         // get assetCategory
-        var assetCategory = await context.AssetCategories.FindAsync(assetId, categoryId);
+        var assetCategory = await _context.AssetCategories.FirstOrDefaultAsync(a => a.AssetId == assetId && a.CategoryId == categoryId);
         if (assetCategory != null)
             throw new BadRequestException("AssetCategory already exists");
-        var category = categoryId < 1 ? null : await context.Categories.FirstOrDefaultAsync(a => a.CategoryId == categoryId);
+        var category = categoryId < 1 ? null : await _context.Categories.FirstOrDefaultAsync(a => a.CategoryId == categoryId);
         if (category == null || category.IsDeleted)
         {
             _logger.LogWarning("Category not found");
             throw new NotFoundException("Category not found");
         }
-        var asset = assetId < 1 ? null : await context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
+        var asset = assetId < 1 ? null : await _context.Assets.FirstOrDefaultAsync(a => a.AssetId == assetId);
         if (asset == null || asset.IsDeleted)
         {
             _logger.LogWarning("Asset not found");
@@ -285,12 +285,13 @@ public class AssetService : IAssetService
             CategoryId = categoryId,
             IsDeleted = false
         };
-        context.Attach(assetCategory);
+        _context.ChangeTracker.Clear();
+        _context.AssetCategories.Add(assetCategory);
         // save changes
        
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             return (assetId, categoryId);
         }
@@ -305,20 +306,20 @@ public class AssetService : IAssetService
     public async Task<(int, int)> CreateAssetDetail(AssetDetailDto assetDetailDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var assetDetail = await context.AssetDetails.FindAsync(assetDetailDto.AssetId, assetDetailDto.DetailId);
+        
+        var assetDetail = await _context.AssetDetails.FindAsync(assetDetailDto.AssetId, assetDetailDto.DetailId);
         if (assetDetail != null)
         {
             _logger.LogWarning("AssetDetail already exists");
             throw new BadRequestException("AssetDetail already exists");
         }
-        var asset = await context.Assets.FindAsync(assetDetailDto.AssetId);
+        var asset = await _context.Assets.FindAsync(assetDetailDto.AssetId);
         if (asset == null || asset.IsDeleted)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
-        var detail = await context.Details.FindAsync(assetDetailDto.DetailId);
+        var detail = await _context.Details.FindAsync(assetDetailDto.DetailId);
         if (detail == null || detail.IsDeleted)
         {
             _logger.LogWarning("Detail not found");
@@ -335,8 +336,9 @@ public class AssetService : IAssetService
        
         try
         {
-            context.AssetDetails.Attach(assetDetail);
-            await context.SaveChangesAsync();
+            _context.ChangeTracker.Clear();
+            _context.AssetDetails.Add(assetDetail);
+            await _context.SaveChangesAsync();
             
             return (assetDetailDto.AssetId, assetDetailDto.DetailId);
         }
@@ -351,10 +353,10 @@ public class AssetService : IAssetService
     public async Task<int> CreateCategory(CategoryCreateDto categoryCreateDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // validate category name
-        var duplicate = await context.Categories.AnyAsync(c => c.Name.ToLower().Trim() == categoryCreateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Categories.AnyAsync(c => c.Name.ToLower().Trim() == categoryCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Category name already exists");
@@ -368,13 +370,14 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create category
-        context.Categories.Attach(category);
+        _context.ChangeTracker.Clear();
+        _context.Categories.Attach(category);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Category with id {CategoryId} created", category.CategoryId);
@@ -392,10 +395,10 @@ public class AssetService : IAssetService
     public async Task<int> CreateDetail(DetailCreateDto detailCreateDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // validate detail name
-        var duplicate = await context.Details.AnyAsync(d => d.Name.ToLower().Trim() == detailCreateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Details.AnyAsync(d => d.Name.ToLower().Trim() == detailCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Detail name already exists");
@@ -409,13 +412,13 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create detail
-        context.Details.Attach(detail);
+        _context.Details.Attach(detail);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Detail with id {DetailId} created", detail.DetailId);
@@ -433,10 +436,10 @@ public class AssetService : IAssetService
     public async Task<int> CreateDevice(DeviceCreateDto deviceCreateDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // validate device name
-        var duplicate = await context.Devices.AnyAsync(d => d.Name.ToLower().Trim() == deviceCreateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Devices.AnyAsync(d => d.Name.ToLower().Trim() == deviceCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Device name already exists");
@@ -450,13 +453,13 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create device
-        context.Devices.Attach(device);
+        _context.Devices.Attach(device);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Device with id {DeviceId} created", device.DeviceId);
@@ -474,10 +477,10 @@ public class AssetService : IAssetService
     public async Task<int> CreateModel(int deviceId, ModelCreateDto modelCreateDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get device
-        var device = await context.Devices.Include(d=>d.Models).AsNoTracking().FirstOrDefaultAsync(d => d.DeviceId == deviceId);
+        var device = await _context.Devices.Include(d=>d.Models).AsNoTracking().FirstOrDefaultAsync(d => d.DeviceId == deviceId);
         if (device == null|| device.IsDeleted)
         {
             _logger.LogWarning("Device not found");
@@ -502,12 +505,12 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create model
-        context.Attach(model);
+        _context.Attach(model);
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Model with id {ModelId} created", model.ModelId);
@@ -525,19 +528,19 @@ public class AssetService : IAssetService
     public async Task<(int, int)> CreateModelParameter(ModelParameterDto modelParameterDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var modelParameter = await context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
+        
+        var modelParameter = await _context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
         if (modelParameter != null)
         {
             throw new BadRequestException("ModelParameter already exists");
         }
-        var model = await context.Models.FindAsync(modelParameterDto.ModelId);
+        var model = await _context.Models.FindAsync(modelParameterDto.ModelId);
         if (model == null || model.IsDeleted)
         {
             _logger.LogWarning("Model not found");
             throw new NotFoundException("Model not found");
         }
-        var parameter = await context.Parameters.FindAsync(modelParameterDto.ParameterId);
+        var parameter = await _context.Parameters.FindAsync(modelParameterDto.ParameterId);
         if (parameter == null || parameter.IsDeleted)
         {
             _logger.LogWarning("Parameter not found");
@@ -554,8 +557,8 @@ public class AssetService : IAssetService
        
         try
         {
-            context.ModelParameters.Attach(modelParameter);
-            await context.SaveChangesAsync();
+            _context.ModelParameters.Attach(modelParameter);
+            await _context.SaveChangesAsync();
             
             return (modelParameter.ModelId, modelParameter.ParameterId);
         }
@@ -570,10 +573,10 @@ public class AssetService : IAssetService
     public async Task<int> CreateParameter(ParameterCreateDto parameterCreateDto)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // validate parameter name
-        var duplicate = await context.Parameters.AnyAsync(p => p.Name.ToLower().Trim() == parameterCreateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Parameters.AnyAsync(p => p.Name.ToLower().Trim() == parameterCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
             _logger.LogWarning("Parameter name already exists");
@@ -587,13 +590,13 @@ public class AssetService : IAssetService
             IsDeleted = false
         };
         // create parameter
-        context.Parameters.Attach(parameter);
+        _context.Parameters.Attach(parameter);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Parameter with id {ParameterId} created", parameter.ParameterId);
@@ -611,10 +614,10 @@ public class AssetService : IAssetService
     public async Task DeleteAsset(int assetId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get asset
-        var asset = await context.Assets.FindAsync(assetId);
+        var asset = await _context.Assets.FindAsync(assetId);
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
@@ -627,13 +630,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("Asset is not marked as deleted");
         }
         // delete asset
-        context.Assets.Remove(asset);
+        _context.Assets.Remove(asset);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Asset with id {AssetId} deleted", asset.AssetId);
@@ -650,9 +653,9 @@ public class AssetService : IAssetService
     public async Task DeleteAssetCategory(int assetId, int categoryId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
-        var assetCategory = await context.AssetCategories.FindAsync(assetId, categoryId);
+        var assetCategory = await _context.AssetCategories.FindAsync(assetId, categoryId);
         // get assetCategory
         if (assetCategory == null)
         {
@@ -665,13 +668,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("AssetCategory is not marked as deleted");
         }
 
-        context.AssetCategories.Remove(assetCategory);
+        _context.AssetCategories.Remove(assetCategory);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("AssetCategory deleted");
         }
@@ -686,8 +689,8 @@ public class AssetService : IAssetService
     public async Task DeleteAssetDetail(int assetId, int detailId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var assetDetail = await context.AssetDetails.FindAsync(assetId, detailId);
+        
+        var assetDetail = await _context.AssetDetails.FindAsync(assetId, detailId);
 
         // get assetDetail
         if (assetDetail == null)
@@ -705,9 +708,9 @@ public class AssetService : IAssetService
        
         try
         {
-            context.AssetDetails.Remove(assetDetail);
+            _context.AssetDetails.Remove(assetDetail);
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("AssetDetail deleted");
         }
@@ -722,10 +725,10 @@ public class AssetService : IAssetService
     public async Task DeleteCategory(int categoryId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get category
-        var category = await context.Categories.FindAsync(categoryId);
+        var category = await _context.Categories.FindAsync(categoryId);
         if (category == null)
         {
             _logger.LogWarning("Category not found");
@@ -738,13 +741,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("Category is not marked as deleted");
         }
         // delete category
-        context.Categories.Remove(category);
+        _context.Categories.Remove(category);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Category with id {CategoryId} deleted", category.CategoryId);
@@ -761,10 +764,10 @@ public class AssetService : IAssetService
     public async Task DeleteDetail(int detailId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get detail
-        var detail = await context.Details.FindAsync(detailId);
+        var detail = await _context.Details.FindAsync(detailId);
         if (detail == null)
         {
             _logger.LogWarning("Detail not found");
@@ -777,13 +780,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("Detail is not marked as deleted");
         }
         // delete detail
-        context.Details.Remove(detail);
+        _context.Details.Remove(detail);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Detail with id {DetailId} deleted", detail.DetailId);
@@ -800,10 +803,10 @@ public class AssetService : IAssetService
     public async Task DeleteDevice(int deviceId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get device
-        var device = await context.Devices.FindAsync(deviceId);
+        var device = await _context.Devices.FindAsync(deviceId);
         if (device == null)
         {
             _logger.LogWarning("Device not found");
@@ -816,13 +819,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("Device is not marked as deleted");
         }
         // delete device
-        context.Devices.Remove(device);
+        _context.Devices.Remove(device);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Device with id {DeviceId} deleted", device.DeviceId);
@@ -839,10 +842,10 @@ public class AssetService : IAssetService
     public async Task DeleteModel(int modelId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get model
-        var model = await context.Models.FindAsync(modelId);
+        var model = await _context.Models.FindAsync(modelId);
         if (model == null)
         {
             _logger.LogWarning("Model not found");
@@ -855,13 +858,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("Model is not marked as deleted");
         }
         // delete model
-        context.Models.Remove(model);
+        _context.Models.Remove(model);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Model with id {ModelId} deleted", model.ModelId);
@@ -878,8 +881,8 @@ public class AssetService : IAssetService
     public async Task DeleteModelParameter(int modelId, int parameterId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var modelParameter = await context.ModelParameters.FindAsync(modelId, parameterId);
+        
+        var modelParameter = await _context.ModelParameters.FindAsync(modelId, parameterId);
 
         // get modelParameter
         if (modelParameter == null)
@@ -892,9 +895,9 @@ public class AssetService : IAssetService
            
             try
             {
-                context.ModelParameters.Remove(modelParameter);
+                _context.ModelParameters.Remove(modelParameter);
                 // save changes
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 
                 _logger.LogInformation("ModelParameter deleted");
             }
@@ -912,10 +915,10 @@ public class AssetService : IAssetService
     public async Task DeleteParameter(int parameterId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get parameter
-        var parameter = await context.Parameters.FindAsync(parameterId);
+        var parameter = await _context.Parameters.FindAsync(parameterId);
         if (parameter == null)
         {
             _logger.LogWarning("Parameter not found");
@@ -928,13 +931,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("Parameter is not marked as deleted");
         }
         // delete parameter
-        context.Parameters.Remove(parameter);
+        _context.Parameters.Remove(parameter);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             
             _logger.LogInformation("Parameter with id {ParameterId} deleted", parameter.ParameterId);
@@ -951,10 +954,10 @@ public class AssetService : IAssetService
     public async Task<AssetDto> GetAssetById(int assetId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get asset
-        var asset = await context.Assets.AsNoTracking().Select(a => new AssetDto
+        var asset = await _context.Assets.AsNoTracking().Select(a => new AssetDto
         {
             AssetId = a.AssetId,
             Name = a.Name,
@@ -979,10 +982,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<AssetDisplayDto>> GetAssetDisplays()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get asset
-        var query = await context.Assets
+        var query = await _context.Assets
             .AsNoTracking()
             .Select(a => new AssetDisplayDto
             {
@@ -1042,10 +1045,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<AssetDto>> GetAssets()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get assets
-        var assets = await context.Assets
+        var assets = await _context.Assets
             .AsNoTracking()
             .Select(a => new AssetDto
             {
@@ -1072,10 +1075,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<CategoryDto>> GetCategories()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get categories
-        var query = await context.Categories
+        var query = await _context.Categories
             .AsNoTracking()
             .Select(c => new CategoryDto
             {
@@ -1098,10 +1101,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<CategoryWithAssetsDto>> GetCategoriesWithAssets()
     {
         // await context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get categories
-        var query = await context.Categories
+        var query = await _context.Categories
             .AsNoTracking()
             .Select(c => new CategoryWithAssetsDto
             {
@@ -1134,10 +1137,10 @@ public class AssetService : IAssetService
     public async Task<CategoryDto> GetCategoryById(int categoryId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get category
-        var query = await context.Categories
+        var query = await _context.Categories
             .AsNoTracking()
             .Select(c => new CategoryDto
             {
@@ -1160,10 +1163,10 @@ public class AssetService : IAssetService
     public async Task<CategoryWithAssetsDto> GetCategoryByIdWithAssets(int categoryId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get category
-        var query = await context.Categories
+        var query = await _context.Categories
             .AsNoTracking()
             .Select(c => new CategoryWithAssetsDto
             {
@@ -1196,10 +1199,10 @@ public class AssetService : IAssetService
     public async Task<DetailDto> GetDetailById(int detailId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get detail
-        var query = await context.Details
+        var query = await _context.Details
             .AsNoTracking()
             .Select(d => new DetailDto
             {
@@ -1222,10 +1225,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<DetailDto>> GetDetails()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get details
-        var query = await context.Details
+        var query = await _context.Details
             .AsNoTracking()
             .Select(d => new DetailDto
             {
@@ -1249,10 +1252,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<DetailWithAssetsDto>> GetDetailsWithAssets()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get details
-        var query = await context.Details
+        var query = await _context.Details
             .AsNoTracking()
             .Select(d => new DetailWithAssetsDto
             {
@@ -1285,10 +1288,10 @@ public class AssetService : IAssetService
     public async Task<DeviceDto> GetDeviceById(int deviceId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get device
-        var query = await context.Devices
+        var query = await _context.Devices
             .AsNoTracking()
             .Select(d => new DeviceDto
             {
@@ -1311,10 +1314,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<DeviceDto>> GetDevices()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get devices
-        var query = await context.Devices
+        var query = await _context.Devices
             .AsNoTracking()
             .Select(d => new DeviceDto
             {
@@ -1337,10 +1340,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<DeviceDto>> GetDevicesWithModels()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get devices
-        var query = await context.Devices
+        var query = await _context.Devices
             .AsNoTracking()
             .Select(d => new DeviceDto
             {
@@ -1370,9 +1373,9 @@ public class AssetService : IAssetService
 
     public async Task<IEnumerable<DeviceWithAssetsDto>> GetDevicesWithAssets()
     {
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get devices
-        var query = await context.Devices
+        var query = await _context.Devices
             .AsNoTracking()
             .Select(d => new DeviceWithAssetsDto
             {
@@ -1401,9 +1404,9 @@ public class AssetService : IAssetService
     }
     public async Task<DeviceWithAssetsDto> GetDeviceWithAssets(int deviceId)
     {
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get device
-        var query = await context.Devices
+        var query = await _context.Devices
             .AsNoTracking()
             .Select(d => new DeviceWithAssetsDto
             {
@@ -1434,9 +1437,9 @@ public class AssetService : IAssetService
     public async Task<ModelDto> GetModelById(int modelId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get model
-        var query = await context.Models
+        var query = await _context.Models
             .AsNoTracking()
             .Select(m => new ModelDto
             {
@@ -1459,10 +1462,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<ModelDto>> GetModels()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get models
-        var query = await context.Models
+        var query = await _context.Models
             .AsNoTracking()
             .Select(m => new ModelDto
             {
@@ -1485,10 +1488,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<ModelDto>> GetModelsWithAssets()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get models
-        var query = await context.Models
+        var query = await _context.Models
             .AsNoTracking()
             .Select(m => new ModelDto
             {
@@ -1519,10 +1522,10 @@ public class AssetService : IAssetService
     public async Task<ParameterDto> GetParameterById(int parameterId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get parameter
-        var query = await context.Parameters
+        var query = await _context.Parameters
             .AsNoTracking()
             .Select(m => new ParameterDto
             {
@@ -1545,10 +1548,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<ParameterDto>> GetParameters()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get parameters
-        var query = await context.Parameters
+        var query = await _context.Parameters
             .AsNoTracking()
             .Select(m => new ParameterDto
             {
@@ -1571,10 +1574,10 @@ public class AssetService : IAssetService
     public async Task<IEnumerable<ParameterWithModelsDto>> GetParametersWithModels()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get parameters
-        var query = await context.Parameters
+        var query = await _context.Parameters
             .AsNoTracking()
             .Select(p => new ParameterWithModelsDto
             {
@@ -1606,10 +1609,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get asset
-        var asset = await context.Assets
+        var asset = await _context.Assets
             .FirstOrDefaultAsync(m => m.AssetId == assetId);
         if (asset == null)
         {
@@ -1625,13 +1628,13 @@ public class AssetService : IAssetService
         // mark asset as deleted
         asset.IsDeleted = true;
         // update asset
-        context.Update(asset);
+        _context.Update(asset);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -1650,10 +1653,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get assetCategory
-        var assetCategory = await context.AssetCategories.FindAsync(assetId, categoryId);
+        var assetCategory = await _context.AssetCategories.FindAsync(assetId, categoryId);
         if (assetCategory == null)
         {
             _logger.LogWarning("AssetCategory not found");
@@ -1666,13 +1669,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("AssetCategory already deleted");
         }
         assetCategory.IsDeleted = true;
-        context.Update(assetCategory);
+        _context.Update(assetCategory);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("AssetCategory marked as deleted");
         }
@@ -1688,10 +1691,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get assetDetail
-        var assetDetail = await context.AssetDetails.FindAsync(assetId, detailId);
+        var assetDetail = await _context.AssetDetails.FindAsync(assetId, detailId);
         if (assetDetail == null)
         {
             _logger.LogWarning("AssetDetail not found");
@@ -1704,13 +1707,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("AssetDetail already deleted");
         }
         assetDetail.IsDeleted = true;
-        context.Update(assetDetail);
+        _context.Update(assetDetail);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("AssetDetail marked as deleted");
         }
@@ -1726,10 +1729,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get category
-        var category = await context.Categories
+        var category = await _context.Categories
             .FirstOrDefaultAsync(m => m.CategoryId == categoryId);
         if (category == null)
         {
@@ -1745,13 +1748,13 @@ public class AssetService : IAssetService
         // mark category as deleted
         category.IsDeleted = true;
         // update category
-        context.Update(category);
+        _context.Update(category);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -1770,10 +1773,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get detail
-        var detail = await context.Details
+        var detail = await _context.Details
             .FirstOrDefaultAsync(m => m.DetailId == detailId);
         if (detail == null)
         {
@@ -1789,13 +1792,13 @@ public class AssetService : IAssetService
         // mark detail as deleted
         detail.IsDeleted = true;
         // update detail
-        context.Update(detail);
+        _context.Update(detail);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -1814,10 +1817,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get device
-        var device = await context.Devices
+        var device = await _context.Devices
             .FirstOrDefaultAsync(m => m.DeviceId == deviceId);
         if (device == null)
         {
@@ -1833,13 +1836,13 @@ public class AssetService : IAssetService
         // mark device as deleted
         device.IsDeleted = true;
         // update device
-        context.Update(device);
+        _context.Update(device);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -1858,10 +1861,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get model
-        var model = await context.Models
+        var model = await _context.Models
             .FirstOrDefaultAsync(m => m.ModelId == modelId);
         if (model == null)
         {
@@ -1877,13 +1880,13 @@ public class AssetService : IAssetService
         // mark model as deleted
         model.IsDeleted = true;
         // update model
-        context.Update(model);
+        _context.Update(model);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -1902,9 +1905,9 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
-        var modelParameter = await context.ModelParameters.FindAsync(modelId, parameterId);
+        var modelParameter = await _context.ModelParameters.FindAsync(modelId, parameterId);
         if (modelParameter == null)
         {
             _logger.LogWarning("ModelParameter not found");
@@ -1916,13 +1919,13 @@ public class AssetService : IAssetService
             throw new BadRequestException("ModelParameter already deleted");
         }
         modelParameter.IsDeleted = true;
-        context.Update(modelParameter);
+        _context.Update(modelParameter);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             _logger.LogInformation("ModelParameter marked as deleted");
         }
@@ -1938,10 +1941,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get parameter
-        var parameter = await context.Parameters
+        var parameter = await _context.Parameters
             .FirstOrDefaultAsync(m => m.ParameterId == parameterId);
         if (parameter == null)
         {
@@ -1957,13 +1960,13 @@ public class AssetService : IAssetService
         // mark parameter as deleted
         parameter.IsDeleted = true;
         // update parameter
-        context.Update(parameter);
+        _context.Update(parameter);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -1982,10 +1985,10 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         
         // get asset with all related data
-        var asset = await context.Assets.FirstOrDefaultAsync(m => m.AssetId == assetId);
+        var asset = await _context.Assets.FirstOrDefaultAsync(m => m.AssetId == assetId);
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
@@ -1995,7 +1998,7 @@ public class AssetService : IAssetService
         // get coordinate
         var coordinateFromDto = asset.CoordinateId == assetUpdateDto.CoordinateId
             ? null
-            : await context.Coordinates.AsNoTracking()
+            : await _context.Coordinates.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.CoordinateId == assetUpdateDto.CoordinateId);
 
         // if new coordinate is different from old coordinate
@@ -2003,19 +2006,19 @@ public class AssetService : IAssetService
         {
             asset.CoordinateId = assetUpdateDto.CoordinateId;
             asset.Coordinate = coordinateFromDto;
-            context.Attach(asset);
+            _context.Attach(asset);
         }
           
         // assign userId to update
         asset.Description = assetUpdateDto.Description;
         asset.IsDeleted = false;
         // update asset
-        context.Update(asset);
+        _context.Update(asset);
         
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -2034,17 +2037,17 @@ public class AssetService : IAssetService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get asset
-        var asset = await context.Assets.FirstOrDefaultAsync(m => m.AssetId == assetId);
+        var asset = await _context.Assets.FirstOrDefaultAsync(m => m.AssetId == assetId);
         if (asset == null)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
 
-        var allAssets = await context.Assets.AsNoTracking().ToListAsync();
+        var allAssets = await _context.Assets.AsNoTracking().ToListAsync();
         if (allAssets.Any(a => a.Name.ToLower().Trim() == name.ToLower().Trim() && a.AssetId != assetId))
         {
             _logger.LogWarning("Asset name already exists");
@@ -2053,12 +2056,12 @@ public class AssetService : IAssetService
         // assign userId to update
         asset.Name = name;
         // update asset
-        context.Update(asset);
+        _context.Update(asset);
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
 
          
@@ -2077,9 +2080,9 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get assetCategory
-        var assetCategory = await context.AssetCategories.FindAsync(assetId, categoryId);
+        var assetCategory = await _context.AssetCategories.FindAsync(assetId, categoryId);
         if (assetCategory == null)
         {
             _logger.LogWarning("AssetCategory not found");
@@ -2087,13 +2090,13 @@ public class AssetService : IAssetService
         }
         if (!assetCategory.IsDeleted)
             throw new BadRequestException("AssetCategory not marked as deleted");
-        var asset = await context.Assets.FindAsync(assetId);
+        var asset = await _context.Assets.FindAsync(assetId);
         if (asset == null || asset.IsDeleted)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
-        var category = await context.Categories.FindAsync(categoryId);
+        var category = await _context.Categories.FindAsync(categoryId);
         if (category == null || category.IsDeleted)
         {
             _logger.LogWarning("Category not found");
@@ -2104,7 +2107,7 @@ public class AssetService : IAssetService
        
         try
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -2120,20 +2123,20 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var assetDetail = await context.AssetDetails.FindAsync(assetDetailDto.AssetId, assetDetailDto.DetailId);
+        
+        var assetDetail = await _context.AssetDetails.FindAsync(assetDetailDto.AssetId, assetDetailDto.DetailId);
         if (assetDetail == null)
         {
             _logger.LogWarning("AssetDetail not found");
             throw new NotFoundException("AssetDetail not found");
         }
-        var asset = await context.Assets.FindAsync(assetDetailDto.AssetId);
+        var asset = await _context.Assets.FindAsync(assetDetailDto.AssetId);
         if (asset == null || asset.IsDeleted)
         {
             _logger.LogWarning("Asset not found");
             throw new NotFoundException("Asset not found");
         }
-        var detail = await context.Details.FindAsync(assetDetailDto.DetailId);
+        var detail = await _context.Details.FindAsync(assetDetailDto.DetailId);
         if (detail == null || detail.IsDeleted)
         {
             _logger.LogWarning("Detail not found");
@@ -2147,8 +2150,8 @@ public class AssetService : IAssetService
        
         try
         {
-            context.AssetDetails.Update(assetDetail);
-            await context.SaveChangesAsync();
+            _context.AssetDetails.Update(assetDetail);
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -2163,17 +2166,17 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get category with all related data
-        var category = await context.Categories.FirstOrDefaultAsync(m => m.CategoryId == categoryId);
+        var category = await _context.Categories.FirstOrDefaultAsync(m => m.CategoryId == categoryId);
         if (category == null)
         {
             _logger.LogWarning("Category not found");
             throw new NotFoundException("Category not found");
         }
         // check if category name from dto is already taken
-        var duplicate = await context.Categories.AnyAsync(a => a.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Categories.AnyAsync(a => a.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim());
         if (duplicate || category.Name.ToLower().Trim() == categoryUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Category name is already taken");
@@ -2184,13 +2187,13 @@ public class AssetService : IAssetService
         category.Description = categoryUpdateDto.Description;
         category.IsDeleted = false;
         // update category
-        context.Update(category);
+        _context.Update(category);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -2209,17 +2212,17 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get detail
-        var detail = await context.Details.FirstOrDefaultAsync(m => m.DetailId == detailId);
+        var detail = await _context.Details.FirstOrDefaultAsync(m => m.DetailId == detailId);
         if (detail == null)
         {
             _logger.LogWarning("Detail not found");
             throw new NotFoundException("Detail not found");
         }
         // check if detail name from dto is already taken
-        var duplicate = await context.Details.AnyAsync(a => a.Name.ToLower().Trim() == detailUpdateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Details.AnyAsync(a => a.Name.ToLower().Trim() == detailUpdateDto.Name.ToLower().Trim());
         if (duplicate || detail.Name.ToLower().Trim() == detailUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Detail name is already taken");
@@ -2230,13 +2233,13 @@ public class AssetService : IAssetService
         detail.Description = detailUpdateDto.Description;
         detail.IsDeleted = false;
         // update detail
-        context.Update(detail);
+        _context.Update(detail);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -2255,17 +2258,17 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get device
-        var device = await context.Devices.FirstOrDefaultAsync(m => m.DeviceId == deviceId);
+        var device = await _context.Devices.FirstOrDefaultAsync(m => m.DeviceId == deviceId);
         if (device == null)
         {
             _logger.LogWarning("Device not found");
             throw new NotFoundException("Device not found");
         }
         // check if device name from dto is already taken
-        var duplicate = await context.Devices.AnyAsync(a => a.Name.ToLower().Trim() == deviceUpdateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Devices.AnyAsync(a => a.Name.ToLower().Trim() == deviceUpdateDto.Name.ToLower().Trim());
         if (duplicate || device.Name.ToLower().Trim() == deviceUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Device name is already taken");
@@ -2276,13 +2279,13 @@ public class AssetService : IAssetService
         device.Description = deviceUpdateDto.Description;
         device.IsDeleted = false;
         // update device
-        context.Update(device);
+        _context.Update(device);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -2301,17 +2304,17 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get model
-        var model = await context.Models.FirstOrDefaultAsync(m => m.ModelId == modelId);
+        var model = await _context.Models.FirstOrDefaultAsync(m => m.ModelId == modelId);
         if (model == null)
         {
             _logger.LogWarning("Model not found");
             throw new NotFoundException("Model not found");
         }
         // check if model name from dto is already taken
-        var duplicate = await context.Models.AnyAsync(a => a.Name.ToLower().Trim() == modelUpdateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Models.AnyAsync(a => a.Name.ToLower().Trim() == modelUpdateDto.Name.ToLower().Trim());
         if (duplicate || model.Name.ToLower().Trim() == modelUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Model name is already taken");
@@ -2322,13 +2325,13 @@ public class AssetService : IAssetService
         model.Description = modelUpdateDto.Description;
         model.IsDeleted = false;
         // update model
-        context.Update(model);
+        _context.Update(model);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success
@@ -2347,20 +2350,20 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var modelParameter = await context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
+        
+        var modelParameter = await _context.ModelParameters.FindAsync(modelParameterDto.ModelId, modelParameterDto.ParameterId);
         if (modelParameter == null)
         {
             _logger.LogWarning("ModelParameter not found");
             throw new NotFoundException("ModelParameter not found");
         }
-        var model = await context.Models.FindAsync(modelParameterDto.ModelId);
+        var model = await _context.Models.FindAsync(modelParameterDto.ModelId);
         if (model == null || model.IsDeleted)
         {
             _logger.LogWarning("Model not found");
             throw new NotFoundException("Model not found");
         }
-        var parameter = await context.Parameters.FindAsync(modelParameterDto.ParameterId);
+        var parameter = await _context.Parameters.FindAsync(modelParameterDto.ParameterId);
         if (parameter == null || parameter.IsDeleted)
         {
             _logger.LogWarning("Parameter not found");
@@ -2373,8 +2376,8 @@ public class AssetService : IAssetService
        
         try
         {
-            context.ModelParameters.Update(modelParameter);
-            await context.SaveChangesAsync();
+            _context.ModelParameters.Update(modelParameter);
+            await _context.SaveChangesAsync();
             
         }
         catch (Exception ex)
@@ -2389,17 +2392,17 @@ public class AssetService : IAssetService
     {
         
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get parameter
-        var parameter = await context.Parameters.FirstOrDefaultAsync(p => p.ParameterId == parameterId);
+        var parameter = await _context.Parameters.FirstOrDefaultAsync(p => p.ParameterId == parameterId);
         if (parameter == null)
         {
             _logger.LogWarning("Parameter not found");
             throw new NotFoundException("Parameter not found");
         }
         // check if parameter name from dto is already taken
-        var duplicate = await context.Parameters.AnyAsync(a => a.Name.ToLower().Trim() == parameterUpdateDto.Name.ToLower().Trim());
+        var duplicate = await _context.Parameters.AnyAsync(a => a.Name.ToLower().Trim() == parameterUpdateDto.Name.ToLower().Trim());
         if (duplicate || parameter.Name.ToLower().Trim() == parameterUpdateDto.Name.ToLower().Trim())
         {
             _logger.LogWarning("Parameter name is already taken");
@@ -2410,13 +2413,13 @@ public class AssetService : IAssetService
         parameter.Description = parameterUpdateDto.Description;
         parameter.IsDeleted = false;
         // update parameter
-        context.Update(parameter);
+        _context.Update(parameter);
         
        
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // await commit transaction
             
             // return success

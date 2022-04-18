@@ -21,7 +21,7 @@ var jwtIssuer = builder.Configuration["JwtIssuer"];
 var jwtAudience = builder.Configuration["JwtAudience"];
 var jwtSecurityKey = builder.Configuration["JwtSecurityKey"];
 
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()

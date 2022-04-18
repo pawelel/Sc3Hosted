@@ -67,12 +67,12 @@ public interface ILocationService
 
 public class LocationService : ILocationService
 {
-    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<LocationService> _logger;
 
-    public LocationService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<LocationService> logger)
+    public LocationService(ApplicationDbContext context, ILogger<LocationService> logger)
     {
-        _contextFactory = contextFactory;
+        _context = context;
         _logger = logger;
 
     }
@@ -81,10 +81,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plant
-        var plant = await context.Plants
+        var plant = await _context.Plants
             .Include(p => p.Areas)
             .FirstOrDefaultAsync(p => p.PlantId == plantId);
         if (plant is null || plant.IsDeleted)
@@ -112,7 +112,7 @@ public class LocationService : ILocationService
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Area with id {AreaId} created", area.AreaId);
@@ -131,10 +131,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get space
-        var space = await context.Spaces.Include(s => s.Coordinates).FirstOrDefaultAsync(s => s.SpaceId == spaceId);
+        var space = await _context.Spaces.Include(s => s.Coordinates).FirstOrDefaultAsync(s => s.SpaceId == spaceId);
         if (space is null || space.IsDeleted)
         {
             throw new NotFoundException("Space not found");
@@ -162,7 +162,7 @@ public class LocationService : ILocationService
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Coordinate with id {CoordinateId} created", coordinate.CoordinateId);
@@ -181,10 +181,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // validate plant name
-        var duplicate = await context.Plants
+        var duplicate = await _context.Plants
             .AnyAsync(p => p.Name.ToLower().Trim() == plantCreateDto.Name.ToLower().Trim());
         if (duplicate)
         {
@@ -200,13 +200,13 @@ public class LocationService : ILocationService
             IsDeleted = false
         };
         // create plant
-        context.Plants.Add(plant);
+        _context.Plants.Add(plant);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Plant with id {PlantId} created", plant.PlantId);
@@ -225,10 +225,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // check if area exists
-        var area = await context.Areas.Include(a => a.Spaces).FirstOrDefaultAsync(a => a.AreaId == areaId);
+        var area = await _context.Areas.Include(a => a.Spaces).FirstOrDefaultAsync(a => a.AreaId == areaId);
         if (area == null || area.IsDeleted)
         {
             _logger.LogWarning("Area with id {AreaId} not found", areaId);
@@ -257,7 +257,7 @@ public class LocationService : ILocationService
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Space with id {SpaceId} created", space.SpaceId);
@@ -275,10 +275,10 @@ public class LocationService : ILocationService
     public async Task DeleteArea(int areaId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get area
-        var area = await context.Areas.FindAsync(areaId);
+        var area = await _context.Areas.FindAsync(areaId);
         if (area == null)
         {
             _logger.LogWarning("Area not found");
@@ -290,13 +290,13 @@ public class LocationService : ILocationService
             _logger.LogWarning("Area not marked as deleted");
             throw new BadRequestException("Area not marked as deleted");
         }
-        context.Areas.Remove(area);
+        _context.Areas.Remove(area);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Area with id {AreaId} deleted", area.AreaId);
@@ -314,10 +314,10 @@ public class LocationService : ILocationService
     public async Task DeleteCoordinate(int coordinateId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get coordinate
-        var coordinate = await context.Coordinates.FindAsync(coordinateId);
+        var coordinate = await _context.Coordinates.FindAsync(coordinateId);
         if (coordinate == null)
         {
             _logger.LogWarning("Coordinate not found");
@@ -329,13 +329,13 @@ public class LocationService : ILocationService
             _logger.LogWarning("Coordinate not marked as deleted");
             throw new BadRequestException("Coordinate not marked as deleted");
         }
-        context.Coordinates.Remove(coordinate);
+        _context.Coordinates.Remove(coordinate);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Coordinate with id {CoordinateId} deleted", coordinate.CoordinateId);
@@ -353,10 +353,10 @@ public class LocationService : ILocationService
     public async Task DeletePlant(int plantId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plant
-        var plant = await context.Plants.FindAsync(plantId);
+        var plant = await _context.Plants.FindAsync(plantId);
         if (plant == null)
         {
             _logger.LogWarning("Plant not found");
@@ -368,13 +368,13 @@ public class LocationService : ILocationService
             _logger.LogWarning("Plant not marked as deleted");
             throw new BadRequestException("Plant not marked as deleted");
         }
-        context.Plants.Remove(plant);
+        _context.Plants.Remove(plant);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Plant with id {PlantId} deleted", plant.PlantId);
@@ -392,10 +392,10 @@ public class LocationService : ILocationService
     public async Task DeleteSpace(int spaceId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get space
-        var space = await context.Spaces.FindAsync(spaceId);
+        var space = await _context.Spaces.FindAsync(spaceId);
         if (space == null)
         {
             _logger.LogWarning("Space not found");
@@ -407,13 +407,13 @@ public class LocationService : ILocationService
             _logger.LogWarning("Space not marked as deleted");
             throw new BadRequestException("Space not marked as deleted");
         }
-        context.Spaces.Remove(space);
+        _context.Spaces.Remove(space);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             _logger.LogInformation("Space with id {SpaceId} deleted", space.SpaceId);
@@ -431,10 +431,10 @@ public class LocationService : ILocationService
     public async Task<AreaDto> GetAreaById(int areaId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get area
-        var area = await context.Areas
+        var area = await _context.Areas
             .AsNoTracking()
             .Select(a => new AreaDto
             {
@@ -457,10 +457,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<AreaDto>> GetAreas()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get areas
-        var areas = await context.Areas
+        var areas = await _context.Areas
             .AsNoTracking()
             .Select(a => new AreaDto
             {
@@ -484,10 +484,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<AreaDto>> GetAreasWithSpaces()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get areas
-        var areas = await context.Areas
+        var areas = await _context.Areas
             .AsNoTracking()
             .Select(a => new AreaDto
             {
@@ -518,10 +518,10 @@ public class LocationService : ILocationService
     public async Task<CoordinateDto> GetCoordinateByIdWithAssets(int coordinateId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get coordinate
-        var coordinate = await context.Coordinates
+        var coordinate = await _context.Coordinates
             .AsNoTracking()
             .Select(c => new CoordinateDto
             {
@@ -552,10 +552,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<CoordinateDto>> GetCoordinates()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get coordinates
-        var coordinates = await context.Coordinates
+        var coordinates = await _context.Coordinates
             .AsNoTracking()
             .Select(c => new CoordinateDto
             {
@@ -578,10 +578,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<CoordinateDto>> GetCoordinatesWithAssets()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get coordinates
-        var coordinates = await context.Coordinates
+        var coordinates = await _context.Coordinates
             .AsNoTracking()
             .Select(c => new CoordinateDto
             {
@@ -612,10 +612,10 @@ public class LocationService : ILocationService
     public async Task<PlantDto> GetPlantById(int plantId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plant
-        var plant = await context.Plants
+        var plant = await _context.Plants
             .AsNoTracking()
             .Select(p => new PlantDto
             {
@@ -638,10 +638,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<PlantDto>> GetPlants()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plants
-        var plants = await context.Plants
+        var plants = await _context.Plants
             .AsNoTracking()
             .Select(p => new PlantDto
             {
@@ -664,10 +664,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<PlantDto>> GetPlantsWithAreas()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plants
-        var plants = await context.Plants
+        var plants = await _context.Plants
             .AsNoTracking()
             .Select(p => new PlantDto
             {
@@ -698,10 +698,10 @@ public class LocationService : ILocationService
     public async Task<SpaceDto> GetSpaceById(int spaceId)
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get space
-        var space = await context.Spaces
+        var space = await _context.Spaces
             .AsNoTracking()
             .Select(s => new SpaceDto
             {
@@ -725,10 +725,10 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<SpaceDto>> GetSpaces()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get spaces
-        var spaces = await context.Spaces
+        var spaces = await _context.Spaces
             .AsNoTracking()
             .Select(s => new SpaceDto
             {
@@ -752,9 +752,9 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<SpaceDto>> GetSpacesWithCoordinates()
     {
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
         // get spaces
-        var spaces = await context.Spaces
+        var spaces = await _context.Spaces
             .AsNoTracking()
             .Select(s => new SpaceDto
             {
@@ -786,10 +786,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get area
-        var area = await context.Areas
+        var area = await _context.Areas
             .Include(a => a.Spaces)
             .FirstOrDefaultAsync(a => a.AreaId == areaId);
         if (area == null)
@@ -812,13 +812,13 @@ public class LocationService : ILocationService
         // mark area as deleted
         area.IsDeleted = true;
         //update area
-        context.Areas.Update(area);
+        _context.Areas.Update(area);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -838,10 +838,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get coordinate
-        var coordinate = await context.Coordinates.Include(c => c.Assets)
+        var coordinate = await _context.Coordinates.Include(c => c.Assets)
             .FirstOrDefaultAsync(c => c.CoordinateId == coordinateId);
         if (coordinate == null)
         {
@@ -862,13 +862,13 @@ public class LocationService : ILocationService
         // mark coordinate as deleted
         coordinate.IsDeleted = true;
         //update coordinate
-        context.Coordinates.Update(coordinate);
+        _context.Coordinates.Update(coordinate);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -888,10 +888,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plant
-        var plant = await context.Plants.Include(p => p.Areas)
+        var plant = await _context.Plants.Include(p => p.Areas)
             .FirstOrDefaultAsync(p => p.PlantId == plantId);
         if (plant == null)
         {
@@ -912,13 +912,13 @@ public class LocationService : ILocationService
         // mark plant as deleted
         plant.IsDeleted = true;
         //update plant
-        context.Plants.Update(plant);
+        _context.Plants.Update(plant);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -938,10 +938,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get space
-        var space = await context.Spaces.Include(s => s.Coordinates)
+        var space = await _context.Spaces.Include(s => s.Coordinates)
             .FirstOrDefaultAsync(s => s.SpaceId == spaceId);
         if (space == null)
         {
@@ -962,13 +962,13 @@ public class LocationService : ILocationService
         // mark space as deleted
         space.IsDeleted = true;
         //update space
-        context.Spaces.Update(space);
+        _context.Spaces.Update(space);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -988,10 +988,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get area
-        var area = await context.Areas
+        var area = await _context.Areas
             .FirstOrDefaultAsync(a => a.AreaId == areaId);
         if (area == null)
         {
@@ -999,7 +999,7 @@ public class LocationService : ILocationService
             throw new NotFoundException("Area not found");
         }
         // check for duplicate name
-        if (await context.Areas.AnyAsync(a => a.AreaId != areaId && a.PlantId == area.PlantId && a.Name.ToLower().Trim() == areaUpdateDto.Name.ToLower().Trim()))
+        if (await _context.Areas.AnyAsync(a => a.AreaId != areaId && a.PlantId == area.PlantId && a.Name.ToLower().Trim() == areaUpdateDto.Name.ToLower().Trim()))
         {
             _logger.LogWarning("Area with name {Name} already exists", areaUpdateDto.Name);
             throw new BadRequestException("Area with name already exists");
@@ -1009,13 +1009,13 @@ public class LocationService : ILocationService
         area.Description = areaUpdateDto.Description;
         area.IsDeleted = false;
         // update area
-        context.Areas.Update(area);
+        _context.Areas.Update(area);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -1035,10 +1035,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get coordinate
-        var coordinate = await context.Coordinates
+        var coordinate = await _context.Coordinates
             .FirstOrDefaultAsync(c => c.CoordinateId == coordinateId);
         if (coordinate == null)
         {
@@ -1046,7 +1046,7 @@ public class LocationService : ILocationService
             throw new NotFoundException("Coordinate not found");
         }
         // check for duplicate name
-        if (await context.Coordinates.AnyAsync(c => c.CoordinateId != coordinateId && c.SpaceId == coordinate.SpaceId && c.Name.ToLower().Trim() == coordinateUpdateDto.Name.ToLower().Trim()))
+        if (await _context.Coordinates.AnyAsync(c => c.CoordinateId != coordinateId && c.SpaceId == coordinate.SpaceId && c.Name.ToLower().Trim() == coordinateUpdateDto.Name.ToLower().Trim()))
         {
             _logger.LogWarning("Coordinate with name {Name} already exists", coordinateUpdateDto.Name);
             throw new BadRequestException("Coordinate with name already exists");
@@ -1056,13 +1056,13 @@ public class LocationService : ILocationService
         coordinate.Description = coordinateUpdateDto.Description;
         coordinate.IsDeleted = false;
         // update coordinate
-        context.Coordinates.Update(coordinate);
+        _context.Coordinates.Update(coordinate);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -1082,10 +1082,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get plant
-        var plant = await context.Plants
+        var plant = await _context.Plants
             .FirstOrDefaultAsync(p => p.PlantId == plantId);
         if (plant == null)
         {
@@ -1093,7 +1093,7 @@ public class LocationService : ILocationService
             throw new NotFoundException("Plant not found");
         }
         // check for duplicate name
-        if (await context.Plants.AnyAsync(p => p.PlantId != plantId && p.Name.ToLower().Trim() == plantUpdateDto.Name.ToLower().Trim()))
+        if (await _context.Plants.AnyAsync(p => p.PlantId != plantId && p.Name.ToLower().Trim() == plantUpdateDto.Name.ToLower().Trim()))
         {
             _logger.LogWarning("Plant with name {Name} already exists", plantUpdateDto.Name);
             throw new BadRequestException("Plant with name already exists");
@@ -1104,13 +1104,13 @@ public class LocationService : ILocationService
         plant.Description = plantUpdateDto.Description;
         plant.IsDeleted = false;
         // update plant
-        context.Plants.Update(plant);
+        _context.Plants.Update(plant);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
@@ -1130,10 +1130,10 @@ public class LocationService : ILocationService
     {
 
         // await using context
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        
 
         // get space
-        var space = await context.Spaces
+        var space = await _context.Spaces
             .FirstOrDefaultAsync(s => s.SpaceId == spaceId);
         if (space == null)
         {
@@ -1141,7 +1141,7 @@ public class LocationService : ILocationService
             throw new NotFoundException("Space not found");
         }
         // check for duplicate name
-        if (await context.Spaces.AnyAsync(s => s.SpaceId != spaceId && s.AreaId == space.AreaId && s.Name.ToLower().Trim() == spaceUpdateDto.Name.ToLower().Trim()))
+        if (await _context.Spaces.AnyAsync(s => s.SpaceId != spaceId && s.AreaId == space.AreaId && s.Name.ToLower().Trim() == spaceUpdateDto.Name.ToLower().Trim()))
         {
             _logger.LogWarning("Space with name {Name} already exists", spaceUpdateDto.Name);
             throw new BadRequestException("Space with name already exists");
@@ -1151,13 +1151,13 @@ public class LocationService : ILocationService
         space.Description = spaceUpdateDto.Description;
         space.IsDeleted = false;
         // update space
-        context.Spaces.Update(space);
+        _context.Spaces.Update(space);
 
 
         try
         {
             // save changes
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
 
             // return success
